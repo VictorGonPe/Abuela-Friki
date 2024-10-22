@@ -32,7 +32,7 @@ function preload () {
     // Cargar imágenes y recursos
     this.load.image('background', 'assets/background.png');
     this.load.image('ground', 'assets/platform.png');
-    this.load.spritesheet('abuela', 'assets/abuelaSprite1.png', { frameWidth: 71, frameHeight: 100 });  
+    this.load.spritesheet('abuela', 'assets/abuelaSprite.png', { frameWidth: 71, frameHeight: 100 });  
     //this.load.image('dust', 'assets/polvo.png');// Cargar el sprite de partículas
 }
 
@@ -42,7 +42,7 @@ function create () {
 
     // Crear el suelo en la posición central horizontal
     this.ground = this.physics.add.staticImage(window.innerWidth / 2, window.innerHeight - 40, 'ground');
-    
+
     // Crear grupo de plataformas
     platforms = this.physics.add.staticGroup();
 
