@@ -27,12 +27,14 @@ let movingPlatformC, movingPlatformL, movingPlatformR;  // Variable para la plat
 var cursors;
 var leftZone, rightZone, upZone; // Control de zonas táctiles
 
-var game = new Phaser.Game(config);
+var game = new Phaser.Game(config); //Inicializo el juego
 
-function preload () {  // Cargar imágenes y recursos
+function preload () {  // Función principal de carga de imágenes y recursos
+    //this -> se refiere al mismo juego
     this.load.image('background', 'assets/background.png');
-    this.load.image('ground', 'assets/platform.png'); // Cargar suelo
-    this.load.spritesheet('abuela', 'assets/abuelaSprite.png', { frameWidth: 71, frameHeight: 100 });  
+    this.load.image('suelo', 'assets/platform.png'); // Cargar suelo
+    //this.load.spritesheet('abuela', 'assets/abuelaSprite.png', { frameWidth: 250, frameHeight: 343 });  
+    this.load.spritesheet('abuela', 'assets/abuelaSprite2.png', { frameWidth: 294, frameHeight: 378 }); 
     this.load.image('plataformasL', 'assets/platformLeft.png'); // Cargar plataformas
     this.load.image('plataformasR', 'assets/platformRight.png'); 
     this.load.image('plataformasC', 'assets/platformCenter.png'); 
@@ -40,12 +42,13 @@ function preload () {  // Cargar imágenes y recursos
 
 function create () {
     // Añadir fondo
-    //this.add.image(window.innerWidth / 2, window.innerHeight / 2, 'background').setDisplaySize(window.innerWidth, window.innerHeight);
-    this.add.image(0, 0, 'background').setOrigin(0, 0).setDisplaySize(window.innerWidth, window.innerHeight);
+    this.add.image(0, 0, 'background').setOrigin(0, 0).setDisplaySize(window.innerWidth, window.innerHeight); //Colocamos el background modificando su centro "setOrigin"
 
+    this.add.tileSprite(0, config.height - 120, config.width, 0, 'suelo').setOrigin(0,0);
     // Crear grupo de plataformas, incluido el suelo
     platforms = this.physics.add.staticGroup();
-    platforms.create(window.innerWidth / 2, window.innerHeight - 40, 'ground').setDisplaySize(window.innerWidth, 140).refreshBody(); // Suelo
+    platforms.create(window.innerWidth / 2, window.innerHeight - 50, 'suelo').setDisplaySize(window.innerWidth, 140).refreshBody(); // Suelo
+    //platforms.create(0,config.height - 33,config.width + 15, 2688, 'suelo').setOrigin(0,0);
     
     // Añadir otras plataformas
     platforms.create(300, 900, 'plataformasL').setScale(0.1).refreshBody();
@@ -61,9 +64,9 @@ function create () {
     platforms.create(880, 850, 'plataformasR').setScale(0.1).refreshBody(); 
 
    // Crear la plataforma móvil
-   movingPlatformL = this.physics.add.image(455, 700, 'plataformasL').setScale(0.1).refreshBody();
-   movingPlatformC = this.physics.add.image(500, 700, 'plataformasC').setScale(0.1).refreshBody();
-   movingPlatformR = this.physics.add.image(545, 700, 'plataformasR').setScale(0.1).refreshBody();
+   movingPlatformL = this.physics.add.image(455, 730, 'plataformasL').setScale(0.11).refreshBody();
+   movingPlatformC = this.physics.add.image(500, 730, 'plataformasC').setScale(0.11).refreshBody();
+   movingPlatformR = this.physics.add.image(545, 730, 'plataformasR').setScale(0.11).refreshBody();
 
    // Desactivar la gravedad para la plataforma móvil
    movingPlatformL.body.setAllowGravity(false);
@@ -81,10 +84,10 @@ function create () {
 
     
     // Crear el jugador (Abuela)
-    player = this.physics.add.sprite(100, 450, 'abuela');
+    player = this.physics.add.sprite(100, 250, 'abuela').setScale(0.4);
 
     // Configurar físicas del jugador
-    player.setBounce(0.2);
+    player.setBounce(0.2); //rebote
     player.setCollideWorldBounds(true);
 
    // Añadir colisión entre el jugador y las plataformas estáticas
@@ -107,14 +110,14 @@ function create () {
 
     this.anims.create({
         key: 'turn',
-        frames: [ { key: 'abuela', frame: 6 } ],
+        frames: [ { key: 'abuela', frame: 21 } ],
         frameRate: 20
     });
 
     this.anims.create({
         key: 'right',
-        frames: this.anims.generateFrameNumbers('abuela', { start: 5, end: 8 }),
-        frameRate: 10,
+        frames: this.anims.generateFrameNumbers('abuela', { start: 0, end: 20 }),
+        frameRate: 21,
         repeat: -1
     });
 
@@ -142,7 +145,7 @@ function update () {
         player.anims.play('left', true);  // Animación de caminar hacia la izquierda
     }
     else if (cursors.right.isDown) {
-        player.setVelocityX(300);  // Mover a la derecha
+        player.setVelocityX(150);  // Mover a la derecha
         player.anims.play('right', true);  // Animación de caminar hacia la derecha
     }
     else {
