@@ -2,6 +2,9 @@
 
 **Abuela Friki** es un juego de plataformas en 2D protagonizado por una abuela geek que viaja a través de diferentes ciudades, enfrentándose a desafíos únicos y divertidos, llenos de referencias a la cultura geek.
 
+![Mi imagen](assets/abuelaSprite2.png "Sprite Abuela andando")
+
+
 ## Descripción del Proyecto
 
 Abuela Friki es una experiencia nostálgica y humorística que combina elementos de juegos clásicos de plataformas con una narrativa ligera y cómica. Los jugadores podrán controlar a una abuela poco convencional que, a lo largo de la aventura, desbloqueará habilidades especiales inspiradas en personajes icónicos de la cultura geek.
@@ -46,7 +49,7 @@ Otra opción es utilizar software como **MAMP** (para macOS) o **WAMP** (para Wi
 1. Descarga e instala **MAMP** (si estás en macOS)  o **WAMP** (si estás en Windows).
 2. Abre MAMP o WAMP y asegúrate de iniciar los servicios de servidor local.
 3. Coloca tu proyecto en la carpeta raíz del servidor local. Para MAMP, suele ser `htdocs`, y para WAMP, suele ser `www`.
-4. Abre tu navegador y visita `http://localhost/nombre_del_proyecto` para ver tu juego en funcionamiento.
+4. Abre tu navegador y visita `http://localhost/Abuela-Friki` para ver tu juego en funcionamiento.
 
 Estas opciones te permitirán ejecutar tu juego hecho en Phaser en un entorno local, evitando problemas de bloqueo de recursos en los navegadores.
 
