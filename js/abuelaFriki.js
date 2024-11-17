@@ -23,12 +23,13 @@ var config = {
 
 var player;
 var platforms;
-let movingPlatformC, movingPlatformL, movingPlatformR;  // Variable para la plataforma móvil
+let movingPlatformC, movingPlatformL, movingPlatformR; // Variables para plataformas móviles
 var cursors;
 var leftZone, rightZone, upZone; // Control de zonas táctiles
-var currentControl = 'keyboard'; //Variable para cambiar de controles táctiles a teclado
+var currentControl = 'keyboard'; // Variable para cambiar de controles táctiles a teclado
 var backgroundMountain, backgroundCiudad; // Variables para los fondos parallax
 
+const LEVEL_WIDTH = 5500; // Ancho total del nivel
 var game = new Phaser.Game(config); // Inicializo el juego
 
 function preload() {
@@ -37,49 +38,74 @@ function preload() {
     this.load.image('backgroundCiudad', 'assets/backgroundCiudad.png'); // Fondo ciudad
     this.load.image('suelo', 'assets/platform.png'); // Cargar suelo
     this.load.spritesheet('abuela', 'assets/abuelaSprite2.png', { frameWidth: 294, frameHeight: 378 }); 
-    this.load.image('plataformasL', 'assets/platformLeft.png'); // Cargar plataformas
-    this.load.image('plataformasR', 'assets/platformRight.png'); 
-    this.load.image('plataformasC', 'assets/platformCenter.png'); 
+    this.load.image('plataformasL', 'assets/plataformaBarnaIzq.png'); // Cargar plataformas
+    this.load.image('plataformasR', 'assets/plataformaBarnaDer.png'); 
+    this.load.image('plataformasC', 'assets/plataformaBarnaC.png'); 
+    this.load.image('monumento1', 'assets/colon1.png');
+    this.load.image('monumento2', 'assets/torresMafre1.png');
+    this.load.image('monumento3', 'assets/sagradaFamilia1.png');
+    this.load.image('monumento4', 'assets/torreGlorias1.png');
+    this.load.image('monumento5', 'assets/tresTorres1.png');
 }
 
 function create() {
+    // Definir el tamaño del mundo del juego
+    this.physics.world.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
+    this.cameras.main.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
+
     // Fondo azul cielo que ocupa todo el nivel
-    this.add.rectangle(0, 0, window.innerWidth, window.innerHeight, 0x87CEEB).setOrigin(0, 0);
+    this.add.rectangle(0, 0, LEVEL_WIDTH, window.innerHeight, 0x42aaff).setOrigin(0, 0);
 
     // Fondo montañoso que se moverá lentamente
-    backgroundMountain = this.add.tileSprite(0, 0, window.innerWidth, window.innerHeight, 'backgroundMountain')
+    backgroundMountain = this.add.tileSprite(0, 0, LEVEL_WIDTH, window.innerHeight, 'backgroundMountain')
         .setOrigin(0, 0)
         .setScrollFactor(0);
 
     // Fondo de ciudad que se moverá más rápido
-    backgroundCiudad = this.add.tileSprite(0, 0, window.innerWidth, window.innerHeight, 'backgroundCiudad')
+    backgroundCiudad = this.add.tileSprite(0, 0, LEVEL_WIDTH, window.innerHeight, 'backgroundCiudad')
         .setOrigin(0, 0)
         .setScrollFactor(0);
 
+
+    //Monumentos // Ajustar según la altura del suelo
+    monumento = this.add.image(1100, window.innerHeight - 140, 'monumento1').setOrigin(0.5, 1); // Anclar la parte inferior del monumento al suelo
+    monumento = this.add.image(2100, window.innerHeight - 90, 'monumento2').setOrigin(0.5, 1); 
+    monumento = this.add.image(3100, window.innerHeight - 140, 'monumento3').setOrigin(0.5, 1); 
+    monumento = this.add.image(4100, window.innerHeight - 130, 'monumento4').setOrigin(0.5, 1); 
+    monumento = this.add.image(5100, window.innerHeight - 130, 'monumento5').setOrigin(0.5, 1); 
+     
+
+
+    monumento.depth = 0; // Asegurarnos de que se renderice detrás del jugador y plataformas
+
+
+
     // Crear grupo de plataformas, incluido el suelo
     platforms = this.physics.add.staticGroup();
-    platforms.create(window.innerWidth / 2, window.innerHeight - 50, 'suelo').setDisplaySize(window.innerWidth, 140).refreshBody();
+    //platforms.depth = 1;
+    platforms.create(LEVEL_WIDTH / 2, window.innerHeight - 50, 'suelo').setDisplaySize(LEVEL_WIDTH, 140).refreshBody();
 
-    // Añadir otras plataformas
-    platforms.create(300, 900, 'plataformasL').setScale(0.1).refreshBody();
-    platforms.create(345, 900, 'plataformasC').setScale(0.1).refreshBody();
-    platforms.create(390, 900, 'plataformasR').setScale(0.1).refreshBody();
+    // Añadir plataformas fijas
+    platforms.create(300, 900, 'plataformasL').setScale(0.35).refreshBody();
+    platforms.create(345, 900, 'plataformasC').setScale(0.35).refreshBody();
+    platforms.create(390, 900, 'plataformasR').setScale(0.35).refreshBody();
 
-    platforms.create(700, 850, 'plataformasL').setScale(0.1).refreshBody();
-    platforms.create(745, 850, 'plataformasC').setScale(0.1).refreshBody();
-    platforms.create(790, 850, 'plataformasC').setScale(0.1).refreshBody();
-    platforms.create(835, 850, 'plataformasC').setScale(0.1).refreshBody();
-    platforms.create(880, 850, 'plataformasR').setScale(0.1).refreshBody();
+    platforms.create(700, 850, 'plataformasL').setScale(0.35).refreshBody();
+    platforms.create(745, 850, 'plataformasC').setScale(0.35).refreshBody();
+    platforms.create(790, 850, 'plataformasC').setScale(0.35).refreshBody();
+    platforms.create(835, 850, 'plataformasC').setScale(0.35).refreshBody();
+    platforms.create(880, 850, 'plataformasR').setScale(0.35).refreshBody();
 
-    // Crear la plataforma móvil
-    movingPlatformL = this.physics.add.image(455, 730, 'plataformasL').setScale(0.11).refreshBody();
-    movingPlatformC = this.physics.add.image(500, 730, 'plataformasC').setScale(0.11).refreshBody();
-    movingPlatformR = this.physics.add.image(545, 730, 'plataformasR').setScale(0.11).refreshBody();
+    // Crear plataformas móviles
+    movingPlatformL = this.physics.add.image(455, 730, 'plataformasL').setScale(0.35).refreshBody();
+    movingPlatformC = this.physics.add.image(500, 730, 'plataformasC').setScale(0.35).refreshBody();
+    movingPlatformR = this.physics.add.image(545, 730, 'plataformasR').setScale(0.35).refreshBody();
 
     // Desactivar la gravedad para la plataforma móvil
     [movingPlatformL, movingPlatformC, movingPlatformR].forEach(platform => {
-        platform.body.setAllowGravity(false).setImmovable(true).setVelocityX(100);
+        platform.body.setAllowGravity(false).setImmovable(true).setVelocityX(100);;
     });
+
 
     // Crear el jugador
     player = this.physics.add.sprite(100, 250, 'abuela').setScale(0.4);
@@ -87,6 +113,9 @@ function create() {
     // Configurar físicas del jugador
     player.setBounce(0.2);
     player.setCollideWorldBounds(true);
+
+    // Hacer que la cámara siga al jugador
+    this.cameras.main.startFollow(player);
 
     // Añadir colisiones
     this.physics.add.collider(player, platforms);
@@ -144,9 +173,14 @@ function update() {
         }
     }
 
-    // Fondo parallax
-    backgroundMountain.tilePositionX = player.x * 0.2; // Movimiento lento
-    backgroundCiudad.tilePositionX = player.x * 0.4; // Movimiento rápido
+    // Fondos parallax
+    const maxScrollX = LEVEL_WIDTH - window.innerWidth; //Calcula el desplazamiento dependiendo del ancho de la ventana
+
+    if (this.cameras.main.scrollX < maxScrollX) {
+        backgroundMountain.tilePositionX = this.cameras.main.scrollX * 0.2; // Movimiento lento
+        backgroundCiudad.tilePositionX = this.cameras.main.scrollX * 0.4; // Movimiento rápido
+        monumento.tilePositionX = 1200 - this.cameras.main.scrollX * 0.5;
+    }
 
     // Cambiar dirección de plataformas móviles
     if (movingPlatformL.x >= 700) {
