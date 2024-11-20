@@ -40,12 +40,19 @@ function preload() {
     //this.load.spritesheet('abuela', 'assets/abuelaSprite2.png', { frameWidth: 294, frameHeight: 378 }); 
     //this.load.spritesheet('abuelaMovimiento','assets/abuelaSpriteSheet.png', {frameWidth: 363, frameHeight: 378});
     this.load.spritesheet('abuelaMovimiento1', 'assets/abuelaAndar.png', {
-        frameWidth: 294,
+        //frameWidth: 294,
+        frameWidth: 363,
         frameHeight: 378
     });
     this.load.spritesheet('abuelaMovimiento2', 'assets/abuelaSalto.png', {
         frameWidth: 363,
         frameHeight: 374
+    });
+
+    this.load.spritesheet('abuelaQuieta', 'assets/abuelaIdle.png', {
+        //frameWidth: 294,
+        frameWidth: 363,
+        frameHeight: 378
     });
     
     this.load.image('plataformasL', 'assets/plataformaBarnaIzq.png'); // Cargar plataformas
@@ -58,7 +65,7 @@ function preload() {
     this.load.image('monumento5', 'assets/tresTorres1.png');
 }
 
-function create() {
+function create() { //____________________________CREATE__________________________________________________________________________________________
     // Definir el tamaño del mundo del juego
     this.physics.world.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
     this.cameras.main.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
@@ -117,14 +124,14 @@ function create() {
     });
 
 
-    // Crear el jugador
+    // __________________________________CREAR ABUELA___________________________________________
     //this.player = this.physics.add.sprite(100, 250, 'abuela').setScale(0.4);
-    this.player = this.physics.add.sprite(100, 250, 'abuelaMovimiento').setScale(0.4).setOrigin(0.2,1);
+    this.player = this.physics.add.sprite(100, 250, 'abuelaMovimiento1').setScale(0.4).setOrigin(0.5,1);
 
     // Ajustar el cuerpo físico del jugador
     this.player.body.setSize(150, 320).setOffset(50, 50); // Ajusta tamaño y desplazamiento
-
-    this.player.anims.play('turn'); // Animación de reposo puesto que al estar en el aire daría error con el salto
+    
+    this.player.anims.play('abuelaQuieta'); // Animación de reposo puesto que al estar en el aire daría error con el salto
     
     
     // Configurar físicas del jugador
@@ -144,27 +151,27 @@ function create() {
     // Animaciones de la abuela
     this.anims.create({
         key: 'left',
-        frames: this.anims.generateFrameNumbers('abuelaMovimiento1', { start: 0, end: 21 }),
+        frames: this.anims.generateFrameNumbers('abuelaMovimiento1', { start: 0, end: 20 }),
         frameRate: 30,
         repeat: -1
     });
 
     this.anims.create({
-        key: 'turn',
-        frames: [{ key: 'abuelaMovimiento1', frame: 5}],
-        frameRate: 20
+        key: 'abuelaIdle',
+        frames: [{ key: 'abuelaQuieta', frame: 1}],
+        frameRate: 1
     });
 
     this.anims.create({
         key: 'right',
-        frames: this.anims.generateFrameNumbers('abuelaMovimiento1', { start: 0, end: 21 }),
+        frames: this.anims.generateFrameNumbers('abuelaMovimiento1', { start: 0, end: 20 }),
         frameRate: 30,
         repeat: -1
     });
 
     this.anims.create({
         key: 'jump',
-        frames: this.anims.generateFrameNumbers('abuelaMovimiento2', { start: 0, end: 21 }), // Rango para salto
+        frames: this.anims.generateFrameNumbers('abuelaMovimiento2', { start: 0, end: 20 }), // Rango para salto
         frameRate: 14,
         repeat: 0 // Sin bucle, se ejecuta una vez por salto
     });
@@ -176,30 +183,42 @@ function create() {
     }
 }
 
-function update() {
+function update() { //____________________________UPDATE__________________________________________________________________________________________
+
    
         if (currentControl === 'keyboard') {
         // Controlar si el jugador está en el aire
         let isOnGround = this.player.body.touching.down;
 
-        // Movimiento horizontal
+        // ABUELA -- Movimiento horizontal
         if (cursors.left.isDown) {
             this.player.setVelocityX(-300);
             if (isOnGround) this.player.anims.play('left', true);
             this.player.flipX = true;
+            //console.log('Mira a la izquierda');
+            this.player.body.setOffset(150, 50); // Al hacer el flipX es necesario jugar con los offset para centrar cuerpo
         } else if (cursors.right.isDown) {
             this.player.setVelocityX(300);
             if (isOnGround) this.player.anims.play('right', true);
             this.player.flipX = false;
+            this.player.body.setOffset(50, 50);
         } else {
             this.player.setVelocityX(0);
-            if (isOnGround) this.player.anims.play('turn'); // Animación de reposo si está en el suelo
+            if (isOnGround) this.player.anims.play('abuelaIdle'); // Animación de reposo si está en el suelo
+            
+            if (this.player.flipX == true){
+                this.player.body.setOffset(150, 50);
+                console.log('Mira a la izquierda');
+            }else{
+                this.player.body.setOffset(50, 50);
+            }
         }
 
-        // Salto del jugador
+        // ABUELA -- Salto 
         if (cursors.up.isDown && isOnGround) {
             this.player.setVelocityY(-630);
             this.player.anims.play('jump'); // Reproducir animación de salto una vez
+            this.player.body.setOffset(150, 50);
         }
     }
         
