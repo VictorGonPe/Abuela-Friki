@@ -11,7 +11,7 @@ var config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 980 }, // gravedad de la tierra
-            debug: false  // Activar el modo de depuración para ver colisiones y límites
+            debug: true  // Activar el modo de depuración para ver colisiones y límites
         }
     },
     scene: {
@@ -37,7 +37,17 @@ function preload() {
     this.load.image('backgroundMountain', 'assets/backgroundMountain.png'); // Fondo montañoso
     this.load.image('backgroundCiudad', 'assets/backgroundCiudad.png'); // Fondo ciudad
     this.load.image('suelo', 'assets/platform.png'); // Cargar suelo
-    this.load.spritesheet('abuela', 'assets/abuelaSprite2.png', { frameWidth: 294, frameHeight: 378 }); 
+    //this.load.spritesheet('abuela', 'assets/abuelaSprite2.png', { frameWidth: 294, frameHeight: 378 }); 
+    //this.load.spritesheet('abuelaMovimiento','assets/abuelaSpriteSheet.png', {frameWidth: 363, frameHeight: 378});
+    this.load.spritesheet('abuelaMovimiento1', 'assets/abuelaAndar.png', {
+        frameWidth: 294,
+        frameHeight: 378
+    });
+    this.load.spritesheet('abuelaMovimiento2', 'assets/abuelaSalto.png', {
+        frameWidth: 363,
+        frameHeight: 374
+    });
+    
     this.load.image('plataformasL', 'assets/plataformaBarnaIzq.png'); // Cargar plataformas
     this.load.image('plataformasR', 'assets/plataformaBarnaDer.png'); 
     this.load.image('plataformasC', 'assets/plataformaBarnaC.png'); 
@@ -108,40 +118,55 @@ function create() {
 
 
     // Crear el jugador
-    player = this.physics.add.sprite(100, 250, 'abuela').setScale(0.4);
+    //this.player = this.physics.add.sprite(100, 250, 'abuela').setScale(0.4);
+    this.player = this.physics.add.sprite(100, 250, 'abuelaMovimiento').setScale(0.4).setOrigin(0.2,1);
 
+    // Ajustar el cuerpo físico del jugador
+    this.player.body.setSize(150, 320).setOffset(50, 50); // Ajusta tamaño y desplazamiento
+
+    this.player.anims.play('turn'); // Animación de reposo puesto que al estar en el aire daría error con el salto
+    
+    
     // Configurar físicas del jugador
-    player.setBounce(0.2);
-    player.setCollideWorldBounds(true);
+    this.player.setBounce(0.2);
+    this.player.setCollideWorldBounds(true);
 
     // Hacer que la cámara siga al jugador
-    this.cameras.main.startFollow(player);
+    this.cameras.main.startFollow(this.player);
 
     // Añadir colisiones
-    this.physics.add.collider(player, platforms);
-    this.physics.add.collider(player, movingPlatformL);
-    this.physics.add.collider(player, movingPlatformC);
-    this.physics.add.collider(player, movingPlatformR);
+    this.physics.add.collider(this.player, platforms);
+    this.physics.add.collider(this.player, movingPlatformL);
+    this.physics.add.collider(this.player, movingPlatformC);
+    this.physics.add.collider(this.player, movingPlatformR);
+
 
     // Animaciones de la abuela
     this.anims.create({
         key: 'left',
-        frames: this.anims.generateFrameNumbers('abuela', { start: 0, end: 20 }),
+        frames: this.anims.generateFrameNumbers('abuelaMovimiento1', { start: 0, end: 21 }),
         frameRate: 30,
         repeat: -1
     });
 
     this.anims.create({
         key: 'turn',
-        frames: [{ key: 'abuela', frame: 21 }],
+        frames: [{ key: 'abuelaMovimiento1', frame: 5}],
         frameRate: 20
     });
 
     this.anims.create({
         key: 'right',
-        frames: this.anims.generateFrameNumbers('abuela', { start: 0, end: 20 }),
+        frames: this.anims.generateFrameNumbers('abuelaMovimiento1', { start: 0, end: 21 }),
         frameRate: 30,
         repeat: -1
+    });
+
+    this.anims.create({
+        key: 'jump',
+        frames: this.anims.generateFrameNumbers('abuelaMovimiento2', { start: 0, end: 21 }), // Rango para salto
+        frameRate: 14,
+        repeat: 0 // Sin bucle, se ejecuta una vez por salto
     });
 
     // Habilitar controles
@@ -152,26 +177,32 @@ function create() {
 }
 
 function update() {
-    if (currentControl === 'keyboard') {
-        // Controlar movimiento horizontal
+   
+        if (currentControl === 'keyboard') {
+        // Controlar si el jugador está en el aire
+        let isOnGround = this.player.body.touching.down;
+
+        // Movimiento horizontal
         if (cursors.left.isDown) {
-            player.setVelocityX(-300);
-            player.anims.play('left', true);
-            player.flipX = true;
+            this.player.setVelocityX(-300);
+            if (isOnGround) this.player.anims.play('left', true);
+            this.player.flipX = true;
         } else if (cursors.right.isDown) {
-            player.setVelocityX(300);
-            player.anims.play('right', true);
-            player.flipX = false;
+            this.player.setVelocityX(300);
+            if (isOnGround) this.player.anims.play('right', true);
+            this.player.flipX = false;
         } else {
-            player.setVelocityX(0);
-            player.anims.play('turn');
+            this.player.setVelocityX(0);
+            if (isOnGround) this.player.anims.play('turn'); // Animación de reposo si está en el suelo
         }
 
         // Salto del jugador
-        if (cursors.up.isDown && player.body.touching.down) {
-            player.setVelocityY(-630);
+        if (cursors.up.isDown && isOnGround) {
+            this.player.setVelocityY(-630);
+            this.player.anims.play('jump'); // Reproducir animación de salto una vez
         }
     }
+        
 
     // Fondos parallax
     const maxScrollX = LEVEL_WIDTH - window.innerWidth; //Calcula el desplazamiento dependiendo del ancho de la ventana
@@ -204,24 +235,24 @@ function createTouchControls(scene) {
     // Habilitar interacción táctil
     leftZone.setInteractive().on('pointerdown', () => {
         currentControl = 'touch';
-        player.setVelocityX(-300);
+        this.player.setVelocityX(-300);
     });
 
     rightZone.setInteractive().on('pointerdown', () => {
         currentControl = 'touch';
-        player.setVelocityX(300);
+        this.player.setVelocityX(300);
     });
 
     upZone.setInteractive().on('pointerdown', () => {
         currentControl = 'touch';
-        if (player.body.touching.down) {
-            player.setVelocityY(-630);
+        if (this.player.body.touching.down) {
+            this.player.setVelocityY(-630);
         }
     });
 
     // Detener movimiento al soltar
     scene.input.on('pointerup', () => {
         currentControl = 'keyboard';
-        player.setVelocityX(0);
+        this.player.setVelocityX(0);
     });
 }
