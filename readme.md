@@ -2,7 +2,7 @@
 
 **Abuela Friki** es un juego de plataformas en 2D protagonizado por una abuela geek que viaja a través de diferentes ciudades, enfrentándose a desafíos únicos y divertidos, llenos de referencias a la cultura geek.
 
-![Mi imagen](assets/abuelaSprite2.png "Sprite Abuela andando")
+![Mi imagen](assets/abuelaAndar.png "Sprite Abuela andando")
 
 
 ## Descripción del Proyecto

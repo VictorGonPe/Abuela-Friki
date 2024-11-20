@@ -39,21 +39,9 @@ function preload() {
     this.load.image('suelo', 'assets/platform.png'); // Cargar suelo
     //this.load.spritesheet('abuela', 'assets/abuelaSprite2.png', { frameWidth: 294, frameHeight: 378 }); 
     //this.load.spritesheet('abuelaMovimiento','assets/abuelaSpriteSheet.png', {frameWidth: 363, frameHeight: 378});
-    this.load.spritesheet('abuelaMovimiento1', 'assets/abuelaAndar.png', {
-        //frameWidth: 294,
-        frameWidth: 363,
-        frameHeight: 378
-    });
-    this.load.spritesheet('abuelaMovimiento2', 'assets/abuelaSalto.png', {
-        frameWidth: 363,
-        frameHeight: 374
-    });
-
-    this.load.spritesheet('abuelaQuieta', 'assets/abuelaIdle.png', {
-        //frameWidth: 294,
-        frameWidth: 363,
-        frameHeight: 378
-    });
+    this.load.spritesheet('abuelaMovimiento1', 'assets/abuelaAndar.png', {frameWidth: 363,frameHeight: 378});
+    this.load.spritesheet('abuelaMovimiento2', 'assets/abuelaSalto.png', {frameWidth: 363,frameHeight: 374});
+    this.load.spritesheet('abuelaQuieta', 'assets/abuelaIdle.png', {frameWidth: 363,frameHeight: 378});
     
     this.load.image('plataformasL', 'assets/plataformaBarnaIzq.png'); // Cargar plataformas
     this.load.image('plataformasR', 'assets/plataformaBarnaDer.png'); 
