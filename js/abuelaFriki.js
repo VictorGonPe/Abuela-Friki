@@ -1,4 +1,6 @@
 // Configuración básica del juego - mediante un JSON
+// Escala basada en la altura de la pantalla
+const altScale = window.innerHeight / 1080; // Referencia de diseño: 1080px de altura
 var config = {
     type: Phaser.AUTO, // Usará webGL y si no admite navegador Canvas
     width: window.innerWidth,
@@ -10,7 +12,7 @@ var config = {
     physics: { //Añade las físicas
         default: 'arcade',
         arcade: {
-            gravity: { y: 980 }, // gravedad de la tierra
+            gravity: { y: 980 * altScale}, // gravedad de la tierra
             debug: true  // Activar el modo de depuración para ver colisiones y límites
         }
     },
@@ -29,7 +31,8 @@ var leftZone, rightZone, upZone; // Control de zonas táctiles
 var currentControl = 'keyboard'; // Variable para cambiar de controles táctiles a teclado
 var backgroundMountain, backgroundCiudad; // Variables para los fondos parallax
 
-const LEVEL_WIDTH = 5500; // Ancho total del nivel
+
+const LEVEL_WIDTH = 5500 * altScale; // Ancho total del nivel
 var game = new Phaser.Game(config); // Inicializo el juego
 
 function preload() {
@@ -65,8 +68,7 @@ function create() { //____________________________CREATE________________________
     this.physics.world.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
     this.cameras.main.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
    
-    // Escala basada en la altura de la pantalla
-    const altScale = window.innerHeight / 1080; // Referencia de diseño: 1080px de altura
+    
 
     //const mountainAspectRatio = 1797 / 1080;
     //const cityAspectRatio = 1815 / 1080;
@@ -75,19 +77,19 @@ function create() { //____________________________CREATE________________________
     this.add.rectangle(0, 0, LEVEL_WIDTH, window.innerHeight, 0x42aaff).setOrigin(0, 0);
 
     // Fondo montañoso que se moverá lentamente
-    backgroundMountain = this.add.tileSprite(0, 0, LEVEL_WIDTH, 1080, 'backgroundMountain').setOrigin(0, 0).setScrollFactor(0).setScale(1 * altScale);
+    backgroundMountain = this.add.tileSprite(0, 0, LEVEL_WIDTH / altScale, 1080, 'backgroundMountain').setOrigin(0, 0).setScrollFactor(0).setScale(1 * altScale);
 
     // Fondo de ciudad que se moverá más rápido
-    backgroundCiudad = this.add.tileSprite(0, 0 , LEVEL_WIDTH, 1080, 'backgroundCiudad').setOrigin(0, 0).setScrollFactor(0).setScale(1 * altScale);
+    backgroundCiudad = this.add.tileSprite(0, 0 , LEVEL_WIDTH /altScale, 1080, 'backgroundCiudad').setOrigin(0, 0).setScrollFactor(0).setScale(1 * altScale);
 
 
 
     //Monumentos // Ajustar según la altura del suelo
-    monumento = this.add.image(1100, window.innerHeight - 140, 'monumento1').setOrigin(0.5, 1); // Anclo la parte inferior del monumento al suelo
-    monumento = this.add.image(2100, window.innerHeight - 90, 'monumento2').setOrigin(0.5, 1); 
-    monumento = this.add.image(3100, window.innerHeight - 140, 'monumento3').setOrigin(0.5, 1); 
-    monumento = this.add.image(4100, window.innerHeight - 130, 'monumento4').setOrigin(0.5, 1); 
-    monumento = this.add.image(5100, window.innerHeight - 130, 'monumento5').setOrigin(0.5, 1); 
+    monumento = this.add.image(1100 * altScale, window.innerHeight - 140 * altScale, 'monumento1').setOrigin(0.5, 1).setScale(0.5  * altScale); // Anclo la parte inferior del monumento al suelo
+    monumento = this.add.image(2100 * altScale, window.innerHeight - 90 * altScale, 'monumento2').setOrigin(0.5, 1).setScale(0.5  * altScale); 
+    monumento = this.add.image(3100 * altScale, window.innerHeight - 140 * altScale, 'monumento3').setOrigin(0.5, 1).setScale(0.5  * altScale); 
+    monumento = this.add.image(4100 * altScale, window.innerHeight - 130 * altScale, 'monumento4').setOrigin(0.5, 1).setScale(0.5  * altScale); 
+    monumento = this.add.image(5100 * altScale, window.innerHeight - 130 * altScale, 'monumento5').setOrigin(0.5, 1).setScale(0.5  * altScale); 
      
 
 
@@ -98,7 +100,7 @@ function create() { //____________________________CREATE________________________
     // Crear grupo de plataformas, incluido el suelo
     platforms = this.physics.add.staticGroup();
     //platforms.depth = 1;
-    platforms.create(LEVEL_WIDTH / 2, window.innerHeight - 50, 'suelo').setDisplaySize(LEVEL_WIDTH, 140).refreshBody();
+    platforms.create(LEVEL_WIDTH / 2, window.innerHeight - 50  * altScale, 'suelo').setDisplaySize(LEVEL_WIDTH, 140  * altScale).refreshBody();
 
     // Añadir plataformas fijas
     platforms.create(300 * altScale, 800 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody();
@@ -191,13 +193,13 @@ function update() { //____________________________UPDATE________________________
 
         // ABUELA -- Movimiento horizontal
         if (cursors.left.isDown) {
-            this.player.setVelocityX(-300);
+            this.player.setVelocityX(-300 * altScale);
             if (isOnGround) this.player.anims.play('left', true);
             this.player.flipX = true;
             //console.log('Mira a la izquierda');
-            this.player.body.setOffset(150, 50); // Al hacer el flipX es necesario jugar con los offset para centrar cuerpo
+            this.player.body.setOffset(150, 50); // Al hacer el flipX es necesario jugar con los offset para centrar cuerpo físico
         } else if (cursors.right.isDown) {
-            this.player.setVelocityX(300);
+            this.player.setVelocityX(300 * altScale);
             if (isOnGround) this.player.anims.play('right', true);
             this.player.flipX = false;
             this.player.body.setOffset(50, 50);
@@ -213,7 +215,7 @@ function update() { //____________________________UPDATE________________________
 
         // ABUELA -- Salto 
         if (cursors.up.isDown && isOnGround) {
-            this.player.setVelocityY(-700);
+            this.player.setVelocityY(-700  * altScale);
             this.player.anims.play('jump'); // Reproducir animación de salto una vez
             this.player.body.setOffset(150, 50);
         }
