@@ -7,11 +7,11 @@ var config = {
         mode: Phaser.Scale.RESIZE, // Escala para ajustar a diferentes pantallas
         autoCenter: Phaser.Scale.CENTER_BOTH
     },
-    physics: {
+    physics: { //Añade las físicas
         default: 'arcade',
         arcade: {
             gravity: { y: 980 }, // gravedad de la tierra
-            debug: true  // Activar el modo de depuración para ver colisiones y límites
+            debug: false  // Activar el modo de depuración para ver colisiones y límites
         }
     },
     scene: {
@@ -46,17 +46,25 @@ function preload() {
     this.load.image('plataformasL', 'assets/plataformaBarnaIzq.png'); // Cargar plataformas
     this.load.image('plataformasR', 'assets/plataformaBarnaDer.png'); 
     this.load.image('plataformasC', 'assets/plataformaBarnaC.png'); 
+
     this.load.image('monumento1', 'assets/colon1.png');
     this.load.image('monumento2', 'assets/torresMafre1.png');
     this.load.image('monumento3', 'assets/sagradaFamilia1.png');
     this.load.image('monumento4', 'assets/torreGlorias1.png');
     this.load.image('monumento5', 'assets/tresTorres1.png');
+
+    this.load.image('nube1', 'assets/nube1.png', {frameWidth: 205, frameHeight: 98});
+    this.load.image('nube2', 'assets/nube2.png', {frameWidth: 286, frameHeight: 103});
+    this.load.image('nube3', 'assets/nube3.png', {frameWidth: 184, frameHeight: 104});
+
+
 }
 
 function create() { //____________________________CREATE__________________________________________________________________________________________
-    // Definir el tamaño del mundo del juego
+    // Definir el tamaño del mundo del juego y de la camara
     this.physics.world.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
     this.cameras.main.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
+   
 
     // Fondo azul cielo que ocupa todo el nivel
     this.add.rectangle(0, 0, LEVEL_WIDTH, window.innerHeight, 0x42aaff).setOrigin(0, 0);
@@ -73,7 +81,7 @@ function create() { //____________________________CREATE________________________
 
 
     //Monumentos // Ajustar según la altura del suelo
-    monumento = this.add.image(1100, window.innerHeight - 140, 'monumento1').setOrigin(0.5, 1); // Anclar la parte inferior del monumento al suelo
+    monumento = this.add.image(1100, window.innerHeight - 140, 'monumento1').setOrigin(0.5, 1); // Anclo la parte inferior del monumento al suelo
     monumento = this.add.image(2100, window.innerHeight - 90, 'monumento2').setOrigin(0.5, 1); 
     monumento = this.add.image(3100, window.innerHeight - 140, 'monumento3').setOrigin(0.5, 1); 
     monumento = this.add.image(4100, window.innerHeight - 130, 'monumento4').setOrigin(0.5, 1); 
@@ -112,6 +120,7 @@ function create() { //____________________________CREATE________________________
     });
 
 
+
     // __________________________________CREAR ABUELA___________________________________________
     //this.player = this.physics.add.sprite(100, 250, 'abuela').setScale(0.4);
     this.player = this.physics.add.sprite(100, 250, 'abuelaMovimiento1').setScale(0.4).setOrigin(0.5,1);
@@ -119,25 +128,24 @@ function create() { //____________________________CREATE________________________
     // Ajustar el cuerpo físico del jugador
     this.player.body.setSize(150, 320).setOffset(50, 50); // Ajusta tamaño y desplazamiento
     
-    this.player.anims.play('abuelaQuieta'); // Animación de reposo puesto que al estar en el aire daría error con el salto
+    //this.player.anims.play('abuelaQuieta'); // Animación de reposo puesto que al estar en el aire daría error con el salto
     
     
     // Configurar físicas del jugador
     this.player.setBounce(0.2);
-    this.player.setCollideWorldBounds(true);
+    this.player.setCollideWorldBounds(true); //Evita que se salgo de los limites del escenario
 
-    // Hacer que la cámara siga al jugador
-    this.cameras.main.startFollow(this.player);
+     // Hacer que la cámara siga al jugador
+     this.cameras.main.startFollow(this.player);
 
-    // Añadir colisiones
+    // Añadir colisiones con objetos
     this.physics.add.collider(this.player, platforms);
     this.physics.add.collider(this.player, movingPlatformL);
     this.physics.add.collider(this.player, movingPlatformC);
     this.physics.add.collider(this.player, movingPlatformR);
 
 
-    // Animaciones de la abuela
-    this.anims.create({
+    this.anims.create({ // Anims: propiedad de phaser para animar. Animaciones de la abuela
         key: 'left',
         frames: this.anims.generateFrameNumbers('abuelaMovimiento1', { start: 0, end: 20 }),
         frameRate: 30,
@@ -146,8 +154,10 @@ function create() { //____________________________CREATE________________________
 
     this.anims.create({
         key: 'abuelaIdle',
-        frames: [{ key: 'abuelaQuieta', frame: 1}],
-        frameRate: 1
+        //frames: [{ key: 'abuelaQuieta', frame: 1}],
+        frames: this.anims.generateFrameNumbers('abuelaQuieta', { start: 0, end: 12 }),
+        frameRate: 4,
+        repeat: -1
     });
 
     this.anims.create({
@@ -174,6 +184,7 @@ function create() { //____________________________CREATE________________________
 function update() { //____________________________UPDATE__________________________________________________________________________________________
 
    
+        //******* MOVIMIENTOS ********/
         if (currentControl === 'keyboard') {
         // Controlar si el jugador está en el aire
         let isOnGround = this.player.body.touching.down;
@@ -192,11 +203,9 @@ function update() { //____________________________UPDATE________________________
             this.player.body.setOffset(50, 50);
         } else {
             this.player.setVelocityX(0);
-            if (isOnGround) this.player.anims.play('abuelaIdle'); // Animación de reposo si está en el suelo
-            
-            if (this.player.flipX == true){
+            if (isOnGround) this.player.anims.play('abuelaIdle', true); // Animación de reposo si está en el suelo
+            if (this.player.flipX == true){  //Mira izquierda o derecha
                 this.player.body.setOffset(150, 50);
-                console.log('Mira a la izquierda');
             }else{
                 this.player.body.setOffset(50, 50);
             }
@@ -204,7 +213,7 @@ function update() { //____________________________UPDATE________________________
 
         // ABUELA -- Salto 
         if (cursors.up.isDown && isOnGround) {
-            this.player.setVelocityY(-630);
+            this.player.setVelocityY(-700);
             this.player.anims.play('jump'); // Reproducir animación de salto una vez
             this.player.body.setOffset(150, 50);
         }
@@ -253,7 +262,7 @@ function createTouchControls(scene) {
     upZone.setInteractive().on('pointerdown', () => {
         currentControl = 'touch';
         if (this.player.body.touching.down) {
-            this.player.setVelocityY(-630);
+            this.player.setVelocityY(-700);
         }
     });
 
