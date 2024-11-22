@@ -11,10 +11,10 @@ var config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 980 }, // gravedad de la tierra
-            debug: false  // Activar el modo de depuración para ver colisiones y límites
+            debug: true  // Activar el modo de depuración para ver colisiones y límites
         }
     },
-    scene: {
+    scene: { //Funciones de phaser para crear la escena
         preload: preload,
         create: create,
         update: update
@@ -65,19 +65,21 @@ function create() { //____________________________CREATE________________________
     this.physics.world.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
     this.cameras.main.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
    
+    // Escala basada en la altura de la pantalla
+    const altScale = window.innerHeight / 1080; // Referencia de diseño: 1080px de altura
+
+    //const mountainAspectRatio = 1797 / 1080;
+    //const cityAspectRatio = 1815 / 1080;
 
     // Fondo azul cielo que ocupa todo el nivel
     this.add.rectangle(0, 0, LEVEL_WIDTH, window.innerHeight, 0x42aaff).setOrigin(0, 0);
 
     // Fondo montañoso que se moverá lentamente
-    backgroundMountain = this.add.tileSprite(0, 0, LEVEL_WIDTH, window.innerHeight, 'backgroundMountain')
-        .setOrigin(0, 0)
-        .setScrollFactor(0);
+    backgroundMountain = this.add.tileSprite(0, 0, LEVEL_WIDTH, 1080, 'backgroundMountain').setOrigin(0, 0).setScrollFactor(0).setScale(1 * altScale);
 
     // Fondo de ciudad que se moverá más rápido
-    backgroundCiudad = this.add.tileSprite(0, 0, LEVEL_WIDTH, window.innerHeight, 'backgroundCiudad')
-        .setOrigin(0, 0)
-        .setScrollFactor(0);
+    backgroundCiudad = this.add.tileSprite(0, 0 , LEVEL_WIDTH, 1080, 'backgroundCiudad').setOrigin(0, 0).setScrollFactor(0).setScale(1 * altScale);
+
 
 
     //Monumentos // Ajustar según la altura del suelo
@@ -99,20 +101,20 @@ function create() { //____________________________CREATE________________________
     platforms.create(LEVEL_WIDTH / 2, window.innerHeight - 50, 'suelo').setDisplaySize(LEVEL_WIDTH, 140).refreshBody();
 
     // Añadir plataformas fijas
-    platforms.create(300, 900, 'plataformasL').setScale(0.35).refreshBody();
-    platforms.create(345, 900, 'plataformasC').setScale(0.35).refreshBody();
-    platforms.create(390, 900, 'plataformasR').setScale(0.35).refreshBody();
+    platforms.create(300 * altScale, 800 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody();
+    platforms.create(360 * altScale, 800 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
+    platforms.create(420 * altScale, 800 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody();
 
-    platforms.create(700, 850, 'plataformasL').setScale(0.35).refreshBody();
-    platforms.create(745, 850, 'plataformasC').setScale(0.35).refreshBody();
-    platforms.create(790, 850, 'plataformasC').setScale(0.35).refreshBody();
-    platforms.create(835, 850, 'plataformasC').setScale(0.35).refreshBody();
-    platforms.create(880, 850, 'plataformasR').setScale(0.35).refreshBody();
+    platforms.create(700, 850, 'plataformasL').setScale(0.45).refreshBody();
+    platforms.create(760, 850, 'plataformasC').setScale(0.45).refreshBody();
+    platforms.create(816, 850, 'plataformasC').setScale(0.45).refreshBody();
+    platforms.create(872, 850, 'plataformasC').setScale(0.45).refreshBody();
+    platforms.create(930, 850, 'plataformasR').setScale(0.45).refreshBody();
 
     // Crear plataformas móviles
-    movingPlatformL = this.physics.add.image(455, 730, 'plataformasL').setScale(0.35).refreshBody();
-    movingPlatformC = this.physics.add.image(500, 730, 'plataformasC').setScale(0.35).refreshBody();
-    movingPlatformR = this.physics.add.image(545, 730, 'plataformasR').setScale(0.35).refreshBody();
+    movingPlatformL = this.physics.add.image(455, 730, 'plataformasL').setScale(0.45).refreshBody();
+    movingPlatformC = this.physics.add.image(515, 730, 'plataformasC').setScale(0.45).refreshBody();
+    movingPlatformR = this.physics.add.image(575, 730, 'plataformasR').setScale(0.45).refreshBody();
 
     // Desactivar la gravedad para la plataforma móvil
     [movingPlatformL, movingPlatformC, movingPlatformR].forEach(platform => {
@@ -123,20 +125,18 @@ function create() { //____________________________CREATE________________________
 
     // __________________________________CREAR ABUELA___________________________________________
     //this.player = this.physics.add.sprite(100, 250, 'abuela').setScale(0.4);
-    this.player = this.physics.add.sprite(100, 250, 'abuelaMovimiento1').setScale(0.4).setOrigin(0.5,1);
+    this.player = this.physics.add.sprite(150 * altScale, 250 * altScale, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5,1);
 
     // Ajustar el cuerpo físico del jugador
-    this.player.body.setSize(150, 320).setOffset(50, 50); // Ajusta tamaño y desplazamiento
-    
-    //this.player.anims.play('abuelaQuieta'); // Animación de reposo puesto que al estar en el aire daría error con el salto
-    
-    
+    this.player.body.setSize(150, 320).setOffset(50 * altScale, 50 * altScale); // Ajusta tamaño y desplazamiento
     // Configurar físicas del jugador
     this.player.setBounce(0.2);
     this.player.setCollideWorldBounds(true); //Evita que se salgo de los limites del escenario
+    //const playerScale = this.scale.height / 800;// Escala el personaje segun el tamaño de la pantalla
+    //player.setScale(playerScale);
 
-     // Hacer que la cámara siga al jugador
-     this.cameras.main.startFollow(this.player);
+    // Hacer que la cámara siga al jugador
+    this.cameras.main.startFollow(this.player);
 
     // Añadir colisiones con objetos
     this.physics.add.collider(this.player, platforms);
