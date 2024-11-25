@@ -5,6 +5,7 @@
  * Descripción: Desarrollo Abuela Friki
  * Derechos de autor (c) 2024, Víctor González Pérez
 */
+import Monumento from './monumento.js';
 
 
 // Configuración básica del juego - mediante un JSON
@@ -39,9 +40,10 @@ var cursors;
 var leftZone, rightZone, upZone; // Control de zonas táctiles
 var currentControl = 'keyboard'; // Variable para cambiar de controles táctiles a teclado
 var backgroundMountain, backgroundCiudad; // Variables para los fondos parallax
+let monumentoManager;
 
 
-const LEVEL_WIDTH = 5500 * altScale; // Ancho total del nivel
+const LEVEL_WIDTH = 6500 * altScale; // Ancho total del nivel
 var game = new Phaser.Game(config); // Inicializo el juego
 
 function preload() {
@@ -89,7 +91,7 @@ function create() { //____________________________CREATE________________________
     backgroundCiudad = this.add.tileSprite(0, 0 , LEVEL_WIDTH /altScale, 1080, 'backgroundCiudad').setOrigin(0, 0).setScrollFactor(0).setScale(1 * altScale);
 
 
-
+/*
     //Monumentos // Ajustar según la altura del suelo
     monumento = this.add.image(1100 * altScale, window.innerHeight - 140 * altScale, 'monumento1').setOrigin(0.5, 1).setScale(0.8  * altScale); // Anclo la parte inferior del monumento al suelo
     monumento = this.add.image(2100 * altScale, window.innerHeight - 90 * altScale, 'monumento2').setOrigin(0.5, 1).setScale(0.8  * altScale); 
@@ -100,9 +102,9 @@ function create() { //____________________________CREATE________________________
 
 
     monumento.depth = 0; // Asegurarnos de que se renderice detrás del jugador y plataformas
-
-
-
+*/
+    monumentoManager = new Monumento(this, altScale); //Esta escena y la escala
+    monumentoManager.crearMonumentos();
     // Crear grupo de plataformas, incluido el suelo
     platforms = this.physics.add.staticGroup();
     //platforms.depth = 1;
@@ -128,28 +130,6 @@ function create() { //____________________________CREATE________________________
     [movingPlatformL, movingPlatformC, movingPlatformR].forEach(platform => {
         platform.body.setAllowGravity(false).setImmovable(true).setVelocityX(100 * altScale);;
     });
-
-        // __________________________________PALOMAS___________________________________________
-    // Crear animación para las palomas
-    this.anims.create({
-        key: 'volar',
-        frames: this.anims.generateFrameNumbers('paloma', { start: 0, end: 5 }),
-        frameRate: 15,
-        repeat: -1 // Animación en bucle
-    });
-
-    // Grupo de enemigos palomas
-    this.palomas = this.physics.add.group();
-
-    // Añadir varias palomas al grupo
-    for (let i = 0; i < 15; i++) {
-        const x = Phaser.Math.Between(window.innerWidth, LEVEL_WIDTH);
-        const y = Phaser.Math.Between(50, 800 * altScale);
-        const paloma = this.palomas.create(x, y, 'paloma').setScale(0.3 * altScale);
-        paloma.play('volar');
-        paloma.body.setAllowGravity(false); // Las palomas no son afectadas por la gravedad
-        paloma.setVelocityX(Phaser.Math.Between(-150 * altScale, -200 * altScale));
-    }
 
 
     // __________________________________CREAR ABUELA___________________________________________
@@ -202,6 +182,28 @@ function create() { //____________________________CREATE________________________
         frameRate: 14,
         repeat: 0 // Sin bucle, se ejecuta una vez por salto
     });
+
+    // __________________________________PALOMAS___________________________________________
+    // Crear animación para las palomas
+    this.anims.create({
+        key: 'volar',
+        frames: this.anims.generateFrameNumbers('paloma', { start: 0, end: 5 }),
+        frameRate: 15,
+        repeat: -1 // Animación en bucle
+    });
+
+    // Grupo de enemigos palomas
+    this.palomas = this.physics.add.group();
+
+    // Añadir varias palomas al grupo
+    for (let i = 0; i < 3; i++) {
+        const x = Phaser.Math.Between(window.innerWidth, LEVEL_WIDTH);
+        const y = Phaser.Math.Between(50, window.innerHeight - 200 * altScale);
+        const paloma = this.palomas.create(x, y, 'paloma').setScale(0.3 * altScale);
+        paloma.play('volar');
+        paloma.body.setAllowGravity(false); // Las palomas no son afectadas por la gravedad
+        paloma.setVelocityX(Phaser.Math.Between(-150 * altScale, -200 * altScale));
+    }
 
 
 
@@ -257,8 +259,12 @@ function update() { //____________________________UPDATE________________________
     if (this.cameras.main.scrollX < maxScrollX) {
         backgroundMountain.tilePositionX = this.cameras.main.scrollX * 0.2; // Movimiento lento
         backgroundCiudad.tilePositionX = this.cameras.main.scrollX * 0.4; // Movimiento rápido
-        monumento.tilePositionX = 1200 - this.cameras.main.scrollX * 0.5;
+        //monumento.tilePositionX = 1200 - this.cameras.main.scrollX * 0.5;
     }
+
+    // Actualizar posición de los monumentos con el scroll de la cámara
+    const scrollX = this.cameras.main.scrollX;
+    monumentoManager.actualizar(scrollX);
 
     // Cambiar dirección de plataformas móviles
     if (movingPlatformL.x >= 700 * altScale) {
@@ -270,16 +276,17 @@ function update() { //____________________________UPDATE________________________
         movingPlatformC.setVelocityX(100 * altScale);
         movingPlatformR.setVelocityX(100 * altScale);
     }
-/*
+
     // Reposicionar palomas si salen de la pantalla
     this.palomas.getChildren().forEach(paloma => {
-        if (paloma.x < -paloma.width) {
-            paloma.x = Phaser.Math.Between(window.innerWidth, LEVEL_WIDTH);
-            paloma.y = Phaser.Math.Between(50, 300 * altScale);
-            paloma.setVelocityX(Phaser.Math.Between(-150 * altScale, -200 * altScale));
+        // Si la paloma sale del borde izquierdo de la cámara, reposicionarla
+        if (paloma.x < this.cameras.main.scrollX - 50) {
+            paloma.x = this.cameras.main.scrollX + this.scale.width + 50; // +50 del área visible
+            paloma.y = Phaser.Math.Between(350, this.scale.height * 0.8); // Altura aleatoria
+            paloma.setVelocityX(Phaser.Math.Between(-150 * altScale, -400 * altScale)); // Velocidad hacia la izquierda
         }
     });
-*/
+
 
 
 }
