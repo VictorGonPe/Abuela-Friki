@@ -1,3 +1,12 @@
+/**
+ * Nombre del archivo: abuelaFriki.js
+ * Autor: Víctor González Pérez
+ * Fecha de creación: 2024-2025
+ * Descripción: Desarrollo Abuela Friki
+ * Derechos de autor (c) 2024, Víctor González Pérez
+*/
+
+
 // Configuración básica del juego - mediante un JSON
 // Escala basada en la altura de la pantalla
 const altScale = window.innerHeight / 1080; // Referencia de diseño: 1080px de altura
@@ -13,7 +22,7 @@ var config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 980 * altScale}, // gravedad de la tierra
-            debug: true  // Activar el modo de depuración para ver colisiones y límites
+            debug: false  // Activar el modo de depuración para ver colisiones y límites
         }
     },
     scene: { //Funciones de phaser para crear la escena
@@ -60,16 +69,13 @@ function preload() {
     this.load.image('nube2', 'assets/nube2.png', {frameWidth: 286, frameHeight: 103});
     this.load.image('nube3', 'assets/nube3.png', {frameWidth: 184, frameHeight: 104});
 
-
+    this.load.spritesheet('paloma', 'assets/paloma.png', {frameWidth: 370, frameHeight: 390});
 }
 
 function create() { //____________________________CREATE__________________________________________________________________________________________
     // Definir el tamaño del mundo del juego y de la camara
     this.physics.world.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
     this.cameras.main.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
-   
-    
-
     //const mountainAspectRatio = 1797 / 1080;
     //const cityAspectRatio = 1815 / 1080;
 
@@ -85,11 +91,11 @@ function create() { //____________________________CREATE________________________
 
 
     //Monumentos // Ajustar según la altura del suelo
-    monumento = this.add.image(1100 * altScale, window.innerHeight - 140 * altScale, 'monumento1').setOrigin(0.5, 1).setScale(0.5  * altScale); // Anclo la parte inferior del monumento al suelo
-    monumento = this.add.image(2100 * altScale, window.innerHeight - 90 * altScale, 'monumento2').setOrigin(0.5, 1).setScale(0.5  * altScale); 
-    monumento = this.add.image(3100 * altScale, window.innerHeight - 140 * altScale, 'monumento3').setOrigin(0.5, 1).setScale(0.5  * altScale); 
-    monumento = this.add.image(4100 * altScale, window.innerHeight - 130 * altScale, 'monumento4').setOrigin(0.5, 1).setScale(0.5  * altScale); 
-    monumento = this.add.image(5100 * altScale, window.innerHeight - 130 * altScale, 'monumento5').setOrigin(0.5, 1).setScale(0.5  * altScale); 
+    monumento = this.add.image(1100 * altScale, window.innerHeight - 140 * altScale, 'monumento1').setOrigin(0.5, 1).setScale(0.8  * altScale); // Anclo la parte inferior del monumento al suelo
+    monumento = this.add.image(2100 * altScale, window.innerHeight - 90 * altScale, 'monumento2').setOrigin(0.5, 1).setScale(0.8  * altScale); 
+    monumento = this.add.image(3100 * altScale, window.innerHeight - 140 * altScale, 'monumento3').setOrigin(0.5, 1).setScale(0.8  * altScale); 
+    monumento = this.add.image(4100 * altScale, window.innerHeight - 130 * altScale, 'monumento4').setOrigin(0.5, 1).setScale(0.8  * altScale); 
+    monumento = this.add.image(5100 * altScale, window.innerHeight - 130 * altScale, 'monumento5').setOrigin(0.5, 1).setScale(0.8  * altScale); 
      
 
 
@@ -107,22 +113,43 @@ function create() { //____________________________CREATE________________________
     platforms.create(360 * altScale, 800 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
     platforms.create(420 * altScale, 800 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody();
 
-    platforms.create(700, 850, 'plataformasL').setScale(0.45).refreshBody();
-    platforms.create(760, 850, 'plataformasC').setScale(0.45).refreshBody();
-    platforms.create(816, 850, 'plataformasC').setScale(0.45).refreshBody();
-    platforms.create(872, 850, 'plataformasC').setScale(0.45).refreshBody();
-    platforms.create(930, 850, 'plataformasR').setScale(0.45).refreshBody();
+    platforms.create(700 * altScale, 850 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody();
+    platforms.create(760 * altScale, 850 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
+    platforms.create(816 * altScale, 850 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
+    platforms.create(872 * altScale, 850 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
+    platforms.create(930 * altScale, 850 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody();
 
     // Crear plataformas móviles
-    movingPlatformL = this.physics.add.image(455, 730, 'plataformasL').setScale(0.45).refreshBody();
-    movingPlatformC = this.physics.add.image(515, 730, 'plataformasC').setScale(0.45).refreshBody();
-    movingPlatformR = this.physics.add.image(575, 730, 'plataformasR').setScale(0.45).refreshBody();
+    movingPlatformL = this.physics.add.image(455 * altScale, 730 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody();
+    movingPlatformC = this.physics.add.image(515 * altScale, 730 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
+    movingPlatformR = this.physics.add.image(575 * altScale, 730 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody();
 
     // Desactivar la gravedad para la plataforma móvil
     [movingPlatformL, movingPlatformC, movingPlatformR].forEach(platform => {
-        platform.body.setAllowGravity(false).setImmovable(true).setVelocityX(100);;
+        platform.body.setAllowGravity(false).setImmovable(true).setVelocityX(100 * altScale);;
     });
 
+        // __________________________________PALOMAS___________________________________________
+    // Crear animación para las palomas
+    this.anims.create({
+        key: 'volar',
+        frames: this.anims.generateFrameNumbers('paloma', { start: 0, end: 5 }),
+        frameRate: 15,
+        repeat: -1 // Animación en bucle
+    });
+
+    // Grupo de enemigos palomas
+    this.palomas = this.physics.add.group();
+
+    // Añadir varias palomas al grupo
+    for (let i = 0; i < 15; i++) {
+        const x = Phaser.Math.Between(window.innerWidth, LEVEL_WIDTH);
+        const y = Phaser.Math.Between(50, 800 * altScale);
+        const paloma = this.palomas.create(x, y, 'paloma').setScale(0.3 * altScale);
+        paloma.play('volar');
+        paloma.body.setAllowGravity(false); // Las palomas no son afectadas por la gravedad
+        paloma.setVelocityX(Phaser.Math.Between(-150 * altScale, -200 * altScale));
+    }
 
 
     // __________________________________CREAR ABUELA___________________________________________
@@ -175,6 +202,8 @@ function create() { //____________________________CREATE________________________
         frameRate: 14,
         repeat: 0 // Sin bucle, se ejecuta una vez por salto
     });
+
+
 
     // Habilitar controles
     cursors = this.input.keyboard.createCursorKeys();
@@ -232,15 +261,27 @@ function update() { //____________________________UPDATE________________________
     }
 
     // Cambiar dirección de plataformas móviles
-    if (movingPlatformL.x >= 700) {
-        movingPlatformL.setVelocityX(-100);
-        movingPlatformC.setVelocityX(-100);
-        movingPlatformR.setVelocityX(-100);
-    } else if (movingPlatformL.x <= 300) {
-        movingPlatformL.setVelocityX(100);
-        movingPlatformC.setVelocityX(100);
-        movingPlatformR.setVelocityX(100);
+    if (movingPlatformL.x >= 700 * altScale) {
+        movingPlatformL.setVelocityX(-100 * altScale);
+        movingPlatformC.setVelocityX(-100 * altScale);
+        movingPlatformR.setVelocityX(-100 * altScale);
+    } else if (movingPlatformL.x <= 300 * altScale) {
+        movingPlatformL.setVelocityX(100 * altScale);
+        movingPlatformC.setVelocityX(100 * altScale);
+        movingPlatformR.setVelocityX(100 * altScale);
     }
+/*
+    // Reposicionar palomas si salen de la pantalla
+    this.palomas.getChildren().forEach(paloma => {
+        if (paloma.x < -paloma.width) {
+            paloma.x = Phaser.Math.Between(window.innerWidth, LEVEL_WIDTH);
+            paloma.y = Phaser.Math.Between(50, 300 * altScale);
+            paloma.setVelocityX(Phaser.Math.Between(-150 * altScale, -200 * altScale));
+        }
+    });
+*/
+
+
 }
 
 // Función para controles táctiles
