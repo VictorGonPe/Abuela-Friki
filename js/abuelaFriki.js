@@ -25,7 +25,7 @@ var config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 980 * altScale}, // gravedad de la tierra
-            debug: true  // Activar el modo de depuración para ver colisiones y límites
+            debug: false  // Activar el modo de depuración para ver colisiones y límites
         }
     },
     scene: { //Funciones de phaser para crear la escena
@@ -75,6 +75,7 @@ function preload() {
     this.load.image('nube3', 'assets/nube3.png', {frameWidth: 184, frameHeight: 104});
 
     this.load.spritesheet('paloma', 'assets/paloma.png', {frameWidth: 370, frameHeight: 390});
+    this.load.spritesheet('explosion', 'assets/explosion.png', {frameWidth: 298, frameHeight: 300});
     this.load.spritesheet('patinete', 'assets/patinete.png', {frameWidth: 313.3, frameHeight: 360});
 }
 
@@ -187,6 +188,16 @@ function create() { //____________________________CREATE________________________
         enemigosManager.crearPalomas(5);
         // Crear colisión entre las palomas y la abuela
     this.physics.add.overlap(enemigosManager.palomas, this.player, colisionPaloma, null, this);
+
+    this.anims.create({
+        key: 'efectoExplosion',
+        frames: this.anims.generateFrameNumbers('explosion', { start: 0, end: 5 }), // Ajusta los frames si es necesario
+        frameRate: 15, // Velocidad de la animación
+        repeat: 0 // No repetir, se ejecuta una sola vez
+    });
+
+
+    
     // __________________________________PATINETES__________________________________________
 
     // Animación de los patinetes
@@ -314,17 +325,34 @@ function createTouchControls(scene) {
 
 // Función de colisión entre las palomas y la abuela
 function colisionPaloma(player, paloma) {
-    console.log("¡Abuela golpeada por una paloma!");
-    // Aquí puedes añadir lógica, como reducir la salud o reiniciar el nivel
-    // Ejemplo: Reducir salud del jugador
-    player.setTint(0xff0000); // Cambiar color de la abuela como indicativo del daño
+    console.log('Colisión con paloma detectada');
+
+    // Crear la animación de explosión en la posición de la paloma
+    const explosion = this.add.sprite(paloma.x, paloma.y, 'explosion')
+        .setScale(0.5 * altScale)
+        //.setDepth(10); // Asegurar que esté visible sobre otros elementos
+
+    explosion.play('efectoExplosion', true);
+
+    // Verificar eventos de animación
+    explosion.on('animationstart', () => console.log('Animación iniciada'));
+    explosion.on('animationcomplete', () => {
+        console.log('Animación completada');
+        explosion.destroy(); // Destruir el sprite tras la animación
+    });
+
+    // Cambiar color de la abuela como indicativo del daño
+    player.setTint(0xff0000);
     this.time.delayedCall(500, () => player.clearTint()); // Quitar el color tras 500ms
-    paloma.destroy(); // Destruir la paloma al impactar (opcional)
+
+    paloma.destroy(); // Destruir la paloma
 }
+
+
 
 // Función de colisión entre los patinetes y la abuela
 function colisionPatinete(player, patinete) {
-    console.log("¡Abuela atropellada por un patinete!");
+    //console.log("¡Abuela atropellada por un patinete!");
     // Lógica similar a la colisión con las palomas
     player.setTint(0xff0000);
     this.time.delayedCall(500, () => player.clearTint());

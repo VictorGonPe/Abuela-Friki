@@ -20,6 +20,7 @@ export default class Enemigos {
             paloma.body.setSize(paloma.width * 0.7, paloma.height * 0.3).setOffset(paloma.width * 0.07, paloma.height * 0.35); // Ajusta el tamaño/pos para colisiones
         }
         this.enemigos.push({ tipo: 'palomas', grupo: this.palomas });
+        
     }
 
     actualizarPalomas(scrollX) {
