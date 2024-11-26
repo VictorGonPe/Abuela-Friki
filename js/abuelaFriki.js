@@ -44,6 +44,15 @@ var currentControl = 'keyboard'; // Variable para cambiar de controles táctiles
 var backgroundMountain, backgroundCiudad; // Variables para los fondos parallax
 let monumentoManager;
 let enemigosManager;
+let isInvulnerable = false; //Para que no dañen continuamente a la abuela
+//PUNTOS Y SALUD
+let puntosTexto;
+let puntos = 0;
+let barraSalud;
+let salud = 100; //Salud Incial
+
+
+
 
 
 const LEVEL_WIDTH = 6500 * altScale; // Ancho total del nivel
@@ -144,8 +153,8 @@ function create() { //____________________________CREATE________________________
     this.physics.add.collider(this.player, movingPlatformC);
     this.physics.add.collider(this.player, movingPlatformR);
 
-
-    this.anims.create({ // Anims: propiedad de phaser para animar. Animaciones de la abuela
+    // Anims: propiedad de phaser para animar. Animaciones de la abuela
+    this.anims.create({
         key: 'left',
         frames: this.anims.generateFrameNumbers('abuelaMovimiento1', { start: 0, end: 20 }),
         frameRate: 30,
@@ -177,7 +186,7 @@ function create() { //____________________________CREATE________________________
     // __________________________________PALOMAS__________________________________________
     // Instancia a la clase
     enemigosManager = new Enemigos(this, altScale);
-    // Animación de las palomas
+    // Animación de las palomas volar
     this.anims.create({
         key: 'volar',
         frames: this.anims.generateFrameNumbers('paloma', { start: 0, end: 5 }),
@@ -185,22 +194,21 @@ function create() { //____________________________CREATE________________________
         repeat: -1 // Animación en bucle
     });
         //Creación de palomas
-        enemigosManager.crearPalomas(5);
+        enemigosManager.crearPalomas(10);
         // Crear colisión entre las palomas y la abuela
     this.physics.add.overlap(enemigosManager.palomas, this.player, colisionPaloma, null, this);
-
+    // Animación de las palomas explosión
     this.anims.create({
         key: 'efectoExplosion',
         frames: this.anims.generateFrameNumbers('explosion', { start: 0, end: 5 }), // Ajusta los frames si es necesario
-        frameRate: 15, // Velocidad de la animación
+        frameRate: 10, // Velocidad de la animación
         repeat: 0 // No repetir, se ejecuta una sola vez
     });
-
 
     
     // __________________________________PATINETES__________________________________________
 
-    // Animación de los patinetes
+    // Animación mover patinetes
     this.anims.create({
         key: 'moverPatinete',
         frames: this.anims.generateFrameNumbers('patinete', { start: 0, end: 5 }),
@@ -217,6 +225,15 @@ function create() { //____________________________CREATE________________________
     if (this.sys.game.device.input.touch) {
         createTouchControls(this);
     }
+
+    // __________________________________PUNTOS Y SALUD__________________________________________
+    // Mostrar los puntos en la esquina superior izquierda
+    puntosTexto = this.add.text(16, 16, `Puntos: ${puntos}`, {fontSize: '30px',fill: '#ffffff',fontFamily: 'Arial',}).setScrollFactor(0).setScale(0.8 * altScale); // Para que no se mueva con la cámara
+
+    // Crear un objeto de gráficos para la barra de salud
+    barraSalud = this.add.graphics().setScrollFactor(0);
+    // Dibujar la barra de salud inicial
+    actualizarBarraSalud(salud);
 
 }
 
@@ -284,7 +301,7 @@ function update() { //____________________________UPDATE________________________
         movingPlatformR.setVelocityX(100 * altScale);
     }
 
-
+    
 }
 
 
@@ -325,7 +342,14 @@ function createTouchControls(scene) {
 
 // Función de colisión entre las palomas y la abuela
 function colisionPaloma(player, paloma) {
-    console.log('Colisión con paloma detectada');
+
+    if (isInvulnerable) {
+        return; // No aplicar daño si la abuela es invulnerable
+    }
+
+    salud -= 10; // Reducir la salud
+    if (salud < 0) salud = 0; // Asegurar que no sea negativa
+    actualizarBarraSalud(salud); // Actualizar la barra de salud
 
     // Crear la animación de explosión en la posición de la paloma
     const explosion = this.add.sprite(paloma.x, paloma.y, 'explosion')
@@ -341,19 +365,77 @@ function colisionPaloma(player, paloma) {
         explosion.destroy(); // Destruir el sprite tras la animación
     });
 
-    // Cambiar color de la abuela como indicativo del daño
-    player.setTint(0xff0000);
-    this.time.delayedCall(500, () => player.clearTint()); // Quitar el color tras 500ms
+    // Hacer a la abuela invulnerable
+    isInvulnerable = true;
+
+    for (let i = 0; i < 5; i++) {
+        this.time.delayedCall(200 * i, () => {
+            player.visible = !player.visible; // Alternar visibilidad
+        });
+    }
+    // Asegurarse de que quede visible al final del parpadeo
+    this.time.delayedCall(1000, () => {
+        player.visible = true;
+        isInvulnerable = false; // Termina invulnerabilidad
+    });
 
     paloma.destroy(); // Destruir la paloma
+
+    // Sumar puntos y actualizar el texto
+    puntos += 10; // Añadir 10 puntos
+    puntosTexto.setText(`Puntos: ${puntos}`);
+
+
 }
 
 
 
 // Función de colisión entre los patinetes y la abuela
 function colisionPatinete(player, patinete) {
-    //console.log("¡Abuela atropellada por un patinete!");
-    // Lógica similar a la colisión con las palomas
-    player.setTint(0xff0000);
-    this.time.delayedCall(500, () => player.clearTint());
+    if (isInvulnerable) {
+        return; // No aplicar daño si la abuela es invulnerable
+    }
+
+    salud -= 30; // Reducir la salud
+    if (salud < 0) salud = 0; // Asegurar que no sea negativa
+    actualizarBarraSalud(salud); // Actualizar la barra de salud
+    
+    // Reducir puntos
+    puntos -= 20;
+    if (puntos < 0) puntos = 0;
+    puntosTexto.setText(`Puntos: ${puntos}`);
+    
+    // Hacer a la abuela invulnerable
+    isInvulnerable = true;
+    player.setTint(0xff0000); // Cambiar color como indicativo de daño
+
+    // Hacer que parpadee durante el período de invulnerabilidad
+    for (let i = 0; i < 5; i++) {
+        this.time.delayedCall(200 * i, () => {
+            player.visible = !player.visible; // Alternar visibilidad
+        });
+    }
+
+    // Restaurar visibilidad y eliminar invulnerabilidad después del tiempo
+    this.time.delayedCall(1000, () => {
+        player.visible = true; // Asegurarse de que sea visible
+        isInvulnerable = false; // Termina invulnerabilidad
+        player.clearTint(); // Quitar el color
+    });
+}
+
+
+function actualizarBarraSalud(valor) {
+    barraSalud.clear(); // Limpia el gráfico anterior
+
+    barraSalud.fillStyle(0xD4AF37); // Color negro
+    barraSalud.fillRect(16, 46, 208, 28); // Posición (20, 20), ancho 200px, alto 20px
+
+    // Dibujar el fondo de la barra
+    barraSalud.fillStyle(0x000000); // Color negro
+    barraSalud.fillRect(20, 50, 200, 20); // Posición (20, 20), ancho 200px, alto 20px
+
+    // Dibujar la barra de salud actual
+    barraSalud.fillStyle(0xff0000); // Color rojo
+    barraSalud.fillRect(20, 50, (200 * valor) / 100, 20); // Escalar ancho según la salud
 }
