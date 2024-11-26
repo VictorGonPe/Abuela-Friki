@@ -6,6 +6,8 @@
  * Derechos de autor (c) 2024, Víctor González Pérez
 */
 import Monumento from './monumento.js';
+import Enemigos from './enemigos.js';
+
 
 
 // Configuración básica del juego - mediante un JSON
@@ -23,7 +25,7 @@ var config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 980 * altScale}, // gravedad de la tierra
-            debug: false  // Activar el modo de depuración para ver colisiones y límites
+            debug: true  // Activar el modo de depuración para ver colisiones y límites
         }
     },
     scene: { //Funciones de phaser para crear la escena
@@ -41,6 +43,7 @@ var leftZone, rightZone, upZone; // Control de zonas táctiles
 var currentControl = 'keyboard'; // Variable para cambiar de controles táctiles a teclado
 var backgroundMountain, backgroundCiudad; // Variables para los fondos parallax
 let monumentoManager;
+let enemigosManager;
 
 
 const LEVEL_WIDTH = 6500 * altScale; // Ancho total del nivel
@@ -72,6 +75,7 @@ function preload() {
     this.load.image('nube3', 'assets/nube3.png', {frameWidth: 184, frameHeight: 104});
 
     this.load.spritesheet('paloma', 'assets/paloma.png', {frameWidth: 370, frameHeight: 390});
+    this.load.spritesheet('patinete', 'assets/patinete.png', {frameWidth: 313.3, frameHeight: 360});
 }
 
 function create() { //____________________________CREATE__________________________________________________________________________________________
@@ -81,31 +85,17 @@ function create() { //____________________________CREATE________________________
     //const mountainAspectRatio = 1797 / 1080;
     //const cityAspectRatio = 1815 / 1080;
 
-    // Fondo azul cielo que ocupa todo el nivel
+    // Fondo azul cielo que ocupa todo el nivel ________________________FONDOS___________________________________
     this.add.rectangle(0, 0, LEVEL_WIDTH, window.innerHeight, 0x42aaff).setOrigin(0, 0);
-
     // Fondo montañoso que se moverá lentamente
     backgroundMountain = this.add.tileSprite(0, 0, LEVEL_WIDTH / altScale, 1080, 'backgroundMountain').setOrigin(0, 0).setScrollFactor(0).setScale(1 * altScale);
-
     // Fondo de ciudad que se moverá más rápido
     backgroundCiudad = this.add.tileSprite(0, 0 , LEVEL_WIDTH /altScale, 1080, 'backgroundCiudad').setOrigin(0, 0).setScrollFactor(0).setScale(1 * altScale);
-
-
-/*
-    //Monumentos // Ajustar según la altura del suelo
-    monumento = this.add.image(1100 * altScale, window.innerHeight - 140 * altScale, 'monumento1').setOrigin(0.5, 1).setScale(0.8  * altScale); // Anclo la parte inferior del monumento al suelo
-    monumento = this.add.image(2100 * altScale, window.innerHeight - 90 * altScale, 'monumento2').setOrigin(0.5, 1).setScale(0.8  * altScale); 
-    monumento = this.add.image(3100 * altScale, window.innerHeight - 140 * altScale, 'monumento3').setOrigin(0.5, 1).setScale(0.8  * altScale); 
-    monumento = this.add.image(4100 * altScale, window.innerHeight - 130 * altScale, 'monumento4').setOrigin(0.5, 1).setScale(0.8  * altScale); 
-    monumento = this.add.image(5100 * altScale, window.innerHeight - 130 * altScale, 'monumento5').setOrigin(0.5, 1).setScale(0.8  * altScale); 
-     
-
-
-    monumento.depth = 0; // Asegurarnos de que se renderice detrás del jugador y plataformas
-*/
+    //Instancia y creacion de monumentos
     monumentoManager = new Monumento(this, altScale); //Esta escena y la escala
     monumentoManager.crearMonumentos();
-    // Crear grupo de plataformas, incluido el suelo
+
+    // Crear grupo de plataformas, incluido el suelo__________________PLATAFORMAS_______________________________
     platforms = this.physics.add.staticGroup();
     //platforms.depth = 1;
     platforms.create(LEVEL_WIDTH / 2, window.innerHeight - 50  * altScale, 'suelo').setDisplaySize(LEVEL_WIDTH, 140  * altScale).refreshBody();
@@ -183,35 +173,40 @@ function create() { //____________________________CREATE________________________
         repeat: 0 // Sin bucle, se ejecuta una vez por salto
     });
 
-    // __________________________________PALOMAS___________________________________________
-    // Crear animación para las palomas
+    // __________________________________PALOMAS__________________________________________
+    // Instancia a la clase
+    enemigosManager = new Enemigos(this, altScale);
+    // Animación de las palomas
     this.anims.create({
         key: 'volar',
         frames: this.anims.generateFrameNumbers('paloma', { start: 0, end: 5 }),
         frameRate: 15,
         repeat: -1 // Animación en bucle
     });
+        //Creación de palomas
+        enemigosManager.crearPalomas(5);
+        // Crear colisión entre las palomas y la abuela
+    this.physics.add.overlap(enemigosManager.palomas, this.player, colisionPaloma, null, this);
+    // __________________________________PATINETES__________________________________________
 
-    // Grupo de enemigos palomas
-    this.palomas = this.physics.add.group();
-
-    // Añadir varias palomas al grupo
-    for (let i = 0; i < 3; i++) {
-        const x = Phaser.Math.Between(window.innerWidth, LEVEL_WIDTH);
-        const y = Phaser.Math.Between(50, window.innerHeight - 200 * altScale);
-        const paloma = this.palomas.create(x, y, 'paloma').setScale(0.3 * altScale);
-        paloma.play('volar');
-        paloma.body.setAllowGravity(false); // Las palomas no son afectadas por la gravedad
-        paloma.setVelocityX(Phaser.Math.Between(-150 * altScale, -200 * altScale));
-    }
-
-
+    // Animación de los patinetes
+    this.anims.create({
+        key: 'moverPatinete',
+        frames: this.anims.generateFrameNumbers('patinete', { start: 0, end: 5 }),
+        frameRate: 6,
+        repeat: -1 // Animación en bucle
+    });
+    enemigosManager.crearPatinetes(1); //Crear patinetes
+    // Crear colisiones entre los patinetes y el suelo
+    this.physics.add.collider(enemigosManager.patinetes, platforms);
+    this.physics.add.overlap(enemigosManager.patinetes, this.player, colisionPatinete, null, this); //overlap lanza un evento
 
     // Habilitar controles
     cursors = this.input.keyboard.createCursorKeys();
     if (this.sys.game.device.input.touch) {
         createTouchControls(this);
     }
+
 }
 
 function update() { //____________________________UPDATE__________________________________________________________________________________________
@@ -265,6 +260,7 @@ function update() { //____________________________UPDATE________________________
     // Actualizar posición de los monumentos con el scroll de la cámara
     const scrollX = this.cameras.main.scrollX;
     monumentoManager.actualizar(scrollX);
+    enemigosManager.actualizar(scrollX);
 
     // Cambiar dirección de plataformas móviles
     if (movingPlatformL.x >= 700 * altScale) {
@@ -277,19 +273,11 @@ function update() { //____________________________UPDATE________________________
         movingPlatformR.setVelocityX(100 * altScale);
     }
 
-    // Reposicionar palomas si salen de la pantalla
-    this.palomas.getChildren().forEach(paloma => {
-        // Si la paloma sale del borde izquierdo de la cámara, reposicionarla
-        if (paloma.x < this.cameras.main.scrollX - 50) {
-            paloma.x = this.cameras.main.scrollX + this.scale.width + 50; // +50 del área visible
-            paloma.y = Phaser.Math.Between(350, this.scale.height * 0.8); // Altura aleatoria
-            paloma.setVelocityX(Phaser.Math.Between(-150 * altScale, -400 * altScale)); // Velocidad hacia la izquierda
-        }
-    });
-
-
 
 }
+
+
+//________________________________________________________OTRAS FUNCIONES______________________________________________________
 
 // Función para controles táctiles
 function createTouchControls(scene) {
@@ -321,4 +309,23 @@ function createTouchControls(scene) {
         currentControl = 'keyboard';
         this.player.setVelocityX(0);
     });
+}
+
+
+// Función de colisión entre las palomas y la abuela
+function colisionPaloma(player, paloma) {
+    console.log("¡Abuela golpeada por una paloma!");
+    // Aquí puedes añadir lógica, como reducir la salud o reiniciar el nivel
+    // Ejemplo: Reducir salud del jugador
+    player.setTint(0xff0000); // Cambiar color de la abuela como indicativo del daño
+    this.time.delayedCall(500, () => player.clearTint()); // Quitar el color tras 500ms
+    paloma.destroy(); // Destruir la paloma al impactar (opcional)
+}
+
+// Función de colisión entre los patinetes y la abuela
+function colisionPatinete(player, patinete) {
+    console.log("¡Abuela atropellada por un patinete!");
+    // Lógica similar a la colisión con las palomas
+    player.setTint(0xff0000);
+    this.time.delayedCall(500, () => player.clearTint());
 }
