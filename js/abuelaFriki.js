@@ -51,10 +51,7 @@ let puntos = 0;
 let barraSalud;
 let salud = 100; //Salud Incial
 let pastillas;
-
-
-
-
+//let galletas;
 
 const LEVEL_WIDTH = 6500 * altScale; // Ancho total del nivel
 var game = new Phaser.Game(config); // Inicializo el juego
@@ -88,6 +85,7 @@ function preload() {
     this.load.image('indicadorVida2', 'assets/indicadorVida2.png');
 
     this.load.spritesheet('paracetamol', 'assets/paracetamol.png', {frameWidth: 550, frameHeight: 520});
+    this.load.image('galleta', 'assets/galleta.png');
 
     this.load.spritesheet('paloma', 'assets/paloma.png', {frameWidth: 370, frameHeight: 390});
     this.load.spritesheet('explosion', 'assets/explosion.png', {frameWidth: 298, frameHeight: 300});
@@ -199,9 +197,13 @@ function create() { //____________________________CREATE________________________
         frameRate: 15,
         repeat: -1 // Animación en bucle
     });
-        //Creación de palomas
-        enemigosManager.crearPalomas(10);
-        // Crear colisión entre las palomas y la abuela
+        
+    //Creación de palomas
+    enemigosManager.crearPalomas(10);
+    // Crear colisión entre las palomas y la abuela
+
+    
+    
     this.physics.add.overlap(enemigosManager.palomas, this.player, colisionPaloma, null, this);
     // Animación de las palomas explosión
     this.anims.create({
@@ -210,7 +212,7 @@ function create() { //____________________________CREATE________________________
         frameRate: 10, // Velocidad de la animación
         repeat: 0 // No repetir, se ejecuta una sola vez
     });
-
+    
     
     // __________________________________PATINETES__________________________________________
 
@@ -231,6 +233,40 @@ function create() { //____________________________CREATE________________________
     if (this.sys.game.device.input.touch) {
         createTouchControls(this);
     }
+
+    // __________________________________GALLETAS__________________________________________
+    this.galletas = this.physics.add.group();
+
+    const keyLanzarGalleta = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X); // Lanzar galletas
+
+    this.keys = {
+        lanzarGalleta: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X)
+    };
+
+    // Colisiones de las galletas con enemigos
+    this.physics.add.overlap(this.galletas, enemigosManager.palomas, (galleta, paloma) => {
+        console.log('¡Galleta impactó una paloma!');
+        galleta.destroy(); // Elimina la galleta
+        paloma.destroy(); // Elimina la paloma
+    });
+    this.physics.add.overlap(this.galletas, enemigosManager.patinetes, (galleta, patinete) => {
+        console.log('¡Galleta impactó un patinete!');
+        galleta.destroy(); // Elimina la galleta
+        patinete.destroy(); // Elimina el patinete
+    }); 
+
+    this.lanzarGalleta = () => { //Función flecha que permite se referenciada en update porque this apunta a la escena
+        const galleta = this.galletas.create(this.player.x, this.player.y - 20, 'galleta').setScale(0.15 * altScale);
+        galleta.setVelocityX(this.player.flipX ? -800  * altScale : 800  * altScale); // Dirección según la orientación del jugador
+        galleta.body.allowGravity = false; // Desactivar gravedad de la galleta
+
+        // Destruir la galleta después de un tiempo
+        this.time.delayedCall(3000, () => {
+            galleta.destroy();
+        });
+    };
+    
+
 
     // __________________________________PUNTOS, SALUD Y PASTILLAS__________________________________________
     // Mostrar los puntos en la esquina superior izquierda
@@ -260,7 +296,6 @@ function create() { //____________________________CREATE________________________
    
     // Colisiones entre las pastillas y las plataformas
     this.physics.add.collider(pastillas, platforms);
-    console.log('Player:', this.player);
     this.physics.add.overlap(this.player, pastillas, recogerPastilla, null, this); //abuela recoje pastilla
 
 }
@@ -268,8 +303,8 @@ function create() { //____________________________CREATE________________________
 function update() { //____________________________UPDATE__________________________________________________________________________________________
 
    
-        //******* MOVIMIENTOS ********/
-        if (currentControl === 'keyboard') {
+    //******* MOVIMIENTOS ********/
+    if (currentControl === 'keyboard') {
         // Controlar si el jugador está en el aire
         let isOnGround = this.player.body.touching.down;
 
@@ -301,6 +336,12 @@ function update() { //____________________________UPDATE________________________
             this.player.anims.play('jump'); // Reproducir animación de salto una vez
             this.player.body.setOffset(150, 50);
         }
+        
+        // ABUELA -- Lanzar galleta
+        if (Phaser.Input.Keyboard.JustDown(this.keys.lanzarGalleta)) {
+            this.lanzarGalleta(); // Lógica para lanzar galleta
+        }
+        
     }
         
 
@@ -496,5 +537,7 @@ function generarPastillas(cantidad) {
         pastilla.play('brillarParacetamol'); // Reproducir la animación
     }
 }
+
+
 
 
