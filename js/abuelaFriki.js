@@ -41,7 +41,7 @@ let movingPlatformC, movingPlatformL, movingPlatformR; // Variables para platafo
 var cursors;
 var leftZone, rightZone, upZone; // Control de zonas táctiles
 var currentControl = 'keyboard'; // Variable para cambiar de controles táctiles a teclado
-var backgroundMountain, backgroundCiudad; // Variables para los fondos parallax
+var backgroundMountain, backgroundCiudad, indicadorVida, indicadorVida2; // Variables para los fondos parallax
 let monumentoManager;
 let enemigosManager;
 let isInvulnerable = false; //Para que no dañen continuamente a la abuela
@@ -50,6 +50,7 @@ let puntosTexto;
 let puntos = 0;
 let barraSalud;
 let salud = 100; //Salud Incial
+let pastillas;
 
 
 
@@ -82,6 +83,11 @@ function preload() {
     this.load.image('nube1', 'assets/nube1.png', {frameWidth: 205, frameHeight: 98});
     this.load.image('nube2', 'assets/nube2.png', {frameWidth: 286, frameHeight: 103});
     this.load.image('nube3', 'assets/nube3.png', {frameWidth: 184, frameHeight: 104});
+
+    this.load.image('indicadorVida', 'assets/indicadorVida.png');
+    this.load.image('indicadorVida2', 'assets/indicadorVida2.png');
+
+    this.load.spritesheet('paracetamol', 'assets/paracetamol.png', {frameWidth: 550, frameHeight: 520});
 
     this.load.spritesheet('paloma', 'assets/paloma.png', {frameWidth: 370, frameHeight: 390});
     this.load.spritesheet('explosion', 'assets/explosion.png', {frameWidth: 298, frameHeight: 300});
@@ -226,14 +232,36 @@ function create() { //____________________________CREATE________________________
         createTouchControls(this);
     }
 
-    // __________________________________PUNTOS Y SALUD__________________________________________
+    // __________________________________PUNTOS, SALUD Y PASTILLAS__________________________________________
     // Mostrar los puntos en la esquina superior izquierda
-    puntosTexto = this.add.text(16, 16, `Puntos: ${puntos}`, {fontSize: '30px',fill: '#ffffff',fontFamily: 'Arial',}).setScrollFactor(0).setScale(0.8 * altScale); // Para que no se mueva con la cámara
-
+    puntosTexto = this.add.text(25  * altScale, 12  * altScale, `Puntos: ${puntos}`, {fontSize: '30px',fill: '#ffffff',fontFamily: 'Arial',}).setScrollFactor(0).setScale(0.8 * altScale); // Para que no se mueva con la cámara
+    
+    indicadorVida = this.add.image(15 * altScale, 40 * altScale, 'indicadorVida').setOrigin(0,0).setScale(0.5 * altScale).setScrollFactor(0);
+    
     // Crear un objeto de gráficos para la barra de salud
-    barraSalud = this.add.graphics().setScrollFactor(0);
+    barraSalud = this.add.graphics().setScrollFactor(0).setScale(1 * altScale);
+
+    indicadorVida2 = this.add.image(15 * altScale, 40 * altScale, 'indicadorVida2').setOrigin(0,0).setScale(0.5 * altScale).setScrollFactor(0);
+    
     // Dibujar la barra de salud inicial
     actualizarBarraSalud(salud);
+
+    this.anims.create({
+        key: 'brillarParacetamol',
+        frames: this.anims.generateFrameNumbers('paracetamol', { start: 0, end: 9 }), // Ajusta los frames según el sprite sheet
+        frameRate: 10, // Velocidad de la animación
+        repeat: -1 // Animación en bucle
+    });
+
+    // Crear grupo de pastillas
+    pastillas = this.physics.add.group();
+
+    generarPastillas(3); // Genera 3 pastillas en posiciones aleatorias
+   
+    // Colisiones entre las pastillas y las plataformas
+    this.physics.add.collider(pastillas, platforms);
+    console.log('Player:', this.player);
+    this.physics.add.overlap(this.player, pastillas, recogerPastilla, null, this); //abuela recoje pastilla
 
 }
 
@@ -299,6 +327,13 @@ function update() { //____________________________UPDATE________________________
         movingPlatformL.setVelocityX(100 * altScale);
         movingPlatformC.setVelocityX(100 * altScale);
         movingPlatformR.setVelocityX(100 * altScale);
+    }
+
+    if (salud <= 0){
+        salud = 100;
+        puntos = 0;
+        isInvulnerable = false; // Asegurar que no quede invulnerable
+        this.scene.restart(); // Reinicia la escena
     }
 
     
@@ -428,14 +463,38 @@ function colisionPatinete(player, patinete) {
 function actualizarBarraSalud(valor) {
     barraSalud.clear(); // Limpia el gráfico anterior
 
-    barraSalud.fillStyle(0xD4AF37); // Color negro
-    barraSalud.fillRect(16, 46, 208, 28); // Posición (20, 20), ancho 200px, alto 20px
+   
 
     // Dibujar el fondo de la barra
     barraSalud.fillStyle(0x000000); // Color negro
-    barraSalud.fillRect(20, 50, 200, 20); // Posición (20, 20), ancho 200px, alto 20px
+    barraSalud.fillRect(80, 63, 140, 25); // Posición (20, 20), ancho 200px, alto 20px
 
     // Dibujar la barra de salud actual
     barraSalud.fillStyle(0xff0000); // Color rojo
-    barraSalud.fillRect(20, 50, (200 * valor) / 100, 20); // Escalar ancho según la salud
+    barraSalud.fillRect(80, 63, (140 * valor) / 100, 25); // Escalar ancho según la salud
+
+    
 }
+
+function recogerPastilla(player, pastilla) {
+    console.log('¡Has recogido una pastilla!');
+
+    // Subir salud, pero no más de 100
+    salud = Math.min(salud + 20, 100);
+
+    actualizarBarraSalud(salud);
+    pastilla.destroy();
+
+}
+
+function generarPastillas(cantidad) {
+    for (let i = 0; i < cantidad; i++) {
+        const x = Phaser.Math.Between(100, LEVEL_WIDTH - 100);
+        const y = Phaser.Math.Between(100, window.innerHeight - 200);
+        const pastilla = pastillas.create(x, y, 'paracetamol').setScale(0.1 * altScale).setBounce(0.5);
+        //pastilla.body.setAllowGravity(false);
+        pastilla.play('brillarParacetamol'); // Reproducir la animación
+    }
+}
+
+
