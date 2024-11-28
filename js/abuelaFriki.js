@@ -1,4 +1,4 @@
-/**
+/*
  * Nombre del archivo: abuelaFriki.js
  * Autor: Víctor González Pérez
  * Fecha de creación: 2024-2025
@@ -97,15 +97,18 @@ function preload() {
     this.load.spritesheet('paloma', 'assets/paloma.png', {frameWidth: 370, frameHeight: 390});
     this.load.spritesheet('explosion', 'assets/explosion.png', {frameWidth: 298, frameHeight: 300});
     this.load.spritesheet('patinete', 'assets/patinete.png', {frameWidth: 313.3, frameHeight: 360});
+    this.load.spritesheet('caca', 'assets/caca.png', {frameWidth: 345.5, frameHeight: 300});
+
 }
 
 function create() { //____________________________CREATE__________________________________________________________________________________________
+    
     // Definir el tamaño del mundo del juego y de la camara
     this.physics.world.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
     this.cameras.main.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
     //const mountainAspectRatio = 1797 / 1080;
     //const cityAspectRatio = 1815 / 1080;
-
+    console.log("Escena activa:", this);
     // Fondo azul cielo que ocupa todo el nivel ________________________FONDOS___________________________________
     this.add.rectangle(0, 0, LEVEL_WIDTH, window.innerHeight, 0x42aaff).setOrigin(0, 0);
     // Fondo montañoso que se moverá lentamente
@@ -197,6 +200,7 @@ function create() { //____________________________CREATE________________________
     // __________________________________PALOMAS__________________________________________
     // Instancia a la clase
     enemigosManager = new Enemigos(this, altScale);
+  
     // Animación de las palomas volar
     this.anims.create({
         key: 'volar',
@@ -208,10 +212,8 @@ function create() { //____________________________CREATE________________________
     //Creación de palomas
     enemigosManager.crearPalomas(10);
     // Crear colisión entre las palomas y la abuela
-
-    
-    
     this.physics.add.overlap(enemigosManager.palomas, this.player, colisionPaloma, null, this);
+
     // Animación de las palomas explosión
     this.anims.create({
         key: 'efectoExplosion',
@@ -241,6 +243,18 @@ function create() { //____________________________CREATE________________________
         createTouchControls(this);
     }
 
+    // __________________________________CACAS__________________________________________
+
+    enemigosManager.crearCacas(5); // Crear cacas
+
+    this.physics.add.collider(enemigosManager.cacas, platforms);// Colisiones suelo
+    this.physics.add.overlap(enemigosManager.cacas, this.player, colisionCaca, null, this);  //detecta colisiones cacas
+
+    
+    
+
+
+
     // __________________________________GALLETAS__________________________________________
     // Crear un contenedor para mostrar la imagen de la galleta y el número de galletas
     galletaIcono = this.add.image(45 * altScale, 150 * altScale, 'galleta').setScale(0.2 * altScale).setScrollFactor(0);
@@ -253,9 +267,12 @@ function create() { //____________________________CREATE________________________
 
     // Crear grupo de frascos de galletas
     frascosGalletas = this.physics.add.group();
+
+    //frascosGalletas.body.setSize(229,250).setOffset(50 * altScale, 50 * altScale);
     
     // Generar frascos de galletas en el nivel
     generarFrascosGalletas(3);
+    
 
     // Colisión entre la abuela y los FRASCOS GALLETAS
     this.physics.add.overlap(this.player, frascosGalletas, (player, frasco) => {
@@ -264,14 +281,12 @@ function create() { //____________________________CREATE________________________
         galletasTexto.setText(`${galletasDisponibles}`); // Actualizar texto
         frasco.destroy(); // Eliminar frasco recolectado
     });
-
+    this.physics.add.collider(frascosGalletas, platforms);
 
     this.galletas = this.physics.add.group();
 
-    const keyLanzarGalleta = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X); // Lanzar galletas
-
     this.keys = {
-        lanzarGalleta: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X)
+        lanzarGalleta: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X) // Lanzar galletas
     };
 
     // Colisiones de las galletas con enemigos
@@ -362,6 +377,7 @@ function update() { //____________________________UPDATE________________________
     //******* MOVIMIENTOS ********/
     if (currentControl === 'keyboard') {
         // Controlar si el jugador está en el aire
+        //console.log(this.player.body.touching.down);
         let isOnGround = this.player.body.touching.down;
 
         // ABUELA -- Movimiento horizontal
@@ -413,7 +429,7 @@ function update() { //____________________________UPDATE________________________
     // Actualizar posición de los monumentos con el scroll de la cámara
     const scrollX = this.cameras.main.scrollX;
     monumentoManager.actualizar(scrollX);
-    enemigosManager.actualizar(scrollX);
+    enemigosManager.actualizar(scrollX); //maneja a todos los enemigos
 
     // Cambiar dirección de plataformas móviles
     if (movingPlatformL.x >= 700 * altScale) {
@@ -598,8 +614,34 @@ function generarFrascosGalletas(cantidad) {
     for (let i = 0; i < cantidad; i++) {
         const x = Phaser.Math.Between(200, LEVEL_WIDTH - 200);
         const y = Phaser.Math.Between(100, window.innerHeight - 200);
-        const frasco = frascosGalletas.create(x, y, 'frascoGalleta').setScale(0.8 * altScale).setBounce(0.5);
-        frasco.body.setAllowGravity(false); // Sin gravedad para los frascos
+        const frasco = frascosGalletas.create(x, y, 'frascoGalletas').setScale(0.3 * altScale).setBounce(0.5).setSize(210,200);
+        frasco.body.setAllowGravity(true); // Sin gravedad para los frascos
+    }
+}
+
+
+function colisionCaca(player, caca) {
+    if (this.tocandoCaca) return; // Si ya está procesando una colisión, no hacer nada
+    this.tocandoCaca = true; // Marcar como en colisión
+
+    console.log('Colisión con caca');
+    console.log('Player:', player);
+    console.log('Caca:', caca);
+
+    salud -= 15;
+    if (salud < 0) salud = 0;
+    actualizarBarraSalud(salud);
+
+    player.setTint(0x964B00);
+    this.time.delayedCall(500, () => {
+        if (player) player.clearTint();
+        this.tocandoCaca = false; // Permitir nuevas colisiones
+    });
+
+    if (caca && caca.body) {
+        caca.body.enable = false;
+        caca.removeAllListeners();
+        caca.destroy();
     }
 }
 

@@ -1,8 +1,11 @@
 export default class Enemigos {
     constructor(scene, altScale) {
+        console.log(this.scene);
         this.scene = scene; // Referencia a la escena de Phaser
         this.altScale = altScale; // Escala para ajustar tamaños
         this.enemigos = []; // Array para todos los enemigos
+        // Configura las animaciones al crear la clase
+        this.configurarAnimaciones();
     }
 
     crearPalomas(cantidad) {
@@ -49,6 +52,7 @@ export default class Enemigos {
         }
         this.enemigos.push({ tipo: 'patinetes', grupo: this.patinetes }); // Guardar referencia en el array de enemigos
     }
+    
 
     actualizarPatinetes(scrollX) {
         this.patinetes.getChildren().forEach(patinete => {
@@ -59,6 +63,126 @@ export default class Enemigos {
             }
         });
     }
+
+
+    crearCacas(cantidad) {
+        this.cacas = this.scene.physics.add.group(); // Grupo para las cacas
+    
+        for (let i = 0; i < cantidad; i++) {
+            const x = Phaser.Math.Between(this.scene.scale.width, this.scene.physics.world.bounds.width);
+            const y = this.scene.scale.height - 400 * this.altScale; // Posición inicial cercana al suelo
+    
+            const caca = this.cacas.create(x, y, 'caca').setScale(0.2 * this.altScale);
+            caca.body.setAllowGravity(true); 
+            caca.setBounce(0.2); // Rebote suave al tocar el suelo
+            caca.body.setSize(caca.width * 0.8, caca.height * 0.8).setOffset(caca.width * 0.1, caca.height * 0.1);
+    
+            // Iniciar el ciclo de comportamiento
+            this.iniciarCicloCaca(caca);
+        }
+    
+        this.enemigos.push({ tipo: 'cacas', grupo: this.cacas });
+    }
+    
+    iniciarCicloCaca(caca) {
+        if (caca && caca.anims) {
+            caca.anims.play('cacaBrillando'); // Animación inicial
+        }
+        this.scene.time.delayedCall(5000, () => {
+            if (caca && caca.anims && this.scene.anims.exists('cacaPreparada')) {
+                caca.anims.play('cacaPreparada');
+            }
+            const tiempoPreparacion = Phaser.Math.Between(3000, 10000);
+            this.scene.time.delayedCall(tiempoPreparacion, () => {
+                if (caca && caca.anims && this.scene.anims.exists('cacaSaltar')) {
+                    caca.anims.play('cacaSaltar');
+                }
+                if (caca && caca.body) {
+                    caca.body.setAllowGravity(true);
+                    caca.setVelocityY(-400 * this.altScale);
+                    caca.setVelocityX(Phaser.Math.Between(-100, 100) * this.altScale);
+                }
+    
+                this.scene.time.delayedCall(2000, () => {
+                    if (caca && caca.anims && this.scene.anims.exists('cacaCaer')) {
+                        caca.anims.play('cacaCaer');
+                    }
+                    if (caca && caca.body) {
+                        caca.body.setAllowGravity(false);
+                        caca.setVelocity(0, 0);
+                    }
+                    if (caca) {
+                        this.iniciarCicloCaca(caca); // Reinicia el ciclo
+                    }
+                });
+            });
+        });
+    }
+    
+    
+    
+    
+    actualizarCacas(scrollX) {
+        this.cacas.getChildren().forEach(caca => {
+            if (caca && caca.body) { // Verificar que caca y su body existen
+                if (caca.x < scrollX - 500) {
+                    caca.x = scrollX + this.scene.scale.width + 50; // Reposicionar fuera del lado derecho
+                    caca.y = this.scene.scale.height - 250 * this.altScale; // Volver cerca del suelo
+                    caca.body.setAllowGravity(false); // Reiniciar la gravedad
+                    caca.setVelocity(0, 0); // Detener movimiento
+                    this.iniciarCicloCaca(caca); // Reiniciar ciclo
+                }
+            }
+        });
+    }
+    
+
+
+    configurarAnimaciones() {
+        // Verifica si las animaciones ya están creadas para evitar duplicados
+        if (!this.scene.anims.exists('cacaQuieta')) {
+            this.scene.anims.create({
+                key: 'cacaQuieta',
+                frames: [{ key: 'caca', frame: 0 }],
+                frameRate: 1,
+            });
+        }
+    
+        if (!this.scene.anims.exists('cacaBrillando')) {
+            this.scene.anims.create({
+                key: 'cacaBrillando',
+                frames: this.scene.anims.generateFrameNumbers('caca', { start: 0, end: 0 }),
+                frameRate: 2,
+                repeat: 10, // Brilla durante 5 segundos
+            });
+        }
+    
+        if (!this.scene.anims.exists('cacaPreparada')) {
+            this.scene.anims.create({
+                key: 'cacaPreparada',
+                frames: this.scene.anims.generateFrameNumbers('caca', { start: 1, end: 4 }),
+                frameRate: 5,
+                repeat: -1, // Repite continuamente
+            });
+        }
+    
+        if (!this.scene.anims.exists('cacaSaltar')) {
+            this.scene.anims.create({
+                key: 'cacaSaltar',
+                frames: [{ key: 'caca', frame: 5 }],
+                frameRate: 1,
+            });
+        }
+    
+        if (!this.scene.anims.exists('cacaCaer')) {
+            this.scene.anims.create({
+                key: 'cacaCaer',
+                frames: [{ key: 'caca', frame: 0 }],
+                frameRate: 1,
+            });
+        }
+    }
+    
     
     
     
@@ -68,9 +192,11 @@ export default class Enemigos {
                 this.actualizarPalomas(scrollX);
             } else if (enemigo.tipo === 'patinetes') {
                 this.actualizarPatinetes(scrollX);
+            } else if (enemigo.tipo === 'cacas') {
+                this.actualizarCacas(scrollX);
             }
             // Añadir mas tipos de enemigos
         });
     }
     
-}
+}  
