@@ -51,7 +51,12 @@ let puntos = 0;
 let barraSalud;
 let salud = 100; //Salud Incial
 let pastillas;
-//let galletas;
+
+let galletasDisponibles = 10; // Número inicial de galletas
+let galletasTexto; // Texto que mostrará cuántas galletas quedan
+let galletaIcono; //PAra colocar la imagen
+let frascosGalletas;
+
 
 const LEVEL_WIDTH = 6500 * altScale; // Ancho total del nivel
 var game = new Phaser.Game(config); // Inicializo el juego
@@ -86,6 +91,8 @@ function preload() {
 
     this.load.spritesheet('paracetamol', 'assets/paracetamol.png', {frameWidth: 550, frameHeight: 520});
     this.load.image('galleta', 'assets/galleta.png');
+    this.load.image('frascoGalletas', 'assets/frascoGalletas.png');
+
 
     this.load.spritesheet('paloma', 'assets/paloma.png', {frameWidth: 370, frameHeight: 390});
     this.load.spritesheet('explosion', 'assets/explosion.png', {frameWidth: 298, frameHeight: 300});
@@ -235,6 +242,30 @@ function create() { //____________________________CREATE________________________
     }
 
     // __________________________________GALLETAS__________________________________________
+    // Crear un contenedor para mostrar la imagen de la galleta y el número de galletas
+    galletaIcono = this.add.image(45 * altScale, 150 * altScale, 'galleta').setScale(0.2 * altScale).setScrollFactor(0);
+    galletasTexto = this.add.text(85 * altScale, 140 * altScale, `= ${ galletasDisponibles}`, {
+        fontSize: '30px',
+        fill: '#ffffff',
+        fontFamily: 'Arial',
+    }).setScrollFactor(0).setScale(0.8 * altScale);
+
+
+    // Crear grupo de frascos de galletas
+    frascosGalletas = this.physics.add.group();
+    
+    // Generar frascos de galletas en el nivel
+    generarFrascosGalletas(3);
+
+    // Colisión entre la abuela y los FRASCOS GALLETAS
+    this.physics.add.overlap(this.player, frascosGalletas, (player, frasco) => {
+        console.log('¡Has recogido un frasco de galletas!');
+        galletasDisponibles += 10; // Incrementar galletas
+        galletasTexto.setText(`${galletasDisponibles}`); // Actualizar texto
+        frasco.destroy(); // Eliminar frasco recolectado
+    });
+
+
     this.galletas = this.physics.add.group();
 
     const keyLanzarGalleta = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X); // Lanzar galletas
@@ -244,27 +275,52 @@ function create() { //____________________________CREATE________________________
     };
 
     // Colisiones de las galletas con enemigos
+    // Colisiones de las galletas con enemigos
     this.physics.add.overlap(this.galletas, enemigosManager.palomas, (galleta, paloma) => {
         console.log('¡Galleta impactó una paloma!');
         galleta.destroy(); // Elimina la galleta
+
+        // Crear la animación de explosión en la posición de la paloma
+        const explosion = this.add.sprite(paloma.x, paloma.y, 'explosion').setScale(0.5 * altScale);
+
+        explosion.play('efectoExplosion', true);
+
+        // Destruir la paloma y el sprite de explosión tras la animación
+        explosion.on('animationcomplete', () => {
+        explosion.destroy();
+        });
+
         paloma.destroy(); // Elimina la paloma
+        puntos += 10; // Añadir puntos por destruir la paloma
+        puntosTexto.setText(`Puntos: ${puntos}`);
     });
+
+
     this.physics.add.overlap(this.galletas, enemigosManager.patinetes, (galleta, patinete) => {
         console.log('¡Galleta impactó un patinete!');
         galleta.destroy(); // Elimina la galleta
         patinete.destroy(); // Elimina el patinete
     }); 
 
-    this.lanzarGalleta = () => { //Función flecha que permite se referenciada en update porque this apunta a la escena
-        const galleta = this.galletas.create(this.player.x, this.player.y - 20, 'galleta').setScale(0.15 * altScale);
-        galleta.setVelocityX(this.player.flipX ? -800  * altScale : 800  * altScale); // Dirección según la orientación del jugador
-        galleta.body.allowGravity = false; // Desactivar gravedad de la galleta
-
-        // Destruir la galleta después de un tiempo
-        this.time.delayedCall(3000, () => {
-            galleta.destroy();
-        });
+    this.lanzarGalleta = () => {
+        if (galletasDisponibles > 0) {
+            const galleta = this.galletas.create(this.player.x, this.player.y - 20, 'galleta').setScale(0.15 * altScale);
+            galleta.setVelocityX(this.player.flipX ? -800 * altScale : 800 * altScale); // Dirección según la orientación del jugador
+            galleta.body.allowGravity = false; // Desactivar gravedad de la galleta
+    
+            // Reducir la cantidad de galletas disponibles
+            galletasDisponibles--;
+            galletasTexto.setText(`${galletasDisponibles}`); // Actualizar el texto en pantalla
+    
+            // Destruir la galleta después de un tiempo
+            this.time.delayedCall(3000, () => {
+                galleta.destroy();
+            });
+        } else {
+            console.log('No tienes galletas suficientes para lanzar.');
+        }
     };
+    
     
 
 
@@ -538,6 +594,14 @@ function generarPastillas(cantidad) {
     }
 }
 
+function generarFrascosGalletas(cantidad) {
+    for (let i = 0; i < cantidad; i++) {
+        const x = Phaser.Math.Between(200, LEVEL_WIDTH - 200);
+        const y = Phaser.Math.Between(100, window.innerHeight - 200);
+        const frasco = frascosGalletas.create(x, y, 'frascoGalleta').setScale(0.8 * altScale).setBounce(0.5);
+        frasco.body.setAllowGravity(false); // Sin gravedad para los frascos
+    }
+}
 
 
 
