@@ -9,11 +9,11 @@ export default class Monumento {
     crearMonumentos() {
         // Coordenadas y datos para los monumentos
         const monumentosData = [
-            { x: 1100, y: 140, key: 'monumento1' },
-            { x: 2100, y: 90, key: 'monumento2' },
-            { x: 3100, y: 140, key: 'monumento3' },
-            { x: 4100, y: 130, key: 'monumento4' },
-            { x: 5100, y: 130, key: 'monumento5' },
+            { x: 1300, y: 180, key: 'monumento1' },
+            { x: 6000, y: 90, key: 'monumento2' },
+            { x: 12000, y: 140, key: 'monumento3' },
+            { x: 18000, y: 130, key: 'monumento4' },
+            { x: 24000, y: 130, key: 'monumento5' },
         ];
 
         // Crear los monumentos basados en los datos

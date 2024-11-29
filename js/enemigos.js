@@ -1,6 +1,5 @@
 export default class Enemigos {
     constructor(scene, altScale) {
-        console.log(this.scene);
         this.scene = scene; // Referencia a la escena de Phaser
         this.altScale = altScale; // Escala para ajustar tamaños
         this.enemigos = []; // Array para todos los enemigos
@@ -13,7 +12,7 @@ export default class Enemigos {
         this.palomas = this.scene.physics.add.group();
         for (let i = 0; i < cantidad; i++) {
             const x = Phaser.Math.Between(this.scene.scale.width, this.scene.physics.world.bounds.width);
-            const y = Phaser.Math.Between(50, this.scene.scale.height * 0.7); // Altura entre 50px y la mitad de la pantalla
+            const y = Phaser.Math.Between(50, this.scene.scale.height * 0.85); // Altura entre 50px y la mitad de la pantalla
 
             const paloma = this.palomas.create(x, y, 'paloma').setScale(0.3 * this.altScale);
             paloma.play('volar'); // Animación de vuelo
@@ -69,7 +68,7 @@ export default class Enemigos {
         this.cacas = this.scene.physics.add.group(); // Grupo para las cacas
     
         for (let i = 0; i < cantidad; i++) {
-            const x = Phaser.Math.Between(this.scene.scale.width, this.scene.physics.world.bounds.width);
+            const x = Phaser.Math.Between(this.scene.scale.width, this.scene.physics.world.bounds.width -3000);
             const y = this.scene.scale.height - 400 * this.altScale; // Posición inicial cercana al suelo
     
             const caca = this.cacas.create(x, y, 'caca').setScale(0.2 * this.altScale);
@@ -92,14 +91,14 @@ export default class Enemigos {
             if (caca && caca.anims && this.scene.anims.exists('cacaPreparada')) {
                 caca.anims.play('cacaPreparada');
             }
-            const tiempoPreparacion = Phaser.Math.Between(3000, 10000);
+            const tiempoPreparacion = Phaser.Math.Between(1000, 10000);
             this.scene.time.delayedCall(tiempoPreparacion, () => {
                 if (caca && caca.anims && this.scene.anims.exists('cacaSaltar')) {
                     caca.anims.play('cacaSaltar');
                 }
                 if (caca && caca.body) {
                     caca.body.setAllowGravity(true);
-                    caca.setVelocityY(-400 * this.altScale);
+                    caca.setVelocityY(-800 * this.altScale);
                     caca.setVelocityX(Phaser.Math.Between(-100, 100) * this.altScale);
                 }
     
@@ -108,7 +107,7 @@ export default class Enemigos {
                         caca.anims.play('cacaCaer');
                     }
                     if (caca && caca.body) {
-                        caca.body.setAllowGravity(false);
+                        //caca.body.setAllowGravity();
                         caca.setVelocity(0, 0);
                     }
                     if (caca) {
@@ -126,10 +125,10 @@ export default class Enemigos {
         this.cacas.getChildren().forEach(caca => {
             if (caca && caca.body) { // Verificar que caca y su body existen
                 if (caca.x < scrollX - 500) {
-                    caca.x = scrollX + this.scene.scale.width + 50; // Reposicionar fuera del lado derecho
-                    caca.y = this.scene.scale.height - 250 * this.altScale; // Volver cerca del suelo
-                    caca.body.setAllowGravity(false); // Reiniciar la gravedad
-                    caca.setVelocity(0, 0); // Detener movimiento
+                    caca.x = scrollX + this.scene.scale.width + Phaser.Math.Between(500,1000) * this.altScale; // Reposicionar fuera del lado derecho
+                    caca.y = this.scene.scale.height - 500 * this.altScale; // Volver cerca del suelo
+                    caca.body.setAllowGravity(true); // Reiniciar la gravedad
+                    caca.setVelocity(5, 5); // Detener movimiento
                     this.iniciarCicloCaca(caca); // Reiniciar ciclo
                 }
             }
@@ -143,7 +142,7 @@ export default class Enemigos {
         if (!this.scene.anims.exists('cacaQuieta')) {
             this.scene.anims.create({
                 key: 'cacaQuieta',
-                frames: [{ key: 'caca', frame: 0 }],
+                frames: [{ key: 'caca', frame: 1 }],
                 frameRate: 1,
             });
         }
@@ -151,9 +150,9 @@ export default class Enemigos {
         if (!this.scene.anims.exists('cacaBrillando')) {
             this.scene.anims.create({
                 key: 'cacaBrillando',
-                frames: this.scene.anims.generateFrameNumbers('caca', { start: 0, end: 0 }),
+                frames: this.scene.anims.generateFrameNumbers('caca', { start: 1, end: 1 }),
                 frameRate: 2,
-                repeat: 10, // Brilla durante 5 segundos
+                repeat: 4, // Brilla durante 5 segundos
             });
         }
     

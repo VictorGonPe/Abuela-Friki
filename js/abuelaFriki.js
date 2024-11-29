@@ -58,7 +58,7 @@ let galletaIcono; //PAra colocar la imagen
 let frascosGalletas;
 
 
-const LEVEL_WIDTH = 6500 * altScale; // Ancho total del nivel
+const LEVEL_WIDTH = 30000 * altScale; // Ancho total del nivel
 var game = new Phaser.Game(config); // Inicializo el juego
 
 function preload() {
@@ -99,6 +99,15 @@ function preload() {
     this.load.spritesheet('patinete', 'assets/patinete.png', {frameWidth: 313.3, frameHeight: 360});
     this.load.spritesheet('caca', 'assets/caca.png', {frameWidth: 345.5, frameHeight: 300});
 
+    //__________________ESCENARIO____________________
+    this.load.image('cartelBarcelona', 'assets/cartelBarcelona.png');
+    this.load.image('quiosco1', 'assets/quiosco1.png');
+    this.load.image('tiendaComic1','assets/tiendaComic1.png');
+    this.load.image('panaderia1','assets/panaderia1.png');
+    this.load.image('pescaderia1','assets/pescaderia2.png');
+    this.load.image('carniceria1','assets/carniceria2.png');
+    this.load.image('badulaque1','assets/badulaque1.png');
+
 }
 
 function create() { //____________________________CREATE__________________________________________________________________________________________
@@ -119,32 +128,52 @@ function create() { //____________________________CREATE________________________
     monumentoManager = new Monumento(this, altScale); //Esta escena y la escala
     monumentoManager.crearMonumentos();
 
+
+    //__________________CREAR ESCENARIO____________________
+
+    const cartelBarcelona = this.add.image(400 * altScale, window.innerHeight - 120 * altScale, 'cartelBarcelona').setScale(0.5 * altScale).setOrigin(0.5, 1);
+    const quiosco1 = this.add.image(1000 * altScale, window.innerHeight - 140 * altScale, 'quiosco1').setScale(0.7 * altScale).setOrigin(0.5, 1);
+    const pescaderia1 = this.add.image(2250 * altScale, window.innerHeight - 180 * altScale, 'pescaderia1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const tiendaComic1 = this.add.image(1750 * altScale, window.innerHeight - 140 * altScale, 'tiendaComic1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const carniceria1 = this.add.image(3500 * altScale, window.innerHeight - 180 * altScale, 'carniceria1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const panaderia1 = this.add.image(2870 * altScale, window.innerHeight - 140 * altScale, 'panaderia1').setScale(0.7 * altScale).setOrigin(0.5, 1);
+    const badulaque1 = this.add.image(4100 * altScale, window.innerHeight - 140 * altScale, 'badulaque1').setScale(0.7 * altScale).setOrigin(0.5, 1);
+
+/*
+const cartelBarcelona = this.add.image(400 * altScale, window.innerHeight - 140 * altScale, 'cartelBarcelona').setScale(0.3 * altScale).setOrigin(0.5, 1);
+const quiosco1 = this.add.image(1000 * altScale, window.innerHeight - 160 * altScale, 'quiosco1').setScale(0.5 * altScale).setOrigin(0.5, 1);
+const pescaderia1 = this.add.image(2250 * altScale, window.innerHeight - 200 * altScale, 'pescaderia1').setScale(0.4 * altScale).setOrigin(0.5, 1);
+const tiendaComic1 = this.add.image(1750 * altScale, window.innerHeight - 160 * altScale, 'tiendaComic1').setScale(0.4 * altScale).setOrigin(0.5, 1);
+const carniceria1 = this.add.image(3500 * altScale, window.innerHeight - 200 * altScale, 'carniceria1').setScale(0.4 * altScale).setOrigin(0.5, 1);
+const panaderia1 = this.add.image(2870 * altScale, window.innerHeight - 160 * altScale, 'panaderia1').setScale(0.4 * altScale).setOrigin(0.5, 1);
+const badulaque1 = this.add.image(4150 * altScale, window.innerHeight - 160 * altScale, 'badulaque1').setScale(0.4 * altScale).setOrigin(0.5, 1);
+*/
+
     // Crear grupo de plataformas, incluido el suelo__________________PLATAFORMAS_______________________________
     platforms = this.physics.add.staticGroup();
     //platforms.depth = 1;
     platforms.create(LEVEL_WIDTH / 2, window.innerHeight - 50  * altScale, 'suelo').setDisplaySize(LEVEL_WIDTH, 140  * altScale).refreshBody();
 
     // Añadir plataformas fijas
-    platforms.create(300 * altScale, 800 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody();
-    platforms.create(360 * altScale, 800 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
-    platforms.create(420 * altScale, 800 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody();
+    platforms.create(700 * altScale, 770 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody();
+    platforms.create(760 * altScale, 770 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
+    platforms.create(820 * altScale, 770 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody();
 
-    platforms.create(700 * altScale, 850 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody();
-    platforms.create(760 * altScale, 850 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
-    platforms.create(816 * altScale, 850 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
-    platforms.create(872 * altScale, 850 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
-    platforms.create(930 * altScale, 850 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody();
+    platforms.create(1000 * altScale, 650 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody();
+    platforms.create(1060 * altScale, 650 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
+    platforms.create(1116 * altScale, 650 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
+    platforms.create(1172 * altScale, 650 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
+    platforms.create(1230 * altScale, 650 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody();
 
     // Crear plataformas móviles
-    movingPlatformL = this.physics.add.image(455 * altScale, 730 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody();
-    movingPlatformC = this.physics.add.image(515 * altScale, 730 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
-    movingPlatformR = this.physics.add.image(575 * altScale, 730 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody();
+    movingPlatformL = this.physics.add.image(1455 * altScale, 530 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody();
+    movingPlatformC = this.physics.add.image(1515 * altScale, 530 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
+    movingPlatformR = this.physics.add.image(1575 * altScale, 530 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody();
 
     // Desactivar la gravedad para la plataforma móvil
     [movingPlatformL, movingPlatformC, movingPlatformR].forEach(platform => {
         platform.body.setAllowGravity(false).setImmovable(true).setVelocityX(100 * altScale);;
     });
-
 
     // __________________________________CREAR ABUELA___________________________________________
     //this.player = this.physics.add.sprite(100, 250, 'abuela').setScale(0.4);
@@ -177,7 +206,6 @@ function create() { //____________________________CREATE________________________
 
     this.anims.create({
         key: 'abuelaIdle',
-        //frames: [{ key: 'abuelaQuieta', frame: 1}],
         frames: this.anims.generateFrameNumbers('abuelaQuieta', { start: 0, end: 12 }),
         frameRate: 4,
         repeat: -1
@@ -319,7 +347,7 @@ function create() { //____________________________CREATE________________________
 
     this.lanzarGalleta = () => {
         if (galletasDisponibles > 0) {
-            const galleta = this.galletas.create(this.player.x, this.player.y - 20, 'galleta').setScale(0.15 * altScale);
+            const galleta = this.galletas.create(this.player.x, this.player.y - 45, 'galleta').setScale(0.15 * altScale);
             galleta.setVelocityX(this.player.flipX ? -800 * altScale : 800 * altScale); // Dirección según la orientación del jugador
             galleta.body.allowGravity = false; // Desactivar gravedad de la galleta
     
