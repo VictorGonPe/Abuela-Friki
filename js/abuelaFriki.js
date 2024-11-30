@@ -106,8 +106,8 @@ function preload() {
     this.load.image('panaderia1','assets/panaderia1.png');
     this.load.image('pescaderia1','assets/pescaderia2.png');
     this.load.image('carniceria1','assets/carniceria2.png');
+    this.load.image('carpinteria1','assets/carpinteria1.png');
     this.load.image('badulaque1','assets/badulaque1.png');
-
 }
 
 function create() { //____________________________CREATE__________________________________________________________________________________________
@@ -137,8 +137,9 @@ function create() { //____________________________CREATE________________________
     const tiendaComic1 = this.add.image(1750 * altScale, window.innerHeight - 140 * altScale, 'tiendaComic1').setScale(0.6 * altScale).setOrigin(0.5, 1);
     const carniceria1 = this.add.image(3500 * altScale, window.innerHeight - 180 * altScale, 'carniceria1').setScale(0.6 * altScale).setOrigin(0.5, 1);
     const panaderia1 = this.add.image(2870 * altScale, window.innerHeight - 140 * altScale, 'panaderia1').setScale(0.7 * altScale).setOrigin(0.5, 1);
-    const badulaque1 = this.add.image(4100 * altScale, window.innerHeight - 140 * altScale, 'badulaque1').setScale(0.7 * altScale).setOrigin(0.5, 1);
-
+    const carpinteria1 = this.add.image(4650 * altScale, window.innerHeight - 180 * altScale, 'carpinteria1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const badulaque1 = this.add.image(4050 * altScale, window.innerHeight - 140 * altScale, 'badulaque1').setScale(0.7 * altScale).setOrigin(0.5, 1);
+    
 /*
 const cartelBarcelona = this.add.image(400 * altScale, window.innerHeight - 140 * altScale, 'cartelBarcelona').setScale(0.3 * altScale).setOrigin(0.5, 1);
 const quiosco1 = this.add.image(1000 * altScale, window.innerHeight - 160 * altScale, 'quiosco1').setScale(0.5 * altScale).setOrigin(0.5, 1);
