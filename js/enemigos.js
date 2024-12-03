@@ -12,7 +12,7 @@ export default class Enemigos {
         this.palomas = this.scene.physics.add.group();
         for (let i = 0; i < cantidad; i++) {
             const x = Phaser.Math.Between(this.scene.scale.width, this.scene.physics.world.bounds.width);
-            const y = Phaser.Math.Between(100, this.scene.scale.height * 0.85 * this.altScale); // Altura entre 50px y la mitad de la pantalla
+            const y = Phaser.Math.Between(100, this.scene.scale.height * 0.9 * this.altScale); // Altura entre 50px y la mitad de la pantalla
 
             const paloma = this.palomas.create(x, y, 'paloma').setScale(0.3 * this.altScale);
             paloma.play('volar'); // Animación de vuelo
@@ -95,6 +95,16 @@ export default class Enemigos {
             this.scene.time.delayedCall(tiempoPreparacion, () => {
                 if (caca && caca.anims && this.scene.anims.exists('cacaSaltar')) {
                     caca.anims.play('cacaSaltar');
+                   
+                    // Verificar si la caca está dentro de la vista de la cámara
+                    const camera = this.scene.cameras.main;
+                    if (
+                        caca.x > camera.scrollX && caca.x < camera.scrollX + camera.width && caca.y > camera.scrollY && caca.y < camera.scrollY + camera.height
+                    ) {
+                        if (this.scene.isSoundOn) {
+                            this.scene.cacaSaltoSound.play();
+                        }
+                    }
                 }
                 if (caca && caca.body) {
                     caca.body.setAllowGravity(true);

@@ -57,6 +57,12 @@ let galletasTexto; // Texto que mostrará cuántas galletas quedan
 let galletaIcono; //PAra colocar la imagen
 let frascosGalletas;
 
+let soundButton; // Referencia al botón
+let isSoundOn; // Estado inicial del sonido
+let jumpSound, cacaSaltoSound, colisionCacaSound, abuelaGolpeSound, choquePatineteSound;
+let cogerGalletasSound, lanzarGalletaSound;
+let gritoPajaros = [];
+
 
 const LEVEL_WIDTH = 30000 * altScale; // Ancho total del nivel
 var game = new Phaser.Game(config); // Inicializo el juego
@@ -111,6 +117,22 @@ function preload() {
     this.load.image('informatica1','assets/informatica1.png');
     this.load.image('valla','assets/valla.png');
     this.load.image('colegio1','assets/colegio1.png');
+
+    //__________________SONIDOS______________________
+    this.load.audio('backgroundSound', 'assets/sonidos/backgroundSound.mp3');
+    this.load.image('soundOn', 'assets/soundOn.png');
+    this.load.image('soundOff', 'assets/soundOff.png');
+    this.load.audio('abuelaSalto', 'assets/sonidos/abuelaSalto.mp3');
+    this.load.audio('cacaSalto', 'assets/sonidos/cacaSalto.mp3');
+    this.load.audio('colisionCacaAsco', 'assets/sonidos/colisionCacaAsco.mp3');
+    this.load.audio('abuelaGolpe', 'assets/sonidos/abuelaGolpe.mp3');
+    this.load.audio('choquePatinete', 'assets/sonidos/lauraPatinete2.mp3');
+    this.load.audio('cogerGalletas', 'assets/sonidos/cogerGalletas.mp3');
+    this.load.audio('lanzarGalleta', 'assets/sonidos/lanzarGalleta.wav');
+    this.load.audio('gritoPajaro1', 'assets/sonidos/gritoPajaro1.wav');
+    this.load.audio('gritoPajaro2', 'assets/sonidos/gritoPajaro2.wav');
+
+
 }
 
 function create() { //____________________________CREATE__________________________________________________________________________________________
@@ -118,9 +140,8 @@ function create() { //____________________________CREATE________________________
     // Definir el tamaño del mundo del juego y de la camara
     this.physics.world.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
     this.cameras.main.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
-    //const mountainAspectRatio = 1797 / 1080;
-    //const cityAspectRatio = 1815 / 1080;
-    console.log("Escena activa:", this);
+
+    this.isSoundOn = false;
     // Fondo azul cielo que ocupa todo el nivel ________________________FONDOS___________________________________
     this.add.rectangle(0, 0, LEVEL_WIDTH, window.innerHeight, 0x42aaff).setOrigin(0, 0);
     // Fondo montañoso que se moverá lentamente
@@ -292,7 +313,7 @@ bloquesYHuecos.forEach((bloque) => {
     });
         
     //Creación de palomas
-    enemigosManager.crearPalomas(10);
+    enemigosManager.crearPalomas(20);
     // Crear colisión entre las palomas y la abuela
     this.physics.add.overlap(enemigosManager.palomas, this.player, colisionPaloma, null, this);
 
@@ -314,7 +335,7 @@ bloquesYHuecos.forEach((bloque) => {
         frameRate: 6,
         repeat: -1 // Animación en bucle
     });
-    enemigosManager.crearPatinetes(3); //Crear patinetes
+    enemigosManager.crearPatinetes(26); //Crear patinetes
     // Crear colisiones entre los patinetes y el suelo
     this.physics.add.collider(enemigosManager.patinetes, platforms);
     this.physics.add.overlap(enemigosManager.patinetes, this.player, colisionPatinete, null, this); //overlap lanza un evento
@@ -334,9 +355,6 @@ bloquesYHuecos.forEach((bloque) => {
 
     
     
-
-
-
     // __________________________________GALLETAS__________________________________________
     // Crear un contenedor para mostrar la imagen de la galleta y el número de galletas
     galletaIcono = this.add.image(45 * altScale, 150 * altScale, 'galleta').setScale(0.2 * altScale).setScrollFactor(0);
@@ -346,19 +364,19 @@ bloquesYHuecos.forEach((bloque) => {
         fontFamily: 'Arial',
     }).setScrollFactor(0).setScale(0.8 * altScale);
 
-
     // Crear grupo de frascos de galletas
     frascosGalletas = this.physics.add.group();
 
-    //frascosGalletas.body.setSize(229,250).setOffset(50 * altScale, 50 * altScale);
-    
     // Generar frascos de galletas en el nivel
     generarFrascosGalletas(3);
     
 
     // Colisión entre la abuela y los FRASCOS GALLETAS
     this.physics.add.overlap(this.player, frascosGalletas, (player, frasco) => {
-        console.log('¡Has recogido un frasco de galletas!');
+
+        if (this.isSoundOn && this.cogerGalletasSound) {
+            this.cogerGalletasSound.play();
+        }
         galletasDisponibles += 10; // Incrementar galletas
         galletasTexto.setText(`${galletasDisponibles}`); // Actualizar texto
         frasco.destroy(); // Eliminar frasco recolectado
@@ -381,6 +399,11 @@ bloquesYHuecos.forEach((bloque) => {
         const explosion = this.add.sprite(paloma.x, paloma.y, 'explosion').setScale(0.5 * altScale);
 
         explosion.play('efectoExplosion', true);
+         // Reproducir un sonido aleatorio de grito de pájaro al chocar con abuela
+        if (this.isSoundOn && this.gritoPajaros) {
+            const sonidoAleatorio = Phaser.Math.Between(0, this.gritoPajaros.length - 1);
+            this.gritoPajaros[sonidoAleatorio].play();
+        }
 
         // Destruir la paloma y el sprite de explosión tras la animación
         explosion.on('animationcomplete', () => {
@@ -392,9 +415,7 @@ bloquesYHuecos.forEach((bloque) => {
         puntosTexto.setText(`Puntos: ${puntos}`);
     });
 
-
     this.physics.add.overlap(this.galletas, enemigosManager.patinetes, (galleta, patinete) => {
-        console.log('¡Galleta impactó un patinete!');
         galleta.destroy(); // Elimina la galleta
         patinete.destroy(); // Elimina el patinete
     }); 
@@ -404,6 +425,10 @@ bloquesYHuecos.forEach((bloque) => {
             const galleta = this.galletas.create(this.player.x, this.player.y - 45 * altScale, 'galleta').setScale(0.15 * altScale);
             galleta.setVelocityX(this.player.flipX ? -800 * altScale : 800 * altScale); // Dirección según la orientación del jugador
             galleta.body.allowGravity = false; // Desactivar gravedad de la galleta
+
+            if (this.isSoundOn && this.lanzarGalletaSound) {
+                this.lanzarGalletaSound.play();
+            }
     
             // Reducir la cantidad de galletas disponibles
             galletasDisponibles--;
@@ -457,6 +482,47 @@ bloquesYHuecos.forEach((bloque) => {
     valla = this.add.image(5932 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
     valla = this.add.image(6040 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
 
+
+     //__________________________SONIDOS___________________ 
+    //Crear al final para tener todas las variables asociadas definidas
+     const backgroundSound = this.sound.add('backgroundSound', {
+        loop: true,
+        volume: 0.2,
+    });
+     
+    // Crear botón de sonido en la esquina superior derecha
+     soundButton = this.add
+     .image(window.innerWidth - 50 * altScale, 80 * altScale, 'soundOff') // Empieza con el ícono de sonido activado
+     .setOrigin(0.5)
+     .setScrollFactor(0) // Fijo en la pantalla
+     .setInteractive()
+     .setScale(0.3 * altScale);
+
+      // Activar desactivar sonido
+      soundButton.on('pointerdown', () => {
+        this.isSoundOn = !this.isSoundOn; // Cambiar el estado global
+        console.log('Estado de sonido actualizado:', this.isSoundOn);
+    
+        if (this.isSoundOn) {
+            soundButton.setTexture('soundOn'); // Cambiar el ícono
+            backgroundSound.play(); // Iniciar música
+        } else {
+            soundButton.setTexture('soundOff'); // Cambiar el ícono
+            backgroundSound.stop(); // Detener música
+        }
+    });
+
+    //Sonidos añadidos en el create
+    this.jumpSound = this.sound.add('abuelaSalto', { volume: 0.05 }); // Volumen inicial del sonido
+    this.cacaSaltoSound = this.sound.add('cacaSalto', { volume: 0.2 });  
+    this.colisionCacaSound = this.sound.add('colisionCacaAsco', { volume: 0.3 });
+    this.abuelaGolpeSound = this.sound.add('abuelaGolpe', { volume: 0.3 });
+    this.choquePatineteSound = this.sound.add('choquePatinete', { volume: 1 });
+    this.cogerGalletasSound = this.sound.add('cogerGalletas', { volume: 0.5 });
+    this.lanzarGalletaSound = this.sound.add('lanzarGalleta', { volume: 0.3 });
+    this.gritoPajaros = [this.sound.add('gritoPajaro1', { volume: 0.5 }), this.sound.add('gritoPajaro2', { volume: 0.5 })];
+   
+
 }
 
 function update() { //____________________________UPDATE__________________________________________________________________________________________
@@ -495,6 +561,10 @@ function update() { //____________________________UPDATE________________________
             this.player.setVelocityY(-700  * altScale);
             this.player.anims.play('jump'); // Reproducir animación de salto una vez
             this.player.body.setOffset(150, 50);
+            if (this.isSoundOn) { // Reproducir el sonido de salto si el sonido está activado
+                console.log('sonido activado');
+                this.jumpSound.play();
+            }
         }
         
         // ABUELA -- Lanzar galleta
@@ -545,6 +615,7 @@ function update() { //____________________________UPDATE________________________
             this.scene.restart(); // Reinicia la escena
          });
     }
+    
 }
 
 
@@ -590,6 +661,10 @@ function colisionPaloma(player, paloma) {
         return; // No aplicar daño si la abuela es invulnerable
     }
 
+    if (this.isSoundOn && this.abuelaGolpeSound) { // Reproducir el sonido de golpe
+        this.abuelaGolpeSound.play();
+    }
+
     salud -= 10; // Reducir la salud
     if (salud < 0) salud = 0; // Asegurar que no sea negativa
     actualizarBarraSalud(salud); // Actualizar la barra de salud
@@ -601,11 +676,17 @@ function colisionPaloma(player, paloma) {
 
     explosion.play('efectoExplosion', true);
 
+    // Sonido aleatorio de grito de pájaro al chocar con abuela
+    if (this.isSoundOn && this.gritoPajaros) {
+        const sonidoAleatorio = Phaser.Math.Between(0, this.gritoPajaros.length - 1);
+        console.log(`Reproduciendo sonido de grito de pájaro: ${sonidoAleatorio}`);
+        this.gritoPajaros[sonidoAleatorio].play();
+    }
+
     // Verificar eventos de animación
     explosion.on('animationstart', () => console.log('Animación iniciada'));
-    explosion.on('animationcomplete', () => {
-        console.log('Animación completada');
-        explosion.destroy(); // Destruir el sprite tras la animación
+    explosion.on('animationcomplete', () => {   
+    explosion.destroy(); // Destruir el sprite tras la animación
     });
 
     // Hacer a la abuela invulnerable
@@ -637,6 +718,10 @@ function colisionPaloma(player, paloma) {
 function colisionPatinete(player, patinete) {
     if (isInvulnerable) {
         return; // No aplicar daño si la abuela es invulnerable
+    }
+
+    if (this.isSoundOn && this.choquePatineteSound) {
+        this.choquePatineteSound.play();
     }
 
     salud -= 30; // Reducir la salud
@@ -722,6 +807,11 @@ function colisionCaca(player, caca) {
     console.log('Colisión con caca');
     console.log('Player:', player);
     console.log('Caca:', caca);
+
+    // Reproducir el sonido de colisión si el sonido está activado
+    if (this.isSoundOn && this.colisionCacaSound) {
+        this.colisionCacaSound.play();
+    }
 
     salud -= 15;
     if (salud < 0) salud = 0;
