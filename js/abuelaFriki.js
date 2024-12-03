@@ -108,6 +108,9 @@ function preload() {
     this.load.image('carniceria1','assets/carniceria2.png');
     this.load.image('carpinteria1','assets/carpinteria1.png');
     this.load.image('badulaque1','assets/badulaque1.png');
+    this.load.image('informatica1','assets/informatica1.png');
+    this.load.image('valla','assets/valla.png');
+    this.load.image('colegio1','assets/colegio1.png');
 }
 
 function create() { //____________________________CREATE__________________________________________________________________________________________
@@ -135,10 +138,13 @@ function create() { //____________________________CREATE________________________
     const quiosco1 = this.add.image(1000 * altScale, window.innerHeight - 140 * altScale, 'quiosco1').setScale(0.7 * altScale).setOrigin(0.5, 1);
     const pescaderia1 = this.add.image(2250 * altScale, window.innerHeight - 180 * altScale, 'pescaderia1').setScale(0.6 * altScale).setOrigin(0.5, 1);
     const tiendaComic1 = this.add.image(1750 * altScale, window.innerHeight - 140 * altScale, 'tiendaComic1').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    const carniceria1 = this.add.image(3500 * altScale, window.innerHeight - 180 * altScale, 'carniceria1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const carniceria1 = this.add.image(3460 * altScale, window.innerHeight - 180 * altScale, 'carniceria1').setScale(0.6 * altScale).setOrigin(0.5, 1);
     const panaderia1 = this.add.image(2870 * altScale, window.innerHeight - 140 * altScale, 'panaderia1').setScale(0.7 * altScale).setOrigin(0.5, 1);
-    const carpinteria1 = this.add.image(4650 * altScale, window.innerHeight - 180 * altScale, 'carpinteria1').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    const badulaque1 = this.add.image(4050 * altScale, window.innerHeight - 140 * altScale, 'badulaque1').setScale(0.7 * altScale).setOrigin(0.5, 1);
+    const carpinteria1 = this.add.image(4580 * altScale, window.innerHeight - 180 * altScale, 'carpinteria1').setScale(0.55 * altScale).setOrigin(0.5, 1);
+    const badulaque1 = this.add.image(4020 * altScale, window.innerHeight - 140 * altScale, 'badulaque1').setScale(0.7 * altScale).setOrigin(0.5, 1);
+    const colegio1 = this.add.image(5790 * altScale, window.innerHeight - 180 * altScale, 'colegio1').setScale(0.7 * altScale).setOrigin(0.5, 1);
+    const informatica1 = this.add.image(5130 * altScale, window.innerHeight - 140 * altScale, 'informatica1').setScale(0.7 * altScale).setOrigin(0.5, 1);
+    
     
 /*
 const cartelBarcelona = this.add.image(400 * altScale, window.innerHeight - 140 * altScale, 'cartelBarcelona').setScale(0.3 * altScale).setOrigin(0.5, 1);
@@ -153,8 +159,48 @@ const badulaque1 = this.add.image(4150 * altScale, window.innerHeight - 160 * al
     // Crear grupo de plataformas, incluido el suelo__________________PLATAFORMAS_______________________________
     platforms = this.physics.add.staticGroup();
     //platforms.depth = 1;
-    platforms.create(LEVEL_WIDTH / 2, window.innerHeight - 50  * altScale, 'suelo').setDisplaySize(LEVEL_WIDTH, 140  * altScale).refreshBody();
+    //platforms.create(LEVEL_WIDTH / 2, window.innerHeight - 50  * altScale, 'suelo').setDisplaySize(LEVEL_WIDTH, 140  * altScale).refreshBody(); //Suelo se repite
 
+ const bloquesYHuecos = [ //Array posiciones suelo, inicio ancho y huecos
+        { x: 0, ancho: 2800 }, // Bloque 1
+        { hueco: 350},         // Hueco 1
+        {  x: 3150, ancho: 5000 }, // Bloque 2
+        { hueco: 200 },         // Hueco 2
+        { x: 8350, ancho: 100 }, // Bloque 3
+        { hueco: 250 },         // Hueco 3
+        { x: 8700, ancho: 4500 }, // Bloque 4
+        { hueco: 200 },         // Hueco 4
+        { x: 13400, ancho: 3000 }, // Bloque 5
+        { hueco: 250 },         // Hueco 5
+        { x: 16650, ancho: 5000 }, // Bloque 6
+        { hueco: 250 },         // Hueco 6
+        { x: 21900, ancho: 100 }, // Bloque 7
+        { hueco: 200 },         // Hueco 7
+        { x: 22200, ancho: 80 }, // Bloque 8
+        { hueco: 300 },         // Hueco 8
+        { x: 22580, ancho: 120 }, // Bloque 9
+        { hueco: 250 },         // Hueco 9
+        { x: 22950, ancho: 50 }, // Bloque 10
+        { hueco: 300 },         // Hueco 10
+        { x: 23300, ancho: 100 }, // Bloque 11
+        { hueco: 200 },         // Hueco 11
+        { x: 23600, ancho: 6400 }, // Bloque 12
+    ];
+
+let currentX = 0 * altScale; // Posición inicial del primer bloque
+
+bloquesYHuecos.forEach((bloque) => {
+    if (bloque.ancho !== undefined && bloque.x !== undefined) {
+        // Creo bloque de suelo usando los valores de "x" y "ancho" escalados AltScale
+        platforms.create(
+            bloque.x * altScale + (bloque.ancho * altScale) / 2, // Centrar el bloque en su posición escalada
+            window.innerHeight - 50 * altScale, // Altura ajustada
+            'suelo'
+        )
+        .setDisplaySize(bloque.ancho * altScale, 140 * altScale) // Ajustar tamaño del bloque
+        .refreshBody();
+    }
+});
     // Añadir plataformas fijas
     platforms.create(700 * altScale, 770 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody();
     platforms.create(760 * altScale, 770 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
@@ -225,6 +271,13 @@ const badulaque1 = this.add.image(4150 * altScale, window.innerHeight - 160 * al
         frameRate: 14,
         repeat: 0 // Sin bucle, se ejecuta una vez por salto
     });
+    /*
+    this.anims.create({
+        key: 'muerte',
+        frames: this.anims.generateFrameNumbers('abuelaMuerte', { start: 0, end: 10 }), // Cambia los valores según tu spritesheet
+        frameRate: 15,
+        repeat: 0 // Sin bucle, se ejecuta una vez
+    });*/
 
     // __________________________________PALOMAS__________________________________________
     // Instancia a la clase
@@ -261,7 +314,7 @@ const badulaque1 = this.add.image(4150 * altScale, window.innerHeight - 160 * al
         frameRate: 6,
         repeat: -1 // Animación en bucle
     });
-    enemigosManager.crearPatinetes(1); //Crear patinetes
+    enemigosManager.crearPatinetes(3); //Crear patinetes
     // Crear colisiones entre los patinetes y el suelo
     this.physics.add.collider(enemigosManager.patinetes, platforms);
     this.physics.add.overlap(enemigosManager.patinetes, this.player, colisionPatinete, null, this); //overlap lanza un evento
@@ -274,7 +327,7 @@ const badulaque1 = this.add.image(4150 * altScale, window.innerHeight - 160 * al
 
     // __________________________________CACAS__________________________________________
 
-    enemigosManager.crearCacas(5); // Crear cacas
+    enemigosManager.crearCacas(8); // Crear cacas
 
     this.physics.add.collider(enemigosManager.cacas, platforms);// Colisiones suelo
     this.physics.add.overlap(enemigosManager.cacas, this.player, colisionCaca, null, this);  //detecta colisiones cacas
@@ -348,7 +401,7 @@ const badulaque1 = this.add.image(4150 * altScale, window.innerHeight - 160 * al
 
     this.lanzarGalleta = () => {
         if (galletasDisponibles > 0) {
-            const galleta = this.galletas.create(this.player.x, this.player.y - 45, 'galleta').setScale(0.15 * altScale);
+            const galleta = this.galletas.create(this.player.x, this.player.y - 45 * altScale, 'galleta').setScale(0.15 * altScale);
             galleta.setVelocityX(this.player.flipX ? -800 * altScale : 800 * altScale); // Dirección según la orientación del jugador
             galleta.body.allowGravity = false; // Desactivar gravedad de la galleta
     
@@ -364,9 +417,7 @@ const badulaque1 = this.add.image(4150 * altScale, window.innerHeight - 160 * al
             console.log('No tienes galletas suficientes para lanzar.');
         }
     };
-    
-    
-
+ 
 
     // __________________________________PUNTOS, SALUD Y PASTILLAS__________________________________________
     // Mostrar los puntos en la esquina superior izquierda
@@ -397,6 +448,14 @@ const badulaque1 = this.add.image(4150 * altScale, window.innerHeight - 160 * al
     // Colisiones entre las pastillas y las plataformas
     this.physics.add.collider(pastillas, platforms);
     this.physics.add.overlap(this.player, pastillas, recogerPastilla, null, this); //abuela recoje pastilla
+
+       
+    let valla = this.add.image(5500 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
+    valla = this.add.image(5608 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
+    valla = this.add.image(5716 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
+    valla = this.add.image(5824 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
+    valla = this.add.image(5932 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
+    valla = this.add.image(6040 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
 
 }
 
@@ -472,13 +531,20 @@ function update() { //____________________________UPDATE________________________
     }
 
     if (salud <= 0){
-        salud = 100;
-        puntos = 0;
-        isInvulnerable = false; // Asegurar que no quede invulnerable
-        this.scene.restart(); // Reinicia la escena
+        // Desactivar controles mientras se reproduce la animación
+        this.physics.pause(); // Pausa físicas para evitar movimiento durante la animación
+        this.player.setVelocity(0); // Detener al jugador
+        this.player.anims.play('muerte', true); // Reproducir animación de muerte
+        // Reiniciar la escena después de que termine la animación
+         this.time.delayedCall(2000, () => { // Ajusta el tiempo al de la duración de la animación
+            salud = 100;
+             puntos = 0;
+            galletasDisponibles = 10;
+            isInvulnerable = false; // Asegurar que no quede invulnerable
+            this.physics.world.colliders.destroy();// Reinica las colisiones - no colision cacas
+            this.scene.restart(); // Reinicia la escena
+         });
     }
-
-    
 }
 
 

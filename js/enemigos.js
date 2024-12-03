@@ -12,7 +12,7 @@ export default class Enemigos {
         this.palomas = this.scene.physics.add.group();
         for (let i = 0; i < cantidad; i++) {
             const x = Phaser.Math.Between(this.scene.scale.width, this.scene.physics.world.bounds.width);
-            const y = Phaser.Math.Between(50, this.scene.scale.height * 0.85); // Altura entre 50px y la mitad de la pantalla
+            const y = Phaser.Math.Between(100, this.scene.scale.height * 0.85 * this.altScale); // Altura entre 50px y la mitad de la pantalla
 
             const paloma = this.palomas.create(x, y, 'paloma').setScale(0.3 * this.altScale);
             paloma.play('volar'); // Animación de vuelo
