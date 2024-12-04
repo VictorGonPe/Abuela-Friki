@@ -7,6 +7,8 @@
 */
 import Monumento from './monumento.js';
 import Enemigos from './enemigos.js';
+import CollisionManager from './collisionManager.js';
+
 
 
 
@@ -44,6 +46,7 @@ var currentControl = 'keyboard'; // Variable para cambiar de controles táctiles
 var backgroundMountain, backgroundCiudad, indicadorVida, indicadorVida2; // Variables para los fondos parallax
 let monumentoManager;
 let enemigosManager;
+let collisionManager;
 let isInvulnerable = false; //Para que no dañen continuamente a la abuela
 //PUNTOS Y SALUD
 let puntosTexto;
@@ -140,6 +143,8 @@ function create() { //____________________________CREATE________________________
     // Definir el tamaño del mundo del juego y de la camara
     this.physics.world.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
     this.cameras.main.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
+
+    this.salud = salud; //Asigno la varianle como propiedad del collision
 
     // Fondo azul cielo que ocupa todo el nivel ________________________FONDOS___________________________________
     this.add.rectangle(0, 0, LEVEL_WIDTH, window.innerHeight, 0x42aaff).setOrigin(0, 0);
@@ -289,9 +294,12 @@ bloquesYHuecos.forEach((bloque) => {
         repeat: 0 // Sin bucle, se ejecuta una vez
     });*/
 
-    // __________________________________PALOMAS__________________________________________
+   
     // Instancia a la clase
     enemigosManager = new Enemigos(this, altScale);
+    collisionManager = new CollisionManager(this, this.player, altScale);
+
+     // __________________________________PALOMAS__________________________________________
   
     // Animación de las palomas volar
     this.anims.create({
@@ -339,8 +347,10 @@ bloquesYHuecos.forEach((bloque) => {
 
     enemigosManager.crearCacas(8); // Crear cacas
 
+    // Colisiones de cacas con el jugador usando CollisionManager
+    this.physics.add.overlap(enemigosManager.cacas,this.player,collisionManager.colisionCaca.bind(collisionManager),null,this); // Manejado por CollisionManager
     this.physics.add.collider(enemigosManager.cacas, platforms);// Colisiones suelo
-    this.physics.add.overlap(enemigosManager.cacas, this.player, colisionCaca, null, this);  //detecta colisiones cacas
+    //this.physics.add.overlap(enemigosManager.cacas, this.player, colisionCaca, null, this);  //detecta colisiones cacas
 
     
     
@@ -445,7 +455,7 @@ bloquesYHuecos.forEach((bloque) => {
     indicadorVida2 = this.add.image(15 * altScale, 40 * altScale, 'indicadorVida2').setOrigin(0,0).setScale(0.5 * altScale).setScrollFactor(0);
     
     // Dibujar la barra de salud inicial
-    actualizarBarraSalud(salud);
+    actualizarBarraSalud(this.salud);
 
     this.anims.create({
         key: 'brillarParacetamol',
@@ -520,7 +530,9 @@ bloquesYHuecos.forEach((bloque) => {
     this.cogerGalletasSound = this.sound.add('cogerGalletas', { volume: 0.5 });
     this.lanzarGalletaSound = this.sound.add('lanzarGalleta', { volume: 0.3 });
     this.gritoPajaros = [this.sound.add('gritoPajaro1', { volume: 0.5 }), this.sound.add('gritoPajaro2', { volume: 0.5 })];
-   
+
+
+    this.actualizarBarraSalud = actualizarBarraSalud.bind(this);//Hace que la barra de salud este disponible en cualquier lugar de la escena
 
 }
 
@@ -599,7 +611,7 @@ function update() { //____________________________UPDATE________________________
         movingPlatformR.setVelocityX(100 * altScale);
     }
 
-    if (salud <= 0){
+    if (this.salud <= 0){
         // Desactivar controles mientras se reproduce la animación
         this.physics.pause(); // Pausa físicas para evitar movimiento durante la animación
         this.player.setVelocity(0); // Detener al jugador
@@ -614,7 +626,7 @@ function update() { //____________________________UPDATE________________________
 
         // Reiniciar la escena después de que termine la animación
          this.time.delayedCall(2000, () => { // Ajusta el tiempo al de la duración de la animación
-            salud = 100;
+            this.salud = 100;
             puntos = 0;
             galletasDisponibles = 10;
             isInvulnerable = false; // Asegurar que no quede invulnerable
@@ -673,9 +685,9 @@ function colisionPaloma(player, paloma) {
         this.abuelaGolpeSound.play();
     }
 
-    salud -= 10; // Reducir la salud
-    if (salud < 0) salud = 0; // Asegurar que no sea negativa
-    actualizarBarraSalud(salud); // Actualizar la barra de salud
+    this.salud -= 10; // Reducir la salud
+    if (this.salud < 0) this.salud = 0; // Asegurar que no sea negativa
+    actualizarBarraSalud(this.salud); // Actualizar la barra de salud
 
     // Crear la animación de explosión en la posición de la paloma
     const explosion = this.add.sprite(paloma.x, paloma.y, 'explosion')
@@ -732,9 +744,9 @@ function colisionPatinete(player, patinete) {
         this.choquePatineteSound.play();
     }
 
-    salud -= 30; // Reducir la salud
-    if (salud < 0) salud = 0; // Asegurar que no sea negativa
-    actualizarBarraSalud(salud); // Actualizar la barra de salud
+    this.salud -= 30; // Reducir la salud
+    if (this.salud < 0) this.salud = 0; // Asegurar que no sea negativa
+    actualizarBarraSalud(this.salud); // Actualizar la barra de salud
     
     // Reducir puntos
     puntos -= 20;
@@ -762,28 +774,28 @@ function colisionPatinete(player, patinete) {
 
 
 function actualizarBarraSalud(valor) {
+     
+     if (valor < 0) valor = 0;
+     if (valor > 100) valor = 100; // Máximo permitido
+
     barraSalud.clear(); // Limpia el gráfico anterior
-
-   
-
     // Dibujar el fondo de la barra
     barraSalud.fillStyle(0x000000); // Color negro
     barraSalud.fillRect(80, 63, 140, 25); // Posición (20, 20), ancho 200px, alto 20px
 
     // Dibujar la barra de salud actual
     barraSalud.fillStyle(0xff0000); // Color rojo
+    
     barraSalud.fillRect(80, 63, (140 * valor) / 100, 25); // Escalar ancho según la salud
-
+    console.log(`Barra de salud actualizada: ${valor}`);
     
 }
 
 function recogerPastilla(player, pastilla) {
     console.log('¡Has recogido una pastilla!');
-
     // Subir salud, pero no más de 100
-    salud = Math.min(salud + 20, 100);
-
-    actualizarBarraSalud(salud);
+    this.salud = Math.min(this.salud + 20, 100);
+    actualizarBarraSalud(this.salud);
     pastilla.destroy();
 
 }
@@ -807,7 +819,7 @@ function generarFrascosGalletas(cantidad) {
     }
 }
 
-
+/*
 function colisionCaca(player, caca) {
     if (this.tocandoCaca) return; // Si ya está procesando una colisión, no hacer nada
     this.tocandoCaca = true; // Marcar como en colisión
@@ -837,6 +849,6 @@ function colisionCaca(player, caca) {
         caca.destroy();
     }
 }
-
+*/
 
 
