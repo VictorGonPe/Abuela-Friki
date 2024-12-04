@@ -141,7 +141,6 @@ function create() { //____________________________CREATE________________________
     this.physics.world.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
     this.cameras.main.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
 
-    this.isSoundOn = false;
     // Fondo azul cielo que ocupa todo el nivel ________________________FONDOS___________________________________
     this.add.rectangle(0, 0, LEVEL_WIDTH, window.innerHeight, 0x42aaff).setOrigin(0, 0);
     // Fondo montañoso que se moverá lentamente
@@ -166,16 +165,6 @@ function create() { //____________________________CREATE________________________
     const colegio1 = this.add.image(5790 * altScale, window.innerHeight - 180 * altScale, 'colegio1').setScale(0.7 * altScale).setOrigin(0.5, 1);
     const informatica1 = this.add.image(5130 * altScale, window.innerHeight - 140 * altScale, 'informatica1').setScale(0.7 * altScale).setOrigin(0.5, 1);
     
-    
-/*
-const cartelBarcelona = this.add.image(400 * altScale, window.innerHeight - 140 * altScale, 'cartelBarcelona').setScale(0.3 * altScale).setOrigin(0.5, 1);
-const quiosco1 = this.add.image(1000 * altScale, window.innerHeight - 160 * altScale, 'quiosco1').setScale(0.5 * altScale).setOrigin(0.5, 1);
-const pescaderia1 = this.add.image(2250 * altScale, window.innerHeight - 200 * altScale, 'pescaderia1').setScale(0.4 * altScale).setOrigin(0.5, 1);
-const tiendaComic1 = this.add.image(1750 * altScale, window.innerHeight - 160 * altScale, 'tiendaComic1').setScale(0.4 * altScale).setOrigin(0.5, 1);
-const carniceria1 = this.add.image(3500 * altScale, window.innerHeight - 200 * altScale, 'carniceria1').setScale(0.4 * altScale).setOrigin(0.5, 1);
-const panaderia1 = this.add.image(2870 * altScale, window.innerHeight - 160 * altScale, 'panaderia1').setScale(0.4 * altScale).setOrigin(0.5, 1);
-const badulaque1 = this.add.image(4150 * altScale, window.innerHeight - 160 * altScale, 'badulaque1').setScale(0.4 * altScale).setOrigin(0.5, 1);
-*/
 
     // Crear grupo de plataformas, incluido el suelo__________________PLATAFORMAS_______________________________
     platforms = this.physics.add.staticGroup();
@@ -485,14 +474,23 @@ bloquesYHuecos.forEach((bloque) => {
 
      //__________________________SONIDOS___________________ 
     //Crear al final para tener todas las variables asociadas definidas
-     const backgroundSound = this.sound.add('backgroundSound', {
+    // Recuperar el estado del sonido por defecto "data".
+    this.isSoundOn = this.data.get('isSoundOn') !== undefined ? this.data.get('isSoundOn') : false;
+    //this.isSoundOn = false;
+
+     this.backgroundSound = this.sound.add('backgroundSound', {
         loop: true,
         volume: 0.2,
     });
      
+    // Iniciar la música si estaba encendida
+    if (this.isSoundOn) {
+        this.backgroundSound.play();
+    }
+
+
     // Crear botón de sonido en la esquina superior derecha
-     soundButton = this.add
-     .image(window.innerWidth - 50 * altScale, 80 * altScale, 'soundOff') // Empieza con el ícono de sonido activado
+     soundButton = this.add.image(window.innerWidth - 50 * altScale, 80 * altScale, this.isSoundOn ? 'soundOn' : 'soundOff') // Ajusta imagen segun estado
      .setOrigin(0.5)
      .setScrollFactor(0) // Fijo en la pantalla
      .setInteractive()
@@ -501,14 +499,15 @@ bloquesYHuecos.forEach((bloque) => {
       // Activar desactivar sonido
       soundButton.on('pointerdown', () => {
         this.isSoundOn = !this.isSoundOn; // Cambiar el estado global
-        console.log('Estado de sonido actualizado:', this.isSoundOn);
+        this.data.set('isSoundOn', this.isSoundOn); // Guardar el estado en 'data'
+        //console.log('Estado de sonido actualizado:', this.isSoundOn);
     
         if (this.isSoundOn) {
             soundButton.setTexture('soundOn'); // Cambiar el ícono
-            backgroundSound.play(); // Iniciar música
+            this.backgroundSound.play(); // Iniciar música
         } else {
             soundButton.setTexture('soundOff'); // Cambiar el ícono
-            backgroundSound.stop(); // Detener música
+            this.backgroundSound.stop(); // Detener música
         }
     });
 
@@ -605,13 +604,22 @@ function update() { //____________________________UPDATE________________________
         this.physics.pause(); // Pausa físicas para evitar movimiento durante la animación
         this.player.setVelocity(0); // Detener al jugador
         this.player.anims.play('muerte', true); // Reproducir animación de muerte
+
+        this.data.set('isSoundOn', this.isSoundOn); // Guardar el estado del sonido en `data` antes de reiniciar
+        
+            // Detener la música si está sonando
+        if (this.backgroundSound && this.backgroundSound.isPlaying) {
+            this.backgroundSound.stop();
+        }
+
         // Reiniciar la escena después de que termine la animación
          this.time.delayedCall(2000, () => { // Ajusta el tiempo al de la duración de la animación
             salud = 100;
-             puntos = 0;
+            puntos = 0;
             galletasDisponibles = 10;
             isInvulnerable = false; // Asegurar que no quede invulnerable
             this.physics.world.colliders.destroy();// Reinica las colisiones - no colision cacas
+            
             this.scene.restart(); // Reinicia la escena
          });
     }
