@@ -90,6 +90,7 @@ function preload() {
     this.load.image('monumento3', 'assets/sagradaFamilia1.png');
     this.load.image('monumento4', 'assets/torreGlorias1.png');
     this.load.image('monumento5', 'assets/tresTorres1.png');
+    this.load.image('monumento6', 'assets/pedrera.png');
 
     this.load.image('nube1', 'assets/nube1.png', {frameWidth: 205, frameHeight: 98});
     this.load.image('nube2', 'assets/nube2.png', {frameWidth: 286, frameHeight: 103});
@@ -818,37 +819,3 @@ function generarFrascosGalletas(cantidad) {
         frasco.body.setAllowGravity(true); // Sin gravedad para los frascos
     }
 }
-
-/*
-function colisionCaca(player, caca) {
-    if (this.tocandoCaca) return; // Si ya está procesando una colisión, no hacer nada
-    this.tocandoCaca = true; // Marcar como en colisión
-
-    console.log('Colisión con caca');
-    console.log('Player:', player);
-    console.log('Caca:', caca);
-
-    // Reproducir el sonido de colisión si el sonido está activado
-    if (this.isSoundOn && this.colisionCacaSound) {
-        this.colisionCacaSound.play();
-    }
-
-    salud -= 15;
-    if (salud < 0) salud = 0;
-    actualizarBarraSalud(salud);
-
-    player.setTint(0x964B00);
-    this.time.delayedCall(500, () => {
-        if (player) player.clearTint();
-        this.tocandoCaca = false; // Permitir nuevas colisiones
-    });
-
-    if (caca && caca.body) {
-        caca.body.enable = false;
-        caca.removeAllListeners();
-        caca.destroy();
-    }
-}
-*/
-
-

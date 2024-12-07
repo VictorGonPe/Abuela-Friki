@@ -9,10 +9,11 @@ export default class Monumento {
     crearMonumentos() {
         // Coordenadas y datos para los monumentos
         const monumentosData = [
-            { x: 1300, y: 180, key: 'monumento1' },
-            { x: 3800, y: 220, key: 'monumento2' },
-            { x: 12000, y: 140, key: 'monumento3' },
-            { x: 18000, y: 130, key: 'monumento4' },
+            { x: 1300, y: 180, key: 'monumento1' }, // Colón
+            { x: 3800, y: 220, key: 'monumento2' }, // T.Maphre
+            { x: 6000, y: 180, key: 'monumento6' },
+            { x: 12000, y: 180, key: 'monumento3' }, // Sagrada Familia
+            { x: 16000, y: 180, key: 'monumento4' }, // Agbar
             { x: 24000, y: 130, key: 'monumento5' },
         ];
 

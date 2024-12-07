@@ -15,7 +15,7 @@ export default class CollisionManager {
         console.log('Player:', player);
         console.log('Caca:', caca);
 
-        this.hacerAbuelaInvulnerable();
+        //this.hacerAbuelaInvulnerable();
     
         // Reproducir el sonido de colisión si está activado
         if (this.scene.isSoundOn && this.scene.colisionCacaSound) {
