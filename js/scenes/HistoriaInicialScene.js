@@ -13,39 +13,40 @@ class HistoriaInicialScene extends Phaser.Scene {
     create() {
         // Crear un fondo negro para asegurarte de que las transiciones se vean bien
         this.cameras.main.setBackgroundColor('#000000');
+        const tamanoFuente = 30 * window.innerHeight / 1080;
 
         // Reproducir el audio de historia
         const historiaAudio = this.sound.add('historiaAudio', { loop: false });
         historiaAudio.play();
 
         // Crear imágenes y texto
-        const imagen1 = this.add.image(this.scale.width / 2, this.scale.height / 2 , 'imagen1').setScale(1 * window.innerHeight / 1080).setAlpha(0);
-        const imagen2 = this.add.image(this.scale.width / 2, this.scale.height / 2 , 'imagen2').setScale(1 * window.innerHeight / 1080).setAlpha(0);
-        const imagen3 = this.add.image(this.scale.width / 2, this.scale.height / 2 , 'imagen3').setScale(1 * window.innerHeight / 1080).setAlpha(0);
+        const imagen1 = this.add.image(this.scale.width / 2, this.scale.height / 2 , 'imagen1').setScale(1.08 * window.innerHeight / 1080).setAlpha(0); // Hacer invisible
+        const imagen2 = this.add.image(this.scale.width / 2, this.scale.height / 2 , 'imagen2').setScale(1.08 * window.innerHeight / 1080).setAlpha(0);
+        const imagen3 = this.add.image(this.scale.width / 2, this.scale.height / 2 , 'imagen3').setScale(1.08 * window.innerHeight / 1080).setAlpha(0);
 
 
-        // Crear un gráfico para el fondo del texto
+        // Fondo negro texto
         const textoFondo = this.add.graphics();
-        textoFondo.fillStyle(0x000000, 0.7); // Color negro con 60% de opacidad
-        textoFondo.fillRect(50, this.scale.height - 340 * window.innerHeight / 1080, this.scale.width - 100 , 120); // Rectángulo centrado en la parte inferior
+        textoFondo.fillStyle(0x000000, 0.7); // Color negro con 70% 
+        textoFondo.fillRect(0, this.scale.height - 150 * window.innerHeight / 1080, this.scale.width , 180 * window.innerHeight / 1080); // Rectángulo centrado en la parte inferior
 
         // Crear texto centrado en la parte inferior
-        const texto = this.add.text(this.scale.width / 2 + 5, this.scale.height / 2 + 285 * window.innerHeight / 1080, '', {fontSize: '24px',color: '#ffffff', wordWrap: { width: this.scale.width - 100 },
+        const texto = this.add.text(this.scale.width / 2 + 5 * window.innerHeight / 1080 , this.scale.height / 2 + 460 * window.innerHeight / 1080, '', {fontSize: tamanoFuente,color: '#ffffff', wordWrap: { width: this.scale.width - 100 },
             align: 'center',
         }).setOrigin(0.5);
 
         // Mostrar las imágenes y textos en secuencia
-    this.tweens.add({
+    this.tweens.add({ // Tweens para las transiciones controlando el alpha
         targets: imagen1,
         alpha: 1, // Hacer visible
-        duration: 2000, // Duración de la transición
+        duration: 1000, // Duración de la transición
         onComplete: () => {
             texto.setText('Desde que se convirtió en abuela, Carmen descubrió su verdadera pasión: los videojuegos y el mundo geek. Ahora, antes de viajar por el mundo con el Imserso, decidió comenzar su aventura explorando su ciudad natal: ¡Barcelona!');
         }
     });
 
-    this.time.delayedCall(10000, () => {
-        this.tweens.add({
+    this.time.delayedCall(14000, () => {
+        this.tweens.add({ 
             targets: imagen1,
             alpha: 0, // Desvanecer la imagen 1
             duration: 1000,
@@ -61,7 +62,7 @@ class HistoriaInicialScene extends Phaser.Scene {
         });
     });
 
-    this.time.delayedCall(20000, () => {
+    this.time.delayedCall(28000, () => {
         this.tweens.add({
             targets: imagen2,
             alpha: 0, // Desvanecer la imagen 2

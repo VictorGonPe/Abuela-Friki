@@ -111,7 +111,7 @@ class GameScene extends Phaser.Scene {
 
     create() {
         //____________________________CREATE__________________________________________________________________________________________
-    
+    console.log(window.innerHeight);
     // Definir el tamaño del mundo del juego y de la camara
     this.physics.world.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
     this.cameras.main.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
