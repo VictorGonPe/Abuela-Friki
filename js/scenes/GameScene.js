@@ -19,6 +19,8 @@ let puntosTexto;
 let puntos = 0;
 let barraSalud;
 let salud = 100; //Salud Incial
+let vidas = 3;
+let haMuerto = false;
 let pastillas;
 
 let galletasDisponibles = 10; // Número inicial de galletas
@@ -69,6 +71,8 @@ class GameScene extends Phaser.Scene {
 
     this.load.image('indicadorVida', 'assets/indicadorVida.png');
     this.load.image('indicadorVida2', 'assets/indicadorVida2.png');
+    this.load.image('vidaIcono', 'assets/vidaIcono.png'); //imagen para las vidas
+
 
     this.load.spritesheet('paracetamol', 'assets/paracetamol.png', {frameWidth: 550, frameHeight: 520});
     this.load.image('galleta', 'assets/galleta.png');
@@ -116,14 +120,16 @@ class GameScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
     this.cameras.main.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
 
-    this.salud = salud; //Asigno la varianle como propiedad del collision
+    this.salud = salud; 
+    this.vidas = vidas;
+
 
     // Fondo azul cielo que ocupa todo el nivel ________________________FONDOS___________________________________
     this.add.rectangle(0, 0, LEVEL_WIDTH, window.innerHeight, 0x42aaff).setOrigin(0, 0);
     // Fondo montañoso que se moverá lentamente
-    backgroundMountain = this.add.tileSprite(0, 0, LEVEL_WIDTH / altScale, 1080, 'backgroundMountain').setOrigin(0, 0).setScrollFactor(0).setScale(1 * altScale);
+    backgroundMountain = this.add.tileSprite(0, window.innerHeight, LEVEL_WIDTH / altScale, 1080, 'backgroundMountain').setOrigin(0, 1).setScrollFactor(0).setScale(1 * altScale);
     // Fondo de ciudad que se moverá más rápido
-    backgroundCiudad = this.add.tileSprite(0, 0 , LEVEL_WIDTH /altScale, 1080, 'backgroundCiudad').setOrigin(0, 0).setScrollFactor(0).setScale(1 * altScale);
+    backgroundCiudad = this.add.tileSprite(0, window.innerHeight, LEVEL_WIDTH /altScale, 1080, 'backgroundCiudad').setOrigin(0, 1).setScrollFactor(0).setScale(1 * altScale);
     //Instancia y creacion de monumentos
     monumentoManager = new Monumento(this, altScale); //Esta escena y la escala
     monumentoManager.crearMonumentos();
@@ -189,20 +195,20 @@ bloquesYHuecos.forEach((bloque) => {
     }
 });
     // Añadir plataformas fijas
-    platforms.create(700 * altScale, 770 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody();
-    platforms.create(760 * altScale, 770 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
-    platforms.create(820 * altScale, 770 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody();
+    platforms.create(700 * altScale, window.innerHeight - 300 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody();
+    platforms.create(760 * altScale, window.innerHeight - 300 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
+    platforms.create(820 * altScale, window.innerHeight - 300 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody();
 
-    platforms.create(1000 * altScale, 650 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody();
-    platforms.create(1060 * altScale, 650 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
-    platforms.create(1116 * altScale, 650 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
-    platforms.create(1172 * altScale, 650 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
-    platforms.create(1230 * altScale, 650 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody();
+    platforms.create(1000 * altScale, window.innerHeight - 400 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody();
+    platforms.create(1060 * altScale, window.innerHeight - 400 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
+    platforms.create(1116 * altScale, window.innerHeight - 400 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
+    platforms.create(1172 * altScale, window.innerHeight - 400 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
+    platforms.create(1230 * altScale, window.innerHeight - 400 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody();
 
     // Crear plataformas móviles
-    movingPlatformL = this.physics.add.image(1455 * altScale, 530 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody();
-    movingPlatformC = this.physics.add.image(1515 * altScale, 530 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
-    movingPlatformR = this.physics.add.image(1575 * altScale, 530 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody();
+    movingPlatformL = this.physics.add.image(1455 * altScale, window.innerHeight - 500 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody();
+    movingPlatformC = this.physics.add.image(1515 * altScale, window.innerHeight - 500 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
+    movingPlatformR = this.physics.add.image(1575 * altScale, window.innerHeight - 500 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody();
 
     // Desactivar la gravedad para la plataforma móvil
     [movingPlatformL, movingPlatformC, movingPlatformR].forEach(platform => {
@@ -429,6 +435,12 @@ bloquesYHuecos.forEach((bloque) => {
     // Dibujar la barra de salud inicial
     this.actualizarBarraSalud(this.salud);
 
+    // Crear contenedor para las imágenes de las vidas
+    this.vidasImagen = this.add.image(15 * altScale, 190 * altScale, 'vidaIcono').setOrigin(0,0).setScale(0.6 * altScale).setScrollFactor(0);
+    // Añadir texto de "Vidas"
+    this.add.text(90 * altScale, 210 * altScale, '= ' + this.vidas, {fontSize: '30px', fill: '#ffffff', fontFamily: 'Arial'}).setScrollFactor(0).setScale(0.8 * altScale);
+
+
     this.anims.create({
         key: 'brillarParacetamol',
         frames: this.anims.generateFrameNumbers('paracetamol', { start: 0, end: 9 }), // Ajusta los frames según el sprite sheet
@@ -446,7 +458,7 @@ bloquesYHuecos.forEach((bloque) => {
     this.physics.add.overlap(this.player, pastillas, this.recogerPastilla, null, this); //abuela recoje pastilla
 
        
-    let valla = this.add.image(5500 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
+    let valla = this.add.image(5500 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1); //Colegio
     valla = this.add.image(5608 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
     valla = this.add.image(5716 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
     valla = this.add.image(5824 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
@@ -457,7 +469,7 @@ bloquesYHuecos.forEach((bloque) => {
      //__________________________SONIDOS___________________ 
     //Crear al final para tener todas las variables asociadas definidas
     // Recuperar el estado del sonido por defecto "data".
-    this.isSoundOn = this.data.get('isSoundOn') !== undefined ? this.data.get('isSoundOn') : false;
+    this.isSoundOn = this.data.get('isSoundOn') !== undefined ? this.data.get('isSoundOn') : true;
     //this.isSoundOn = false;
 
      this.backgroundSound = this.sound.add('backgroundSound', {
@@ -507,106 +519,54 @@ bloquesYHuecos.forEach((bloque) => {
     this.actualizarBarraSalud = this.actualizarBarraSalud.bind(this);//Hace que la barra de salud este disponible en cualquier lugar de la escena
     }
 
+    //________________________________UPDATE__________________________________
     update() {
-        
-    //******* MOVIMIENTOS ********/
-    if (currentControl === 'keyboard') {
-        // Controlar si el jugador está en el aire
-        //console.log(this.player.body.touching.down);
-        let isOnGround = this.player.body.touching.down;
+    
+       
+        this.novimientosAbuela();  
+        this.updateParallax(); //Controla desplazamientos, fondos, monumentos, enemigos, etc.
+        this.updateMovingPlatforms();
 
-        // ABUELA -- Movimiento horizontal
-        if (cursors.left.isDown) {
-            this.player.setVelocityX(-300 * altScale);
-            if (isOnGround) this.player.anims.play('left', true);
-            this.player.flipX = true;
-            //console.log('Mira a la izquierda');
-            this.player.body.setOffset(150, 50); // Al hacer el flipX es necesario jugar con los offset para centrar cuerpo físico
-        } else if (cursors.right.isDown) {
-            this.player.setVelocityX(300 * altScale);
-            if (isOnGround) this.player.anims.play('right', true);
-            this.player.flipX = false;
-            this.player.body.setOffset(50, 50);
-        } else {
-            this.player.setVelocityX(0);
-            if (isOnGround) this.player.anims.play('abuelaIdle', true); // Animación de reposo si está en el suelo
-            if (this.player.flipX == true){  //Mira izquierda o derecha
-                this.player.body.setOffset(150, 50);
-            }else{
-                this.player.body.setOffset(50, 50);
-            }
+
+        const limiteInferior = this.scale.height - 10; // Ajusta este valor según el diseño del nivel
+        if (this.player.y > limiteInferior) {
+            this.salud = 0; 
         }
 
-        // ABUELA -- Salto 
-        if (cursors.up.isDown && isOnGround) {
-            this.player.setVelocityY(-700  * altScale);
-            this.player.anims.play('jump'); // Reproducir animación de salto una vez
-            this.player.body.setOffset(150, 50);
-            if (this.isSoundOn) { // Reproducir el sonido de salto si el sonido está activado
-                console.log('sonido activado');
-                this.jumpSound.play();
-            }
-        }
-        
-        // ABUELA -- Lanzar galleta
-        if (Phaser.Input.Keyboard.JustDown(this.keys.lanzarGalleta)) {
-            this.lanzarGalleta(); // Lógica para lanzar galleta
-        }
-        
-    }
-        
+        //Cuando muere
+        if (this.salud <= 0 && !this.haMuerto)  {
+            console.log(this.vidas);
+            this.vidas--;
+            console.log(this.vidas);
+            // Desactivar controles mientras se reproduce la animación
+            this.physics.pause(); // Pausa físicas para evitar movimiento durante la animación
+            this.player.setVelocity(0); // Detener al jugador
+            this.player.anims.play('muerte', true); // Reproducir animación de muerte
 
-    // Fondos parallax
-    const maxScrollX = LEVEL_WIDTH - window.innerWidth; //Calcula el desplazamiento dependiendo del ancho de la ventana
-
-    if (this.cameras.main.scrollX < maxScrollX) {
-        backgroundMountain.tilePositionX = this.cameras.main.scrollX * 0.2; // Movimiento lento
-        backgroundCiudad.tilePositionX = this.cameras.main.scrollX * 0.4; // Movimiento rápido
-        //monumento.tilePositionX = 1200 - this.cameras.main.scrollX * 0.5;
-    }
-
-    // Actualizar posición de los monumentos con el scroll de la cámara
-    const scrollX = this.cameras.main.scrollX;
-    monumentoManager.actualizar(scrollX);
-    enemigosManager.actualizar(scrollX); //maneja a todos los enemigos
-
-    // Cambiar dirección de plataformas móviles
-    if (movingPlatformL.x >= 700 * altScale) {
-        movingPlatformL.setVelocityX(-100 * altScale);
-        movingPlatformC.setVelocityX(-100 * altScale);
-        movingPlatformR.setVelocityX(-100 * altScale);
-    } else if (movingPlatformL.x <= 300 * altScale) {
-        movingPlatformL.setVelocityX(100 * altScale);
-        movingPlatformC.setVelocityX(100 * altScale);
-        movingPlatformR.setVelocityX(100 * altScale);
-    }
-
-    if (this.salud <= 0){
-        // Desactivar controles mientras se reproduce la animación
-        this.physics.pause(); // Pausa físicas para evitar movimiento durante la animación
-        this.player.setVelocity(0); // Detener al jugador
-        this.player.anims.play('muerte', true); // Reproducir animación de muerte
-
-        this.data.set('isSoundOn', this.isSoundOn); // Guardar el estado del sonido en `data` antes de reiniciar
-        
-            // Detener la música si está sonando
-        if (this.backgroundSound && this.backgroundSound.isPlaying) {
-            this.backgroundSound.stop();
-        }
-
-        // Reiniciar la escena después de que termine la animación
-         this.time.delayedCall(2000, () => { // Ajusta el tiempo al de la duración de la animación
-            salud = 100;
-            puntos = 0;
-            galletasDisponibles = 10;
-            isInvulnerable = false; // Asegurar que no quede invulnerable
-            this.physics.world.colliders.destroy();// Reinica las colisiones - no colision cacas
+            this.data.set('isSoundOn', this.isSoundOn); // Guardar el estado del sonido en `data` antes de reiniciar
             
-            this.scene.restart(); // Reinicia la escena
-         });
-    }
+                // Detener la música si está sonando
+            if (this.backgroundSound && this.backgroundSound.isPlaying) {
+                this.backgroundSound.stop();
+            }
+
+            // Reiniciar la escena después de que termine la animación
+            this.time.delayedCall(2000, () => { // Ajusta el tiempo al de la duración de la animación
+                salud = 100;
+                puntos = 0;
+                galletasDisponibles = 10;
+                isInvulnerable = false; // Asegurar que no quede invulnerable
+                this.physics.world.colliders.destroy();// Reinica las colisiones - no colision cacas
+                
+                this.scene.restart(); // Reinicia la escena
+            });
+            this.haMuerto = true;
+        }
     
     }
+
+
+//___________________________________METODOS_________________________________
 
 colisionPaloma(player, paloma) {
 
@@ -747,6 +707,86 @@ generarFrascosGalletas(cantidad) {
         frasco.body.setAllowGravity(true); // Sin gravedad para los frascos
     }
 }
+
+novimientosAbuela() {
+    //******* MOVIMIENTOS ********/
+    if (currentControl === 'keyboard') {
+        // Controlar si el jugador está en el aire
+        //console.log(this.player.body.touching.down);
+        let isOnGround = this.player.body.touching.down;
+
+        // ABUELA -- Movimiento horizontal
+        if (cursors.left.isDown) {
+            this.player.setVelocityX(-300 * altScale);
+            if (isOnGround) this.player.anims.play('left', true);
+            this.player.flipX = true;
+            //console.log('Mira a la izquierda');
+            this.player.body.setOffset(150, 50); // Al hacer el flipX es necesario jugar con los offset para centrar cuerpo físico
+        } else if (cursors.right.isDown) {
+            this.player.setVelocityX(300 * altScale);
+            if (isOnGround) this.player.anims.play('right', true);
+            this.player.flipX = false;
+            this.player.body.setOffset(50, 50);
+        } else {
+            this.player.setVelocityX(0);
+            if (isOnGround) this.player.anims.play('abuelaIdle', true); // Animación de reposo si está en el suelo
+            if (this.player.flipX == true){  //Mira izquierda o derecha
+                this.player.body.setOffset(150, 50);
+            }else{
+                this.player.body.setOffset(50, 50);
+            }
+        }
+
+        // ABUELA -- Salto 
+        if (cursors.up.isDown && isOnGround) {
+            this.player.setVelocityY(-700  * altScale);
+            this.player.anims.play('jump'); // Reproducir animación de salto una vez
+            this.player.body.setOffset(150, 50);
+            if (this.isSoundOn) { // Reproducir el sonido de salto si el sonido está activado
+                console.log('sonido activado');
+                this.jumpSound.play();
+            }
+        }
+        
+        // ABUELA -- Lanzar galleta
+        if (Phaser.Input.Keyboard.JustDown(this.keys.lanzarGalleta)) {
+            this.lanzarGalleta(); // Lógica para lanzar galleta
+        }
+        
+    }
+}   
+
+updateParallax() {
+    // Fondos parallax
+    const maxScrollX = LEVEL_WIDTH - window.innerWidth; //Calcula el desplazamiento dependiendo del ancho de la ventana
+
+    if (this.cameras.main.scrollX < maxScrollX) {
+        backgroundMountain.tilePositionX = this.cameras.main.scrollX * 0.2; // Movimiento lento
+        backgroundCiudad.tilePositionX = this.cameras.main.scrollX * 0.4; // Movimiento rápido
+        //monumento.tilePositionX = 1200 - this.cameras.main.scrollX * 0.5;
+    }
+
+    // Actualizar posición de los monumentos con el scroll de la cámara
+    const scrollX = this.cameras.main.scrollX;
+    monumentoManager.actualizar(scrollX);
+    enemigosManager.actualizar(scrollX); //maneja a todos los enemigos   
 }
+
+updateMovingPlatforms() {
+    // Cambiar dirección de plataformas móviles
+    if (movingPlatformL.x >= 700 * altScale) {
+        movingPlatformL.setVelocityX(-100 * altScale);
+        movingPlatformC.setVelocityX(-100 * altScale);
+        movingPlatformR.setVelocityX(-100 * altScale);
+    } else if (movingPlatformL.x <= 300 * altScale) {
+        movingPlatformL.setVelocityX(100 * altScale);
+        movingPlatformC.setVelocityX(100 * altScale);
+        movingPlatformR.setVelocityX(100 * altScale);
+    }
+}
+
+}
+
+
 
 export default GameScene;

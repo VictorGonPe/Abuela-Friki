@@ -11,21 +11,22 @@ class AjustesScene extends Phaser.Scene {
         const escalaPantalla = window.innerHeight / 1080;
         const tamanoFuente = 24 * escalaPantalla;
 
-        this.add.image(this.scale.width / 2, this.scale.height / 2, 'menuAjustes').setScale( 1 * escalaPantalla);
+        // Asocia la imagen del menú ajustes
+        this.menuAjustes = this.add.image(this.scale.width / 2, this.scale.height / 2, 'menuAjustes')
+            .setOrigin(0.5)
+            .setDisplaySize(this.scale.width, this.scale.height); // Tamaño inicial ajustado al canvas
 
-         // Fondo negro para el texto
-         const textoFondo = this.add.graphics();
-         textoFondo.fillStyle(0x000000, 0.7); 
-         textoFondo.fillRect(50 * escalaPantalla, 120 * escalaPantalla , this.scale.width / 4 - 5 * escalaPantalla, 500 * escalaPantalla);
+        // Fondo negro para el texto
+        const textoFondo = this.add.graphics();
+        textoFondo.fillStyle(0x000000, 0.7);
+        textoFondo.fillRect(50 * escalaPantalla, 120 * escalaPantalla, this.scale.width / 4 - 5 * escalaPantalla, 500 * escalaPantalla);
 
         // Título
-        this.add.text(this.scale.width / 2 + 5, 1030 * escalaPantalla, 'Ajustes', {
+        this.add.text(this.scale.width / 2, 1030 * escalaPantalla, 'Ajustes', {
             fontSize: `${32 * escalaPantalla}px`,
             fontStyle: 'bold',
             color: '#000000',
         }).setOrigin(0.5);
-
-       
 
         // Música
         let musicOn = true;
@@ -38,7 +39,6 @@ class AjustesScene extends Phaser.Scene {
         musicButton.on('pointerdown', () => {
             musicOn = !musicOn;
             musicButton.setText(`Música: ${musicOn ? 'On' : 'Off'}`);
-            // Lógica para activar/desactivar música
         });
 
         // Efectos de sonido
@@ -52,7 +52,6 @@ class AjustesScene extends Phaser.Scene {
         sfxButton.on('pointerdown', () => {
             sfxOn = !sfxOn;
             sfxButton.setText(`Efectos de Sonido: ${sfxOn ? 'On' : 'Off'}`);
-            // Lógica para activar/desactivar efectos de sonido
         });
 
         // Pantalla Completa
@@ -73,19 +72,9 @@ class AjustesScene extends Phaser.Scene {
             }
             isFullscreen = !isFullscreen;
 
-            // Retardo para obtener dimensiones correctas
-            this.time.delayedCall(100, () => {
-                console.log(`Ancho: ${window.innerWidth}, Alto: ${window.innerHeight}`);
-                this.scale.refresh(); // Asegura que Phaser actualice el canvas
-                console.log(window.innerHeight);
-
-                 // Emitir evento global para notificar a otras escenas
-                this.events.emit('screen-resize', window.innerWidth, window.innerHeight);
-            });
-            
+            // Redimensiona elementos inmediatamente
+            this.redimensionarElementos();
         });
-
-
 
         // Dificultad
         const difficulties = ['Fácil', 'Medio', 'Difícil'];
@@ -100,7 +89,6 @@ class AjustesScene extends Phaser.Scene {
         difficultyText.on('pointerdown', () => {
             currentDifficulty = (currentDifficulty + 1) % difficulties.length;
             difficultyText.setText(`Dificultad: ${difficulties[currentDifficulty]}`);
-            // Lógica para cambiar la dificultad
         });
 
         // Volver al menú principal
@@ -112,6 +100,34 @@ class AjustesScene extends Phaser.Scene {
 
         backButton.on('pointerdown', () => {
             this.scene.start('MenuScene');
+        });
+
+        // Escuchar eventos de redimensionamiento
+        this.scale.on('resize', () => this.redimensionarElementos());
+    }
+
+    /**
+     * Método para redimensionar elementos al cambiar tamaño de pantalla
+     */
+    redimensionarElementos() {
+        const newWidth = this.scale.width;
+        const newHeight = this.scale.height;
+        const escalaPantalla = newHeight / 1080;
+
+        // Redimensionar la imagen del menú ajustes
+        if (this.menuAjustes) {
+            this.menuAjustes.setDisplaySize(newWidth, newHeight);
+        }
+
+        
+
+        // Redimensionar botones y texto
+        const tamanoFuente = 24 * escalaPantalla;
+        const botones = this.children.list.filter(child => child.text);
+
+        botones.forEach((boton, index) => {
+            boton.setFontSize(`${tamanoFuente}px`);
+            boton.setPosition(100 * escalaPantalla, (150 + index * 100) * escalaPantalla);
         });
     }
 }
