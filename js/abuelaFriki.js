@@ -35,9 +35,7 @@ var config = {
     },
     /*
     scene: { //Funciones de phaser para crear la escena implementadas en cada escena
-        preload: preload,
-        create: create,
-        update: update
+        preload: preload, create: create, update: update
     }
     */
    //Especie de máquina de estados
@@ -45,5 +43,8 @@ var config = {
 };
 
 
-var game = new Phaser.Game(config); // Inicializo el juego
+const game = new Phaser.Game(config); // Inicializo el juego
+
+
+
 

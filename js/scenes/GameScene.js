@@ -19,7 +19,7 @@ let puntosTexto;
 let puntos = 0;
 let barraSalud;
 let salud = 100; //Salud Incial
-let vidas = 3;
+//let vidas = 3;
 let haMuerto = false;
 let pastillas;
 
@@ -46,7 +46,7 @@ class GameScene extends Phaser.Scene {
 
     preload() {
     this.load.image('backgroundMountain', 'assets/backgroundMountain.png'); // Fondo montañoso
-    this.load.image('backgroundCiudad', 'assets/backgroundCiudad.png'); // Fondo ciudad
+    this.load.image('backgroundCiudad', 'assets/backgroundCiudad2.png'); // Fondo ciudad
     this.load.image('suelo', 'assets/platform.png'); // Cargar suelo
     //this.load.spritesheet('abuela', 'assets/abuelaSprite2.png', { frameWidth: 294, frameHeight: 378 }); 
     //this.load.spritesheet('abuelaMovimiento','assets/abuelaSpriteSheet.png', {frameWidth: 363, frameHeight: 378});
@@ -89,13 +89,15 @@ class GameScene extends Phaser.Scene {
     this.load.image('quiosco1', 'assets/quiosco1.png');
     this.load.image('tiendaComic1','assets/tiendaComic1.png');
     this.load.image('panaderia1','assets/panaderia1.png');
-    this.load.image('pescaderia1','assets/pescaderia2.png');
-    this.load.image('carniceria1','assets/carniceria2.png');
+    this.load.image('pescaderia1','assets/pescaderia1.png');
+    this.load.image('carniceria1','assets/carniceria1.png');
     this.load.image('carpinteria1','assets/carpinteria1.png');
     this.load.image('badulaque1','assets/badulaque1.png');
     this.load.image('informatica1','assets/informatica1.png');
     this.load.image('valla','assets/valla.png');
     this.load.image('colegio1','assets/colegio1.png');
+    this.load.image('heladeria1','assets/heladeria1.png');
+    this.load.image('colmado1','assets/colmado1.png');
 
     //__________________SONIDOS______________________
     this.load.audio('backgroundSound', 'assets/sonidos/backgroundSound.mp3');
@@ -115,13 +117,14 @@ class GameScene extends Phaser.Scene {
 
     create() {
         //____________________________CREATE__________________________________________________________________________________________
-    console.log(window.innerHeight);
     // Definir el tamaño del mundo del juego y de la camara
     this.physics.world.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
     this.cameras.main.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
 
     this.salud = salud; 
-    this.vidas = vidas;
+    // Si hay vidas guardadas, úsalas; de lo contrario, inicia con 3
+    this.vidas = this.data.get('vidas') !== undefined ? this.data.get('vidas') : 3;
+    this.haMuerto = false;
 
 
     // Fondo azul cielo que ocupa todo el nivel ________________________FONDOS___________________________________
@@ -141,12 +144,14 @@ class GameScene extends Phaser.Scene {
     const quiosco1 = this.add.image(1000 * altScale, window.innerHeight - 140 * altScale, 'quiosco1').setScale(0.7 * altScale).setOrigin(0.5, 1);
     const pescaderia1 = this.add.image(2250 * altScale, window.innerHeight - 180 * altScale, 'pescaderia1').setScale(0.6 * altScale).setOrigin(0.5, 1);
     const tiendaComic1 = this.add.image(1750 * altScale, window.innerHeight - 140 * altScale, 'tiendaComic1').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    const carniceria1 = this.add.image(3460 * altScale, window.innerHeight - 180 * altScale, 'carniceria1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const carniceria1 = this.add.image(3430 * altScale, window.innerHeight - 180 * altScale, 'carniceria1').setScale(0.55 * altScale).setOrigin(0.5, 1);
     const panaderia1 = this.add.image(2870 * altScale, window.innerHeight - 140 * altScale, 'panaderia1').setScale(0.7 * altScale).setOrigin(0.5, 1);
-    const carpinteria1 = this.add.image(4580 * altScale, window.innerHeight - 180 * altScale, 'carpinteria1').setScale(0.55 * altScale).setOrigin(0.5, 1);
-    const badulaque1 = this.add.image(4020 * altScale, window.innerHeight - 140 * altScale, 'badulaque1').setScale(0.7 * altScale).setOrigin(0.5, 1);
-    const colegio1 = this.add.image(5790 * altScale, window.innerHeight - 180 * altScale, 'colegio1').setScale(0.7 * altScale).setOrigin(0.5, 1);
-    const informatica1 = this.add.image(5130 * altScale, window.innerHeight - 140 * altScale, 'informatica1').setScale(0.7 * altScale).setOrigin(0.5, 1);
+    const carpinteria1 = this.add.image(4470 * altScale, window.innerHeight - 180 * altScale, 'carpinteria1').setScale(0.55 * altScale).setOrigin(0.5, 1);
+    const badulaque1 = this.add.image(3940 * altScale, window.innerHeight - 140 * altScale, 'badulaque1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const colegio1 = this.add.image(5600 * altScale, window.innerHeight - 180 * altScale, 'colegio1').setScale(0.7 * altScale).setOrigin(0.5, 1);
+    const informatica1 = this.add.image(5000 * altScale, window.innerHeight - 140 * altScale, 'informatica1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const heladeria1 = this.add.image(6100 * altScale, window.innerHeight - 120 * altScale, 'heladeria1').setScale(0.7 * altScale).setOrigin(0.5, 1);
+    const colmado1 = this.add.image(7150 * altScale, window.innerHeight - 140 * altScale, 'colmado1').setScale(0.6 * altScale).setOrigin(0.5, 1);
     
 
     // Crear grupo de plataformas, incluido el suelo__________________PLATAFORMAS_______________________________
@@ -335,7 +340,7 @@ bloquesYHuecos.forEach((bloque) => {
     // __________________________________GALLETAS__________________________________________
     // Crear un contenedor para mostrar la imagen de la galleta y el número de galletas
     galletaIcono = this.add.image(45 * altScale, 150 * altScale, 'galleta').setScale(0.2 * altScale).setScrollFactor(0);
-    galletasTexto = this.add.text(85 * altScale, 140 * altScale, `= ${ galletasDisponibles}`, {
+    galletasTexto = this.add.text(85 * altScale, 140 * altScale, `${ galletasDisponibles}`, {
         fontSize: '30px',
         fill: '#ffffff',
         fontFamily: 'Arial',
@@ -438,7 +443,7 @@ bloquesYHuecos.forEach((bloque) => {
     // Crear contenedor para las imágenes de las vidas
     this.vidasImagen = this.add.image(15 * altScale, 190 * altScale, 'vidaIcono').setOrigin(0,0).setScale(0.6 * altScale).setScrollFactor(0);
     // Añadir texto de "Vidas"
-    this.add.text(90 * altScale, 210 * altScale, '= ' + this.vidas, {fontSize: '30px', fill: '#ffffff', fontFamily: 'Arial'}).setScrollFactor(0).setScale(0.8 * altScale);
+    this.add.text(90 * altScale, 210 * altScale, `${this.vidas}`, {fontSize: '30px', fill: '#ffffff', fontFamily: 'Arial'}).setScrollFactor(0).setScale(0.8 * altScale);
 
 
     this.anims.create({
@@ -458,12 +463,13 @@ bloquesYHuecos.forEach((bloque) => {
     this.physics.add.overlap(this.player, pastillas, this.recogerPastilla, null, this); //abuela recoje pastilla
 
        
-    let valla = this.add.image(5500 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1); //Colegio
-    valla = this.add.image(5608 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
-    valla = this.add.image(5716 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
-    valla = this.add.image(5824 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
-    valla = this.add.image(5932 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
-    valla = this.add.image(6040 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
+    let valla = this.add.image(5504 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1); //Colegio
+    valla = this.add.image(5312 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
+    valla = this.add.image(5420 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
+    valla = this.add.image(5528 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
+    valla = this.add.image(5636 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
+    valla = this.add.image(5744 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
+    valla = this.add.image(5852 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
 
 
      //__________________________SONIDOS___________________ 
@@ -535,13 +541,13 @@ bloquesYHuecos.forEach((bloque) => {
 
         //Cuando muere
         if (this.salud <= 0 && !this.haMuerto)  {
-            console.log(this.vidas);
+            this.haMuerto = true;
             this.vidas--;
-            console.log(this.vidas);
+            this.data.set('vidas', this.vidas); // Guardar vidas en `data`
             // Desactivar controles mientras se reproduce la animación
             this.physics.pause(); // Pausa físicas para evitar movimiento durante la animación
             this.player.setVelocity(0); // Detener al jugador
-            this.player.anims.play('muerte', true); // Reproducir animación de muerte
+            //this.player.anims.play('muerte', true); // Reproducir animación de muerte
 
             this.data.set('isSoundOn', this.isSoundOn); // Guardar el estado del sonido en `data` antes de reiniciar
             
@@ -552,15 +558,18 @@ bloquesYHuecos.forEach((bloque) => {
 
             // Reiniciar la escena después de que termine la animación
             this.time.delayedCall(2000, () => { // Ajusta el tiempo al de la duración de la animación
+                console.log(this.vidas);
+                if(this.vidas > 0) {
                 salud = 100;
-                puntos = 0;
-                galletasDisponibles = 10;
+                //puntos = 0;
+                //galletasDisponibles = 10;
                 isInvulnerable = false; // Asegurar que no quede invulnerable
                 this.physics.world.colliders.destroy();// Reinica las colisiones - no colision cacas
-                
                 this.scene.restart(); // Reinicia la escena
+                }else{
+                    this.gameOver();
+                }
             });
-            this.haMuerto = true;
         }
     
     }
@@ -784,6 +793,70 @@ updateMovingPlatforms() {
         movingPlatformR.setVelocityX(100 * altScale);
     }
 }
+
+gameOver() {
+    // Detener toda la física y lógica del juego
+    this.physics.pause();
+    this.player.setTint(0xff0000); // Cambiar color del jugador para indicar el final
+    this.player.anims.stop(); // Detener cualquier animación del jugador
+
+    // Mostrar un texto de "Game Over"
+    const gameOverText = this.add.text(
+        this.cameras.main.worldView.x + this.cameras.main.width / 2,
+        this.cameras.main.worldView.y + this.cameras.main.height / 2,
+        'GAME OVER',
+        {
+            fontSize: '64px',
+            fill: '#ff0000',
+            fontFamily: 'Arial',
+        }
+    ).setOrigin(0.5);
+
+    // Mostrar botón para reiniciar el juego
+    const restartButton = this.add.text(
+        this.cameras.main.worldView.x + this.cameras.main.width / 2,
+        this.cameras.main.worldView.y + this.cameras.main.height / 2 + 100,
+        'Click to Restart',
+        {
+            fontSize: '32px',
+            fill: '#ffffff',
+            fontFamily: 'Arial',
+        }
+    ).setOrigin(0.5).setInteractive();
+
+    // Al hacer clic en el botón, reiniciar el juego
+    restartButton.on('pointerdown', () => {
+        this.vidas = 3; // Reiniciar las vidas
+        this.data.set('vidas', this.vidas); // Guardar las vidas
+        puntos = 0; // Reiniciar los puntos
+        salud = 100; // Restaurar la salud
+        galletasDisponibles = 10; // Reiniciar las galletas
+        isInvulnerable = false; // Reiniciar invulnerabilidad
+        this.scene.restart(); // Reiniciar la escena
+    });
+
+    // Detener música y sonidos si están activos
+    if (this.backgroundSound && this.backgroundSound.isPlaying) {
+        this.backgroundSound.stop();
+    }
+/*
+    // Opción de volver al menú principal (opcional)
+    const menuButton = this.add.text(
+        this.cameras.main.worldView.x + this.cameras.main.width / 2,
+        this.cameras.main.worldView.y + this.cameras.main.height / 2 + 160,
+        'Main Menu',
+        {
+            fontSize: '32px',
+            fill: '#ffffff',
+            fontFamily: 'Arial',
+        }
+    ).setOrigin(0.5).setInteractive();
+
+    menuButton.on('pointerdown', () => {
+        this.scene.start('MenuScene'); // Cambia a la escena del menú principal
+    });*/
+}
+
 
 }
 

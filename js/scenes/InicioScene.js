@@ -10,6 +10,7 @@ class InicioScene extends Phaser.Scene {
 
     create() {
 
+
         const tamanoFuente = 30 * window.innerHeight / 1080; 
         this.add.rectangle(0, 0, this.scale.width, this.scale.height, 0x1e90ff).setOrigin(0, 0); // fondo azul con rectángulo
 

@@ -102,6 +102,12 @@ class AjustesScene extends Phaser.Scene {
             this.scene.start('MenuScene');
         });
 
+        game.scale.on('resize', (gameSize) => {
+            const newAlturaEscala = gameSize.height / 1080;
+            game.config.globalData.alturaEscala = newAlturaEscala;
+            console.log(`Nueva escala global: ${newAlturaEscala}`);
+        });
+        
         // Escuchar eventos de redimensionamiento
         this.scale.on('resize', () => this.redimensionarElementos());
     }
@@ -118,8 +124,6 @@ class AjustesScene extends Phaser.Scene {
         if (this.menuAjustes) {
             this.menuAjustes.setDisplaySize(newWidth, newHeight);
         }
-
-        
 
         // Redimensionar botones y texto
         const tamanoFuente = 24 * escalaPantalla;
