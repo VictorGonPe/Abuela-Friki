@@ -9,7 +9,7 @@ let movingPlatformC, movingPlatformL, movingPlatformR; // Variables para platafo
 var cursors;
 var leftZone, rightZone, upZone; // Control de zonas táctiles
 var currentControl = 'keyboard'; // Variable para cambiar de controles táctiles a teclado
-var backgroundMountain, backgroundCiudad, indicadorVida, indicadorVida2; // Variables para los fondos parallax
+var backgroundMountain, backgroundCiudad, backgroundCesped, indicadorVida, indicadorVida2; // Variables para los fondos parallax
 let monumentoManager;
 let enemigosManager;
 let collisionManager;
@@ -46,7 +46,8 @@ class GameScene extends Phaser.Scene {
 
     preload() {
     this.load.image('backgroundMountain', 'assets/backgroundMountain.png'); // Fondo montañoso
-    this.load.image('backgroundCiudad', 'assets/backgroundCiudad2.png'); // Fondo ciudad
+    this.load.image('backgroundCiudad', 'assets/backgroundCiudadCompleto.png'); // Fondo ciudad
+    this.load.image('cesped', 'assets/cesped.png'); // césped frontal
     this.load.image('suelo', 'assets/platform.png'); // Cargar suelo
     //this.load.spritesheet('abuela', 'assets/abuelaSprite2.png', { frameWidth: 294, frameHeight: 378 }); 
     //this.load.spritesheet('abuelaMovimiento','assets/abuelaSpriteSheet.png', {frameWidth: 363, frameHeight: 378});
@@ -54,9 +55,9 @@ class GameScene extends Phaser.Scene {
     this.load.spritesheet('abuelaMovimiento2', 'assets/abuelaSalto.png', {frameWidth: 363,frameHeight: 374});
     this.load.spritesheet('abuelaQuieta', 'assets/abuelaIdle.png', {frameWidth: 363,frameHeight: 378});
     
-    this.load.image('plataformasL', 'assets/plataformaBarnaIzq.png'); // Cargar plataformas
-    this.load.image('plataformasR', 'assets/plataformaBarnaDer.png'); 
-    this.load.image('plataformasC', 'assets/plataformaBarnaC.png'); 
+    this.load.image('plataformasL', 'assets/plataformaBcnIzq.png'); // Cargar plataformas
+    this.load.image('plataformasR', 'assets/plataformaBcnDer.png'); 
+    this.load.image('plataformasC', 'assets/plataformaBcnCentro.png'); 
 
     this.load.image('monumento1', 'assets/colon1.png');
     this.load.image('monumento2', 'assets/torresMafre1.png');
@@ -86,18 +87,19 @@ class GameScene extends Phaser.Scene {
 
     //__________________ESCENARIO____________________
     this.load.image('cartelBarcelona', 'assets/cartelBarcelona.png');
-    this.load.image('quiosco1', 'assets/quiosco1.png');
-    this.load.image('tiendaComic1','assets/tiendaComic1.png');
-    this.load.image('panaderia1','assets/panaderia1.png');
-    this.load.image('pescaderia1','assets/pescaderia1.png');
-    this.load.image('carniceria1','assets/carniceria1.png');
-    this.load.image('carpinteria1','assets/carpinteria1.png');
-    this.load.image('badulaque1','assets/badulaque1.png');
-    this.load.image('informatica1','assets/informatica1.png');
+    this.load.image('quiosco1', 'assets/edificios/quiosco1.png');
+    this.load.image('tiendaComic1','assets/edificios/tiendaComic1.png');
+    this.load.image('panaderia1','assets/edificios/panaderia1.png');
+    this.load.image('pescaderia1','assets/edificios/pescaderia1.png');
+    this.load.image('carniceria1','assets/edificios/carniceria1.png');
+    this.load.image('carpinteria1','assets/edificios/carpinteria1.png');
+    this.load.image('badulaque1','assets/edificios/badulaque1.png');
+    this.load.image('informatica1','assets/edificios/informatica1.png');
     this.load.image('valla','assets/valla.png');
-    this.load.image('colegio1','assets/colegio1.png');
-    this.load.image('heladeria1','assets/heladeria1.png');
-    this.load.image('colmado1','assets/colmado1.png');
+    this.load.image('colegio1','assets/edificios/colegio1.png');
+    this.load.image('heladeria1','assets/edificios/heladeria1.png');
+    this.load.image('colmado1','assets/edificios/colmado1.png');
+    this.load.image('floristeria1','assets/edificios/floristeria2.png');
 
     //__________________SONIDOS______________________
     this.load.audio('backgroundSound', 'assets/sonidos/backgroundSound.mp3');
@@ -116,6 +118,7 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
+    console.log(this.textures.list);
         //____________________________CREATE__________________________________________________________________________________________
     // Definir el tamaño del mundo del juego y de la camara
     this.physics.world.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
@@ -133,6 +136,7 @@ class GameScene extends Phaser.Scene {
     backgroundMountain = this.add.tileSprite(0, window.innerHeight, LEVEL_WIDTH / altScale, 1080, 'backgroundMountain').setOrigin(0, 1).setScrollFactor(0).setScale(1 * altScale);
     // Fondo de ciudad que se moverá más rápido
     backgroundCiudad = this.add.tileSprite(0, window.innerHeight, LEVEL_WIDTH /altScale, 1080, 'backgroundCiudad').setOrigin(0, 1).setScrollFactor(0).setScale(1 * altScale);
+    backgroundCesped = this.add.tileSprite(0, window.innerHeight - (70 * altScale), LEVEL_WIDTH / altScale, 130 * altScale, 'cesped').setOrigin(0, 1);
     //Instancia y creacion de monumentos
     monumentoManager = new Monumento(this, altScale); //Esta escena y la escala
     monumentoManager.crearMonumentos();
@@ -151,10 +155,11 @@ class GameScene extends Phaser.Scene {
     const colegio1 = this.add.image(5600 * altScale, window.innerHeight - 180 * altScale, 'colegio1').setScale(0.7 * altScale).setOrigin(0.5, 1);
     const informatica1 = this.add.image(5000 * altScale, window.innerHeight - 140 * altScale, 'informatica1').setScale(0.6 * altScale).setOrigin(0.5, 1);
     const heladeria1 = this.add.image(6100 * altScale, window.innerHeight - 120 * altScale, 'heladeria1').setScale(0.7 * altScale).setOrigin(0.5, 1);
-    const colmado1 = this.add.image(7150 * altScale, window.innerHeight - 140 * altScale, 'colmado1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const colmado1 = this.add.image(7600 * altScale, window.innerHeight - 180 * altScale, 'colmado1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const floristeria1 = this.add.image(7100 * altScale, window.innerHeight - 120 * altScale, 'floristeria1').setScale(0.7 * altScale).setOrigin(0.5, 1);
     
 
-    // Crear grupo de plataformas, incluido el suelo__________________PLATAFORMAS_______________________________
+    // Crear grupo de plataformas, incluido el suelo__________________SUELOS_______________________________
     platforms = this.physics.add.staticGroup();
     //platforms.depth = 1;
     //platforms.create(LEVEL_WIDTH / 2, window.innerHeight - 50  * altScale, 'suelo').setDisplaySize(LEVEL_WIDTH, 140  * altScale).refreshBody(); //Suelo se repite
@@ -163,10 +168,10 @@ class GameScene extends Phaser.Scene {
         { x: 0, ancho: 2800 }, // Bloque 1
         { hueco: 350},         // Hueco 1
         {  x: 3150, ancho: 5000 }, // Bloque 2
-        { hueco: 200 },         // Hueco 2
-        { x: 8350, ancho: 100 }, // Bloque 3
-        { hueco: 250 },         // Hueco 3
-        { x: 8700, ancho: 4500 }, // Bloque 4
+        { hueco: 2000 },         // Hueco 2
+        //{ x: 8350, ancho: 100 }, // Bloque 3
+        //{ hueco: 250 },         // Hueco 3
+        { x: 10150, ancho: 3050 }, // Bloque 4
         { hueco: 200 },         // Hueco 4
         { x: 13400, ancho: 3000 }, // Bloque 5
         { hueco: 250 },         // Hueco 5
@@ -199,26 +204,11 @@ bloquesYHuecos.forEach((bloque) => {
         .refreshBody();
     }
 });
-    // Añadir plataformas fijas
-    platforms.create(700 * altScale, window.innerHeight - 300 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody();
-    platforms.create(760 * altScale, window.innerHeight - 300 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
-    platforms.create(820 * altScale, window.innerHeight - 300 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody();
+    
 
-    platforms.create(1000 * altScale, window.innerHeight - 400 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody();
-    platforms.create(1060 * altScale, window.innerHeight - 400 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
-    platforms.create(1116 * altScale, window.innerHeight - 400 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
-    platforms.create(1172 * altScale, window.innerHeight - 400 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
-    platforms.create(1230 * altScale, window.innerHeight - 400 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody();
+    //platforms.body.setSize(140, 70).setOffset(50 * altScale, 50 * altScale);
 
-    // Crear plataformas móviles
-    movingPlatformL = this.physics.add.image(1455 * altScale, window.innerHeight - 500 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody();
-    movingPlatformC = this.physics.add.image(1515 * altScale, window.innerHeight - 500 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
-    movingPlatformR = this.physics.add.image(1575 * altScale, window.innerHeight - 500 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody();
-
-    // Desactivar la gravedad para la plataforma móvil
-    [movingPlatformL, movingPlatformC, movingPlatformR].forEach(platform => {
-        platform.body.setAllowGravity(false).setImmovable(true).setVelocityX(100 * altScale);;
-    });
+   
 
     // __________________________________CREAR ABUELA___________________________________________
     //this.player = this.physics.add.sprite(100, 250, 'abuela').setScale(0.4);
@@ -235,11 +225,7 @@ bloquesYHuecos.forEach((bloque) => {
     // Hacer que la cámara siga al jugador
     this.cameras.main.startFollow(this.player);
 
-    // Añadir colisiones con objetos
-    this.physics.add.collider(this.player, platforms);
-    this.physics.add.collider(this.player, movingPlatformL);
-    this.physics.add.collider(this.player, movingPlatformC);
-    this.physics.add.collider(this.player, movingPlatformR);
+    
 
     // Anims: propiedad de phaser para animar. Animaciones de la abuela
     this.anims.create({
@@ -282,14 +268,28 @@ bloquesYHuecos.forEach((bloque) => {
     enemigosManager = new Enemigos(this, altScale);
     collisionManager = new CollisionManager(this, this.player, altScale);
 
-     // __________________________________PALOMAS__________________________________________
+    // Crear grupo de plataformas, incluido el suelo_________________OTRAS PLATFORMS___________________________________________________________________________
+    
+     
+
+    
+    this.plataformaDeUno(550,300);
+    this.plataformaDeUno(872,500);
+    this.plataformaDeUno(1120,500);
+    this.plataformaDeDos(1510,700,1607,700);
+    this.plataformaDeDos(1903,700,2000,700);
+    this.plataformaDeDos(2400,550,2497,550);
+    //this.plataformaDeDos(1100,500,1150,700);
+
+    this.colisionPlataformas();
   
+    // __________________________________PALOMAS__________________________________________
     // Animación de las palomas volar
     this.anims.create({
         key: 'volar',
         frames: this.anims.generateFrameNumbers('paloma', { start: 0, end: 5 }),
         frameRate: 15,
-        repeat: -1 // Animación en bucle
+        repeat: -1 // Animación en buclecxxxxxx
     });
         
     //Creación de palomas
@@ -531,8 +531,7 @@ bloquesYHuecos.forEach((bloque) => {
        
         this.novimientosAbuela();  
         this.updateParallax(); //Controla desplazamientos, fondos, monumentos, enemigos, etc.
-        this.updateMovingPlatforms();
-
+        //this.updateMovingPlatforms();
 
         const limiteInferior = this.scale.height - 10; // Ajusta este valor según el diseño del nivel
         if (this.player.y > limiteInferior) {
@@ -857,6 +856,69 @@ gameOver() {
     });*/
 }
 
+plataformaDeUno(x,y) {
+       // Añadir plataformas fijas
+       //platforms.create(700 * altScale, window.innerHeight - 300 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody().setSize(70 * altScale, 15 * altScale);
+       platforms.create(x * altScale, window.innerHeight - y * altScale, 'plataformasL')
+       .setScale(0.6 * altScale)
+       .refreshBody()
+       .setSize(90 * altScale, 15 * altScale) //Tamaño cuerpo físico
+       .setOffset(7 * altScale, 25 * altScale); //Colocación
+
+}
+
+plataformaDeDos(x1,y1,x2,y2) { //97 px entre una x y la otra
+
+   // Añadir plataformas fijas
+   platforms.create(x1 * altScale, window.innerHeight - y1 * altScale, 'plataformasL').setScale(0.6 * altScale).refreshBody()
+   .setSize(90 * altScale, 15 * altScale)
+   .setSize(90 * altScale, 15 * altScale) //Tamaño cuerpo físico
+   .setOffset(7 * altScale, 25 * altScale); //Colocación
+
+   platforms.create(x2 * altScale, window.innerHeight - y2 * altScale, 'plataformasR').setScale(0.6 * altScale).refreshBody()
+   .setSize(90 * altScale, 15 * altScale)
+   .setSize(90 * altScale, 15 * altScale) //Tamaño cuerpo físico
+   .setOffset(0 * altScale, 25 * altScale); //Colocación
+
+}
+
+plataformaGrande() {
+
+    // Añadir plataformas fijas
+    platforms.create(700 * altScale, window.innerHeight - 300 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody().setSize(70 * altScale, 15 * altScale);
+    platforms.create(773 * altScale, window.innerHeight - 300 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody().setSize(70 * altScale, 15 * altScale);
+ 
+    //platforms.create(1000 * altScale, window.innerHeight - 400 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody().setSize(70 * altScale, 15 * altScale);
+    //platforms.create(1060 * altScale, window.innerHeight - 400 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
+    platforms.create(1116 * altScale, window.innerHeight - 400 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody().setSize(400 * altScale, 15 * altScale);
+    //platforms.create(1172 * altScale, window.innerHeight - 400 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
+    //platforms.create(1230 * altScale, window.innerHeight - 400 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody().setSize(70 * altScale, 15 * altScale);
+ 
+     // Crear plataformas móviles
+     movingPlatformL = this.physics.add.image(1455 * altScale, window.innerHeight - 800 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody().setSize(130 * altScale, 15 * altScale);
+     movingPlatformC = this.physics.add.image(1515 * altScale, window.innerHeight - 630 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody().setSize(750 * altScale, 15 * altScale);
+     movingPlatformR = this.physics.add.image(1575 * altScale, window.innerHeight - 800 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody().setSize(130 * altScale, 15 * altScale);
+ 
+     // Desactivar la gravedad para la plataforma móvil
+     [movingPlatformL, movingPlatformC, movingPlatformR].forEach(platform => {
+         platform.body.setAllowGravity(false).setImmovable(true).setVelocityX(100 * altScale);;
+     });
+ 
+     // Añadir colisiones con objetos
+    this.physics.add.collider(this.player, platforms);
+    this.physics.add.collider(this.player, movingPlatformL);
+    this.physics.add.collider(this.player, movingPlatformC);
+    this.physics.add.collider(this.player, movingPlatformR);
+ 
+ }
+
+colisionPlataformas() {
+     // Añadir colisiones abuela con plataformas
+     this.physics.add.collider(this.player, platforms);
+     this.physics.add.collider(this.player, movingPlatformL);
+     this.physics.add.collider(this.player, movingPlatformC);
+     this.physics.add.collider(this.player, movingPlatformR);
+}
 
 }
 
