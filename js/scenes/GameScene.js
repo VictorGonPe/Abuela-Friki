@@ -100,6 +100,32 @@ class GameScene extends Phaser.Scene {
     this.load.image('heladeria1','assets/edificios/heladeria1.png');
     this.load.image('colmado1','assets/edificios/colmado1.png');
     this.load.image('floristeria1','assets/edificios/floristeria2.png');
+    this.load.image('cafeteria1','assets/edificios/cafeteria1.png');
+    this.load.image('carniceria2','assets/edificios/carniceria2.png');
+    this.load.image('drogueria1','assets/edificios/drogueria1.png');
+    this.load.image('pasteleria1','assets/edificios/pasteleria1.png');
+    this.load.image('bar1','assets/edificios/bar1.png');
+
+    //Objetos escenario
+    this.load.image('senal1','assets/imagenes/obras/senal1.png');
+    this.load.image('senal2','assets/imagenes/obras/senal2.png');
+    this.load.image('senal3','assets/imagenes/obras/senal3.png');
+    this.load.image('cono1','assets/imagenes/obras/cono1.png');
+    this.load.image('cono2','assets/imagenes/obras/cono2.png');
+    this.load.image('cono3','assets/imagenes/obras/cono3.png');
+    this.load.image('vallas2','assets/imagenes/obras/vallas2.png');
+    this.load.image('vallas3','assets/imagenes/obras/vallas3.png');
+    this.load.image('vallas4','assets/imagenes/obras/vallas4.png');
+    this.load.image('tierra1','assets/imagenes/obras/tierra1.png');
+    this.load.image('tierra2','assets/imagenes/obras/tierra2.png');
+    this.load.image('carretilla1','assets/imagenes/obras/carretilla1.png');
+
+    this.load.image('pivote2','assets/imagenes/objetos/pivote2.png');
+    this.load.image('basura1','assets/imagenes/objetos/basura1.png');
+    this.load.image('basura2','assets/imagenes/objetos/basura2.png');
+    this.load.image('buzon1','assets/imagenes/objetos/buzon1.png');
+    this.load.image('bocaIncendios1','assets/imagenes/objetos/bocaIncendios1.png');
+    this.load.image('semaforo1','assets/imagenes/objetos/semaforo1.png');
 
     //__________________SONIDOS______________________
     this.load.audio('backgroundSound', 'assets/sonidos/backgroundSound.mp3');
@@ -143,7 +169,7 @@ class GameScene extends Phaser.Scene {
 
 
     //__________________CREAR ESCENARIO____________________
-
+    //__TIENDAS
     const cartelBarcelona = this.add.image(400 * altScale, window.innerHeight - 120 * altScale, 'cartelBarcelona').setScale(0.5 * altScale).setOrigin(0.5, 1);
     const quiosco1 = this.add.image(1000 * altScale, window.innerHeight - 140 * altScale, 'quiosco1').setScale(0.7 * altScale).setOrigin(0.5, 1);
     const pescaderia1 = this.add.image(2250 * altScale, window.innerHeight - 180 * altScale, 'pescaderia1').setScale(0.6 * altScale).setOrigin(0.5, 1);
@@ -155,9 +181,43 @@ class GameScene extends Phaser.Scene {
     const colegio1 = this.add.image(5600 * altScale, window.innerHeight - 180 * altScale, 'colegio1').setScale(0.7 * altScale).setOrigin(0.5, 1);
     const informatica1 = this.add.image(5000 * altScale, window.innerHeight - 140 * altScale, 'informatica1').setScale(0.6 * altScale).setOrigin(0.5, 1);
     const heladeria1 = this.add.image(6100 * altScale, window.innerHeight - 120 * altScale, 'heladeria1').setScale(0.7 * altScale).setOrigin(0.5, 1);
-    const colmado1 = this.add.image(7600 * altScale, window.innerHeight - 180 * altScale, 'colmado1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const colmado1 = this.add.image(7600 * altScale, window.innerHeight - 180 * altScale, 'colmado1').setScale(0.5 * altScale).setOrigin(0.5, 1);
     const floristeria1 = this.add.image(7100 * altScale, window.innerHeight - 120 * altScale, 'floristeria1').setScale(0.7 * altScale).setOrigin(0.5, 1);
+    const carniceria2 = this.add.image(11200 * altScale, window.innerHeight - 170 * altScale, 'carniceria2').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const cafeteria1 = this.add.image(10750 * altScale, window.innerHeight - 140 * altScale, 'cafeteria1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const drogueria1 = this.add.image(12110 * altScale, window.innerHeight - 170 * altScale, 'drogueria1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const pasteleria1 = this.add.image(12600 * altScale, window.innerHeight - 140 * altScale, 'pasteleria1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const bar1 = this.add.image(11650 * altScale, window.innerHeight - 140 * altScale, 'bar1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    //__OBJETOS
+    const senal2 = this.add.image(2750 * altScale, window.innerHeight - 115 * altScale, 'senal2').setScale(0.65 * altScale).setOrigin(0.5, 1);
+    const vallas4 = this.add.image(8050 * altScale, window.innerHeight - 94 * altScale, 'vallas4').setScale(0.6 * altScale).setOrigin(0.5, 1).depth = 1;
+    const cono1 = this.add.image(7960 * altScale, window.innerHeight - 120 * altScale, 'cono1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const semaforo1 = this.add.image(10250 * altScale, window.innerHeight - 115 * altScale, 'semaforo1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+
+    const buzon1 = this.add.image(10400 * altScale, window.innerHeight - 120 * altScale, 'buzon1').setScale(0.7 * altScale).setOrigin(0.5, 1).flipX = true;
+    this.tierra1 = this.add.image(12980 * altScale, window.innerHeight - 90 * altScale, 'tierra1').setScale(0.5 * altScale).setOrigin(0.5, 1);
+    this.tierra1.flipX = true
+    this.tierra1.depth = 1;
+
+    this.crearPivote(13450,16350); //Sagrada Familia = 13450 a 16350
+    const bocaIncendios1 = this.add.image(14400 * altScale, window.innerHeight - 140 * altScale, 'bocaIncendios1').setScale(0.5 * altScale).setOrigin(0.5, 1);
+    const basura1 = this.add.image(13600 * altScale, window.innerHeight - 120 * altScale, 'basura2').setScale(0.5 * altScale).setOrigin(0.5, 1);
+    const basura12 = this.add.image(16200 * altScale, window.innerHeight - 120 * altScale, 'basura2').setScale(0.5 * altScale).setOrigin(0.5, 1).flipX = true;
+
+    //Tramo obras agujeros 21100
+    const senal1 = this.add.image(21300 * altScale, window.innerHeight - 115 * altScale, 'senal1').setScale(0.7 * altScale).setOrigin(0.5, 1);
+    this.add.image(21450 * altScale, window.innerHeight - 130 * altScale, 'carretilla1').setScale(0.5 * altScale).setOrigin(0.5, 1);
+    this.add.image(21650 * altScale, window.innerHeight - 130 * altScale, 'vallas3').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    this.add.image(23600 * altScale, window.innerHeight - 130 * altScale, 'vallas3').setScale(0.6 * altScale).setOrigin(0.5, 1).flipX = true;
+    this.ponerVallasObra(21750,23500);
+    this.add.image(23700 * altScale, window.innerHeight - 110 * altScale, 'senal3').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    this.add.image(23755 * altScale, window.innerHeight - 95 * altScale, 'tierra2').setScale(0.6 * altScale).setOrigin(0.5, 1).depth = 1;
+    this.add.image(21590 * altScale, window.innerHeight - 120 * altScale, 'cono3').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    this.add.image(23830 * altScale, window.innerHeight - 98 * altScale, 'cono2').setScale(0.6 * altScale).setOrigin(0.5, 1).depth = 1;
     
+
+   
+
 
     // Crear grupo de plataformas, incluido el suelo__________________SUELOS_______________________________
     platforms = this.physics.add.staticGroup();
@@ -204,6 +264,33 @@ bloquesYHuecos.forEach((bloque) => {
         .refreshBody();
     }
 });
+
+// Crear grupo de plataformas, incluido el suelo_________________OTRAS PLATFORMS___________________________________________________________________________
+  
+this.plataformaDeUno(550,320);
+this.plataformaDeUno(872,500);
+this.plataformaDeUno(1120,500);
+this.plataformaDeDos(1510,700,1607,700);
+this.plataformaDeDos(1903,700,2000,700);
+this.plataformaDeDos(2210,530,2307,530);
+this.plataformaDeDos(8300,330,8397,330); //Plataformas Agujero
+this.plataformaDeDos(8700,560,8797,560);
+this.plataformaDeUno(9120,800);
+this.plataformaDeUno(9120,350);
+this.plataformaDeUno(9470,400);
+this.plataformaDeUno(9720,620);
+this.plataformaDeUno(9780,280);
+
+
+this.plataformaDeUno(10470,310);
+this.plataformaDeUno(10630,550);
+this.plataformaDeUno(10860,550);
+this.plataformaDeDos(11150,550,11247,550);
+this.plataformaDeDos(11600,500,11697,500);
+
+this.plataformaDeUno(13750,320);//Sagrada Familia
+this.plataformaGrande(14250,550);
+//this.plataformaDeDos(1100,500,1150,700);
     
 
     //platforms.body.setSize(140, 70).setOffset(50 * altScale, 50 * altScale);
@@ -212,8 +299,9 @@ bloquesYHuecos.forEach((bloque) => {
 
     // __________________________________CREAR ABUELA___________________________________________
     //this.player = this.physics.add.sprite(100, 250, 'abuela').setScale(0.4);
-    this.player = this.physics.add.sprite(150 * altScale, 250 * altScale, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5,1);
-
+    //this.player = this.physics.add.sprite(150 * altScale, 250 * altScale, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5,1);
+    this.player = this.physics.add.sprite(21000 * altScale, 250 * altScale, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5,1);
+    // 10500 Zona cafeteria //13500 Zona Sagrada
     // Ajustar el cuerpo físico del jugador
     this.player.body.setSize(150, 320).setOffset(50 * altScale, 50 * altScale); // Ajusta tamaño y desplazamiento
     // Configurar físicas del jugador
@@ -264,24 +352,10 @@ bloquesYHuecos.forEach((bloque) => {
     });*/
 
    
-    // Instancia a la clase
+    // Instancias a la clase
     enemigosManager = new Enemigos(this, altScale);
     collisionManager = new CollisionManager(this, this.player, altScale);
-
-    // Crear grupo de plataformas, incluido el suelo_________________OTRAS PLATFORMS___________________________________________________________________________
-    
-     
-
-    
-    this.plataformaDeUno(550,300);
-    this.plataformaDeUno(872,500);
-    this.plataformaDeUno(1120,500);
-    this.plataformaDeDos(1510,700,1607,700);
-    this.plataformaDeDos(1903,700,2000,700);
-    this.plataformaDeDos(2400,550,2497,550);
-    //this.plataformaDeDos(1100,500,1150,700);
-
-    this.colisionPlataformas();
+    this.colisionPlataformas(); //Colisiones abuela-plataforma
   
     // __________________________________PALOMAS__________________________________________
     // Animación de las palomas volar
@@ -293,7 +367,7 @@ bloquesYHuecos.forEach((bloque) => {
     });
         
     //Creación de palomas
-    enemigosManager.crearPalomas(20);
+    enemigosManager.crearPalomas(2);
     // Crear colisión entre las palomas y la abuela
     this.physics.add.overlap(enemigosManager.palomas, this.player, this.colisionPaloma, null, this);
 
@@ -315,7 +389,7 @@ bloquesYHuecos.forEach((bloque) => {
         frameRate: 6,
         repeat: -1 // Animación en bucle
     });
-    enemigosManager.crearPatinetes(26); //Crear patinetes
+    enemigosManager.crearPatinetes(2); //Crear patinetes
     // Crear colisiones entre los patinetes y el suelo
     this.physics.add.collider(enemigosManager.patinetes, platforms);
     this.physics.add.overlap(enemigosManager.patinetes, this.player, this.colisionPatinete, null, this); //overlap lanza un evento
@@ -328,7 +402,7 @@ bloquesYHuecos.forEach((bloque) => {
 
     // __________________________________CACAS__________________________________________
 
-    enemigosManager.crearCacas(8); // Crear cacas
+    enemigosManager.crearCacas(2); // Crear cacas
 
     // Colisiones de cacas con el jugador usando CollisionManager
     this.physics.add.overlap(enemigosManager.cacas,this.player,collisionManager.colisionCaca.bind(collisionManager),null,this); // Manejado por CollisionManager
@@ -856,44 +930,48 @@ gameOver() {
     });*/
 }
 
-plataformaDeUno(x,y) {
-       // Añadir plataformas fijas
-       //platforms.create(700 * altScale, window.innerHeight - 300 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody().setSize(70 * altScale, 15 * altScale);
-       platforms.create(x * altScale, window.innerHeight - y * altScale, 'plataformasL')
-       .setScale(0.6 * altScale)
-       .refreshBody()
-       .setSize(90 * altScale, 15 * altScale) //Tamaño cuerpo físico
-       .setOffset(7 * altScale, 25 * altScale); //Colocación
+plataformaDeUno(x, y) {
+    // Añadir plataformas fijas
+    //platforms.create(700 * altScale, window.innerHeight - 300 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody().setSize(70 * altScale, 15 * altScale);
+    const plataforma = platforms.create(x * altScale, window.innerHeight - y * altScale, 'plataformasL')
+    .setScale(0.6 * altScale)
+    .refreshBody()
+    .setSize(90 * altScale, 15 * altScale) //Tamaño cuerpo físico
+    .setOffset(7 * altScale, 25 * altScale); //Colocación
+
+    plataforma.depth = 1;
 
 }
 
-plataformaDeDos(x1,y1,x2,y2) { //97 px entre una x y la otra
+plataformaDeDos(x1, y1, x2, y2) { //97 px entre una x y la otra
 
    // Añadir plataformas fijas
-   platforms.create(x1 * altScale, window.innerHeight - y1 * altScale, 'plataformasL').setScale(0.6 * altScale).refreshBody()
+   const plataforma1 = platforms.create(x1 * altScale, window.innerHeight - y1 * altScale, 'plataformasL').setScale(0.6 * altScale).refreshBody()
    .setSize(90 * altScale, 15 * altScale)
    .setSize(90 * altScale, 15 * altScale) //Tamaño cuerpo físico
    .setOffset(7 * altScale, 25 * altScale); //Colocación
 
-   platforms.create(x2 * altScale, window.innerHeight - y2 * altScale, 'plataformasR').setScale(0.6 * altScale).refreshBody()
+   const plataforma2 = platforms.create(x2 * altScale, window.innerHeight - y2 * altScale, 'plataformasR').setScale(0.6 * altScale).refreshBody()
    .setSize(90 * altScale, 15 * altScale)
    .setSize(90 * altScale, 15 * altScale) //Tamaño cuerpo físico
    .setOffset(0 * altScale, 25 * altScale); //Colocación
 
+   plataforma1.depth = 1;
+   plataforma2.depth = 1;
+
 }
 
-plataformaGrande() {
+plataformaGrande(x, y) {
 
-    // Añadir plataformas fijas
-    platforms.create(700 * altScale, window.innerHeight - 300 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody().setSize(70 * altScale, 15 * altScale);
-    platforms.create(773 * altScale, window.innerHeight - 300 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody().setSize(70 * altScale, 15 * altScale);
- 
-    //platforms.create(1000 * altScale, window.innerHeight - 400 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody().setSize(70 * altScale, 15 * altScale);
-    //platforms.create(1060 * altScale, window.innerHeight - 400 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
-    platforms.create(1116 * altScale, window.innerHeight - 400 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody().setSize(400 * altScale, 15 * altScale);
-    //platforms.create(1172 * altScale, window.innerHeight - 400 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody();
-    //platforms.create(1230 * altScale, window.innerHeight - 400 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody().setSize(70 * altScale, 15 * altScale);
- 
+    const plataforma = platforms.create(x * altScale, window.innerHeight - y * altScale, 'plataformasC')
+    .setScale(0.6 * altScale)
+    .refreshBody()
+    .setSize(500 * altScale, 15 * altScale) //Tamaño cuerpo físico
+    .setOffset(0 * altScale, 25 * altScale); //Colocación
+
+    plataforma.depth = 1;
+    
+    /*
      // Crear plataformas móviles
      movingPlatformL = this.physics.add.image(1455 * altScale, window.innerHeight - 800 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody().setSize(130 * altScale, 15 * altScale);
      movingPlatformC = this.physics.add.image(1515 * altScale, window.innerHeight - 630 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody().setSize(750 * altScale, 15 * altScale);
@@ -903,12 +981,7 @@ plataformaGrande() {
      [movingPlatformL, movingPlatformC, movingPlatformR].forEach(platform => {
          platform.body.setAllowGravity(false).setImmovable(true).setVelocityX(100 * altScale);;
      });
- 
-     // Añadir colisiones con objetos
-    this.physics.add.collider(this.player, platforms);
-    this.physics.add.collider(this.player, movingPlatformL);
-    this.physics.add.collider(this.player, movingPlatformC);
-    this.physics.add.collider(this.player, movingPlatformR);
+ */
  
  }
 
@@ -918,6 +991,18 @@ colisionPlataformas() {
      this.physics.add.collider(this.player, movingPlatformL);
      this.physics.add.collider(this.player, movingPlatformC);
      this.physics.add.collider(this.player, movingPlatformR);
+}
+
+crearPivote(x,y) { //Sagrada Familia = 13450 a 16350
+    for (x; x <= y; x += 100){
+        this.add.image(x * altScale, window.innerHeight - 105 * altScale, 'pivote2').setScale(0.5 * altScale).setOrigin(0.5, 1).depth = 1;
+    }   
+}
+
+ponerVallasObra(x,y) { //Vallas zona agujeros
+    for (x; x<= y; x+=102.5){
+        this.add.image(x * altScale, window.innerHeight - 130 * altScale, 'vallas2').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    }
 }
 
 }

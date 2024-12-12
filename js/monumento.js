@@ -12,7 +12,7 @@ export default class Monumento {
             { x: 1300, y: 180, key: 'monumento1' }, // Colón
             { x: 3800, y: 220, key: 'monumento2' }, // T.Maphre
             { x: 5430, y: 195, key: 'monumento6' }, //Pedrera
-            { x: 12000, y: 180, key: 'monumento3' }, // Sagrada Familia
+            { x: 12200, y: 180, key: 'monumento3' }, // Sagrada Familia
             { x: 16000, y: 180, key: 'monumento4' }, // Agbar
             { x: 24000, y: 130, key: 'monumento5' },
         ];
