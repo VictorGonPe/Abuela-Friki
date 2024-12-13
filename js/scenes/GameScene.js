@@ -19,7 +19,7 @@ let puntosTexto;
 let puntos = 0;
 let barraSalud;
 let salud = 100; //Salud Incial
-//let vidas = 3;
+let textoVidas;
 let haMuerto = false;
 let pastillas;
 
@@ -47,13 +47,14 @@ class GameScene extends Phaser.Scene {
     preload() {
     this.load.image('backgroundMountain', 'assets/backgroundMountain.png'); // Fondo montañoso
     this.load.image('backgroundCiudad', 'assets/backgroundCiudadCompleto.png'); // Fondo ciudad
-    this.load.image('cesped', 'assets/cesped.png'); // césped frontal
+    this.load.image('cesped', 'assets/cesped1.png'); // césped frontal
     this.load.image('suelo', 'assets/platform.png'); // Cargar suelo
     //this.load.spritesheet('abuela', 'assets/abuelaSprite2.png', { frameWidth: 294, frameHeight: 378 }); 
     //this.load.spritesheet('abuelaMovimiento','assets/abuelaSpriteSheet.png', {frameWidth: 363, frameHeight: 378});
     this.load.spritesheet('abuelaMovimiento1', 'assets/abuelaAndar.png', {frameWidth: 363,frameHeight: 378});
     this.load.spritesheet('abuelaMovimiento2', 'assets/abuelaSalto.png', {frameWidth: 363,frameHeight: 374});
     this.load.spritesheet('abuelaQuieta', 'assets/abuelaIdle.png', {frameWidth: 363,frameHeight: 378});
+    this.load.spritesheet('abuelaMuerte', 'assets/abuelaMuerte.png', {frameWidth: 363,frameHeight: 378});
     
     this.load.image('plataformasL', 'assets/plataformaBcnIzq.png'); // Cargar plataformas
     this.load.image('plataformasR', 'assets/plataformaBcnDer.png'); 
@@ -80,7 +81,7 @@ class GameScene extends Phaser.Scene {
     this.load.image('frascoGalletas', 'assets/frascoGalletas.png');
 
 
-    this.load.spritesheet('paloma', 'assets/paloma.png', {frameWidth: 370, frameHeight: 390});
+    this.load.spritesheet('paloma', 'assets/paloma1.png', {frameWidth: 370, frameHeight: 450});
     this.load.spritesheet('explosion', 'assets/explosion.png', {frameWidth: 298, frameHeight: 300});
     this.load.spritesheet('patinete', 'assets/patinete.png', {frameWidth: 313.3, frameHeight: 360});
     this.load.spritesheet('caca', 'assets/caca.png', {frameWidth: 345.5, frameHeight: 300});
@@ -159,10 +160,10 @@ class GameScene extends Phaser.Scene {
     // Fondo azul cielo que ocupa todo el nivel ________________________FONDOS___________________________________
     this.add.rectangle(0, 0, LEVEL_WIDTH, window.innerHeight, 0x42aaff).setOrigin(0, 0);
     // Fondo montañoso que se moverá lentamente
-    backgroundMountain = this.add.tileSprite(0, window.innerHeight, LEVEL_WIDTH / altScale, 1080, 'backgroundMountain').setOrigin(0, 1).setScrollFactor(0).setScale(1 * altScale);
+    backgroundMountain = this.add.tileSprite(0, window.innerHeight - 50, LEVEL_WIDTH / altScale, 1080, 'backgroundMountain').setOrigin(0, 1).setScrollFactor(0).setScale(1 * altScale);
     // Fondo de ciudad que se moverá más rápido
-    backgroundCiudad = this.add.tileSprite(0, window.innerHeight, LEVEL_WIDTH /altScale, 1080, 'backgroundCiudad').setOrigin(0, 1).setScrollFactor(0).setScale(1 * altScale);
-    backgroundCesped = this.add.tileSprite(0, window.innerHeight - (70 * altScale), LEVEL_WIDTH / altScale, 130 * altScale, 'cesped').setOrigin(0, 1);
+    backgroundCiudad = this.add.tileSprite(0, window.innerHeight - 50, LEVEL_WIDTH / altScale, 1080, 'backgroundCiudad').setOrigin(0, 1).setScrollFactor(0).setScale(1 * altScale);
+    backgroundCesped = this.add.tileSprite(0, window.innerHeight - (0 * altScale), LEVEL_WIDTH / altScale,220 * altScale, 'cesped').setOrigin(0, 1).setScale(1* altScale);
     //Instancia y creacion de monumentos
     monumentoManager = new Monumento(this, altScale); //Esta escena y la escala
     monumentoManager.crearMonumentos();
@@ -172,16 +173,16 @@ class GameScene extends Phaser.Scene {
     //__TIENDAS
     const cartelBarcelona = this.add.image(400 * altScale, window.innerHeight - 120 * altScale, 'cartelBarcelona').setScale(0.5 * altScale).setOrigin(0.5, 1);
     const quiosco1 = this.add.image(1000 * altScale, window.innerHeight - 140 * altScale, 'quiosco1').setScale(0.7 * altScale).setOrigin(0.5, 1);
-    const pescaderia1 = this.add.image(2250 * altScale, window.innerHeight - 180 * altScale, 'pescaderia1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const pescaderia1 = this.add.image(2250 * altScale, window.innerHeight - 170 * altScale, 'pescaderia1').setScale(0.57 * altScale).setOrigin(0.5, 1);
     const tiendaComic1 = this.add.image(1750 * altScale, window.innerHeight - 140 * altScale, 'tiendaComic1').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    const carniceria1 = this.add.image(3430 * altScale, window.innerHeight - 180 * altScale, 'carniceria1').setScale(0.55 * altScale).setOrigin(0.5, 1);
+    const carniceria1 = this.add.image(3430 * altScale, window.innerHeight - 170 * altScale, 'carniceria1').setScale(0.55 * altScale).setOrigin(0.5, 1);
     const panaderia1 = this.add.image(2870 * altScale, window.innerHeight - 140 * altScale, 'panaderia1').setScale(0.7 * altScale).setOrigin(0.5, 1);
-    const carpinteria1 = this.add.image(4470 * altScale, window.innerHeight - 180 * altScale, 'carpinteria1').setScale(0.55 * altScale).setOrigin(0.5, 1);
+    const carpinteria1 = this.add.image(4470 * altScale, window.innerHeight - 170 * altScale, 'carpinteria1').setScale(0.55 * altScale).setOrigin(0.5, 1);
     const badulaque1 = this.add.image(3940 * altScale, window.innerHeight - 140 * altScale, 'badulaque1').setScale(0.6 * altScale).setOrigin(0.5, 1);
     const colegio1 = this.add.image(5600 * altScale, window.innerHeight - 180 * altScale, 'colegio1').setScale(0.7 * altScale).setOrigin(0.5, 1);
     const informatica1 = this.add.image(5000 * altScale, window.innerHeight - 140 * altScale, 'informatica1').setScale(0.6 * altScale).setOrigin(0.5, 1);
     const heladeria1 = this.add.image(6100 * altScale, window.innerHeight - 120 * altScale, 'heladeria1').setScale(0.7 * altScale).setOrigin(0.5, 1);
-    const colmado1 = this.add.image(7600 * altScale, window.innerHeight - 180 * altScale, 'colmado1').setScale(0.5 * altScale).setOrigin(0.5, 1);
+    const colmado1 = this.add.image(7600 * altScale, window.innerHeight - 170 * altScale, 'colmado1').setScale(0.5 * altScale).setOrigin(0.5, 1);
     const floristeria1 = this.add.image(7100 * altScale, window.innerHeight - 120 * altScale, 'floristeria1').setScale(0.7 * altScale).setOrigin(0.5, 1);
     const carniceria2 = this.add.image(11200 * altScale, window.innerHeight - 170 * altScale, 'carniceria2').setScale(0.6 * altScale).setOrigin(0.5, 1);
     const cafeteria1 = this.add.image(10750 * altScale, window.innerHeight - 140 * altScale, 'cafeteria1').setScale(0.6 * altScale).setOrigin(0.5, 1);
@@ -205,7 +206,7 @@ class GameScene extends Phaser.Scene {
     const basura12 = this.add.image(16200 * altScale, window.innerHeight - 120 * altScale, 'basura2').setScale(0.5 * altScale).setOrigin(0.5, 1).flipX = true;
 
     //Tramo obras agujeros 21100
-    const senal1 = this.add.image(21300 * altScale, window.innerHeight - 115 * altScale, 'senal1').setScale(0.7 * altScale).setOrigin(0.5, 1);
+    const senal1 = this.add.image(21300 * altScale, window.innerHeight - 95 * altScale, 'senal1').setScale(0.7 * altScale).setOrigin(0.5, 1).depth = 1;
     this.add.image(21450 * altScale, window.innerHeight - 130 * altScale, 'carretilla1').setScale(0.5 * altScale).setOrigin(0.5, 1);
     this.add.image(21650 * altScale, window.innerHeight - 130 * altScale, 'vallas3').setScale(0.6 * altScale).setOrigin(0.5, 1);
     this.add.image(23600 * altScale, window.innerHeight - 130 * altScale, 'vallas3').setScale(0.6 * altScale).setOrigin(0.5, 1).flipX = true;
@@ -214,6 +215,8 @@ class GameScene extends Phaser.Scene {
     this.add.image(23755 * altScale, window.innerHeight - 95 * altScale, 'tierra2').setScale(0.6 * altScale).setOrigin(0.5, 1).depth = 1;
     this.add.image(21590 * altScale, window.innerHeight - 120 * altScale, 'cono3').setScale(0.6 * altScale).setOrigin(0.5, 1);
     this.add.image(23830 * altScale, window.innerHeight - 98 * altScale, 'cono2').setScale(0.6 * altScale).setOrigin(0.5, 1).depth = 1;
+
+   
     
 
    
@@ -272,7 +275,7 @@ this.plataformaDeUno(872,500);
 this.plataformaDeUno(1120,500);
 this.plataformaDeDos(1510,700,1607,700);
 this.plataformaDeDos(1903,700,2000,700);
-this.plataformaDeDos(2210,530,2307,530);
+this.plataformaDeDos(2210,505,2307,505);
 this.plataformaDeDos(8300,330,8397,330); //Plataformas Agujero
 this.plataformaDeDos(8700,560,8797,560);
 this.plataformaDeUno(9120,800);
@@ -300,8 +303,8 @@ this.plataformaGrande(14250,550);
     // __________________________________CREAR ABUELA___________________________________________
     //this.player = this.physics.add.sprite(100, 250, 'abuela').setScale(0.4);
     //this.player = this.physics.add.sprite(150 * altScale, 250 * altScale, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5,1);
-    this.player = this.physics.add.sprite(21000 * altScale, 250 * altScale, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5,1);
-    // 10500 Zona cafeteria //13500 Zona Sagrada
+    this.player = this.physics.add.sprite(2050 * altScale, 250 * altScale, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5,1);
+    // 10500 Zona cafeteria //13500 Zona Sagrada //21000 Agbar obras
     // Ajustar el cuerpo físico del jugador
     this.player.body.setSize(150, 320).setOffset(50 * altScale, 50 * altScale); // Ajusta tamaño y desplazamiento
     // Configurar físicas del jugador
@@ -343,13 +346,13 @@ this.plataformaGrande(14250,550);
         frameRate: 14,
         repeat: 0 // Sin bucle, se ejecuta una vez por salto
     });
-    /*
+    
     this.anims.create({
         key: 'muerte',
-        frames: this.anims.generateFrameNumbers('abuelaMuerte', { start: 0, end: 10 }), // Cambia los valores según tu spritesheet
-        frameRate: 15,
-        repeat: 0 // Sin bucle, se ejecuta una vez
-    });*/
+        frames: this.anims.generateFrameNumbers('abuelaMuerte', { start: 0, end: 5 }), // Cambia los valores según tu spritesheet
+        frameRate: 10,
+        repeat: -1 // Sin bucle, se ejecuta una vez
+    });
 
    
     // Instancias a la clase
@@ -361,13 +364,13 @@ this.plataformaGrande(14250,550);
     // Animación de las palomas volar
     this.anims.create({
         key: 'volar',
-        frames: this.anims.generateFrameNumbers('paloma', { start: 0, end: 5 }),
-        frameRate: 15,
+        frames: this.anims.generateFrameNumbers('paloma', { start: 0, end: 1 }),
+        frameRate: 9,
         repeat: -1 // Animación en buclecxxxxxx
     });
         
     //Creación de palomas
-    enemigosManager.crearPalomas(2);
+    enemigosManager.crearPalomas(20);
     // Crear colisión entre las palomas y la abuela
     this.physics.add.overlap(enemigosManager.palomas, this.player, this.colisionPaloma, null, this);
 
@@ -389,7 +392,7 @@ this.plataformaGrande(14250,550);
         frameRate: 6,
         repeat: -1 // Animación en bucle
     });
-    enemigosManager.crearPatinetes(2); //Crear patinetes
+    enemigosManager.crearPatinetes(20); //Crear patinetes
     // Crear colisiones entre los patinetes y el suelo
     this.physics.add.collider(enemigosManager.patinetes, platforms);
     this.physics.add.overlap(enemigosManager.patinetes, this.player, this.colisionPatinete, null, this); //overlap lanza un evento
@@ -402,15 +405,13 @@ this.plataformaGrande(14250,550);
 
     // __________________________________CACAS__________________________________________
 
-    enemigosManager.crearCacas(2); // Crear cacas
+    enemigosManager.crearCacas(40); // Crear cacas
 
     // Colisiones de cacas con el jugador usando CollisionManager
     this.physics.add.overlap(enemigosManager.cacas,this.player,collisionManager.colisionCaca.bind(collisionManager),null,this); // Manejado por CollisionManager
     this.physics.add.collider(enemigosManager.cacas, platforms);// Colisiones suelo
     //this.physics.add.overlap(enemigosManager.cacas, this.player, colisionCaca, null, this);  //detecta colisiones cacas
 
-    
-    
     // __________________________________GALLETAS__________________________________________
     // Crear un contenedor para mostrar la imagen de la galleta y el número de galletas
     galletaIcono = this.add.image(45 * altScale, 150 * altScale, 'galleta').setScale(0.2 * altScale).setScrollFactor(0);
@@ -504,7 +505,7 @@ this.plataformaGrande(14250,550);
     // Mostrar los puntos en la esquina superior izquierda
     puntosTexto = this.add.text(25  * altScale, 12  * altScale, `Puntos: ${puntos}`, {fontSize: '30px',fill: '#ffffff',fontFamily: 'Arial',}).setScrollFactor(0).setScale(0.8 * altScale); // Para que no se mueva con la cámara
     
-    indicadorVida = this.add.image(15 * altScale, 40 * altScale, 'indicadorVida').setOrigin(0,0).setScale(0.5 * altScale).setScrollFactor(0);
+    indicadorVida = this.add.image(15 * altScale, 40 * altScale, 'indicadorVida').setOrigin(0,0).setScale(0.5 * altScale).setScrollFactor(0); //Para el montje de la imagen
     
     // Crear un objeto de gráficos para la barra de salud
     barraSalud = this.add.graphics().setScrollFactor(0).setScale(1 * altScale);
@@ -517,7 +518,7 @@ this.plataformaGrande(14250,550);
     // Crear contenedor para las imágenes de las vidas
     this.vidasImagen = this.add.image(15 * altScale, 190 * altScale, 'vidaIcono').setOrigin(0,0).setScale(0.6 * altScale).setScrollFactor(0);
     // Añadir texto de "Vidas"
-    this.add.text(90 * altScale, 210 * altScale, `${this.vidas}`, {fontSize: '30px', fill: '#ffffff', fontFamily: 'Arial'}).setScrollFactor(0).setScale(0.8 * altScale);
+    this.textoVidas = this.add.text(90 * altScale, 210 * altScale, `${this.vidas}`, {fontSize: '30px', fill: '#ffffff', fontFamily: 'Arial'}).setScrollFactor(0).setScale(0.8 * altScale);
 
 
     this.anims.create({
@@ -612,38 +613,8 @@ this.plataformaGrande(14250,550);
             this.salud = 0; 
         }
 
-        //Cuando muere
-        if (this.salud <= 0 && !this.haMuerto)  {
-            this.haMuerto = true;
-            this.vidas--;
-            this.data.set('vidas', this.vidas); // Guardar vidas en `data`
-            // Desactivar controles mientras se reproduce la animación
-            this.physics.pause(); // Pausa físicas para evitar movimiento durante la animación
-            this.player.setVelocity(0); // Detener al jugador
-            //this.player.anims.play('muerte', true); // Reproducir animación de muerte
-
-            this.data.set('isSoundOn', this.isSoundOn); // Guardar el estado del sonido en `data` antes de reiniciar
-            
-                // Detener la música si está sonando
-            if (this.backgroundSound && this.backgroundSound.isPlaying) {
-                this.backgroundSound.stop();
-            }
-
-            // Reiniciar la escena después de que termine la animación
-            this.time.delayedCall(2000, () => { // Ajusta el tiempo al de la duración de la animación
-                console.log(this.vidas);
-                if(this.vidas > 0) {
-                salud = 100;
-                //puntos = 0;
-                //galletasDisponibles = 10;
-                isInvulnerable = false; // Asegurar que no quede invulnerable
-                this.physics.world.colliders.destroy();// Reinica las colisiones - no colision cacas
-                this.scene.restart(); // Reinicia la escena
-                }else{
-                    this.gameOver();
-                }
-            });
-        }
+        this.verificaMuerte();
+        
     
     }
 
@@ -704,6 +675,8 @@ colisionPaloma(player, paloma) {
     puntos += 10; // Añadir 10 puntos
     puntosTexto.setText(`Puntos: ${puntos}`);
 
+    this.verificaMuerte(); //Si llega a 0 verifica y activa animacion muerte
+
 
 }
 
@@ -742,6 +715,7 @@ colisionPatinete(player, patinete) {
         isInvulnerable = false; // Termina invulnerabilidad
         player.clearTint(); // Quitar el color
     });
+    this.verificaMuerte();
 }
 
 actualizarBarraSalud(valor) {
@@ -793,6 +767,12 @@ generarFrascosGalletas(cantidad) {
 novimientosAbuela() {
     //******* MOVIMIENTOS ********/
     if (currentControl === 'keyboard') {
+
+        // Bloquear movimientos si el jugador ha muerto
+        if (this.haMuerto) {
+            this.player.setVelocityX(0); // Detener el movimiento horizontal
+            return;
+        }
         // Controlar si el jugador está en el aire
         //console.log(this.player.body.touching.down);
         let isOnGround = this.player.body.touching.down;
@@ -1002,6 +982,46 @@ crearPivote(x,y) { //Sagrada Familia = 13450 a 16350
 ponerVallasObra(x,y) { //Vallas zona agujeros
     for (x; x<= y; x+=102.5){
         this.add.image(x * altScale, window.innerHeight - 130 * altScale, 'vallas2').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    }
+}
+
+verificaMuerte() {
+    //Cuando muere
+    if (this.salud <= 0 && !this.haMuerto)  {
+        this.haMuerto = true;
+        this.vidas--;
+        this.data.set('vidas', this.vidas); // Guardar vidas en `data` 
+
+        if (this.textoVidas) {
+            this.textoVidas.setText(`${this.vidas}`);
+        }
+        // Desactivar controles mientras se reproduce la animación
+        this.physics.pause(); // Pausa físicas para evitar movimiento durante la animación
+        this.player.setVelocity(0); // Detener al jugador
+        this.player.anims.play('muerte', true); // Reproducir animación de muerte
+
+        this.data.set('isSoundOn', this.isSoundOn); // Guardar el estado del sonido en `data` antes de reiniciar
+        
+            // Detener la música si está sonando
+        if (this.backgroundSound && this.backgroundSound.isPlaying) {
+            this.backgroundSound.stop();
+        }
+
+        // Reiniciar la escena después de que termine la animación
+        this.time.delayedCall(2000, () => { // Ajusta el tiempo al de la duración de la animación
+            console.log(`Vidas restantes: ${this.vidas}`);
+            if(this.vidas <= 0) {
+                this.textoVidas.setText(`${this.vidas}`);
+                this.gameOver();
+            }else{
+                salud = 100;
+                //puntos = 0;
+                //galletasDisponibles = 10;
+                isInvulnerable = false; // Asegurar que no quede invulnerable
+                this.physics.world.colliders.destroy();// Reinica las colisiones - no colision cacas
+                this.scene.restart(); // Reinicia la escena
+            }
+        });
     }
 }
 

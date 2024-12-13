@@ -11,49 +11,39 @@ export default class CollisionManager {
         if (this.tocandoCaca) return; // Evitar múltiples colisiones simultáneas
         this.tocandoCaca = true; // Marcar que estamos procesando una colisión
         
-        console.log('Colisión con caca detectada');
-        console.log('Player:', player);
-        console.log('Caca:', caca);
-
-        //this.hacerAbuelaInvulnerable();
-    
         // Reproducir el sonido de colisión si está activado
         if (this.scene.isSoundOn && this.scene.colisionCacaSound) {
             this.scene.colisionCacaSound.play();
         }
         // Reducir la salud del jugador
         this.scene.salud -= 15;
-        if (this.scene.salud < 0) this.scene.salud = 0;
+        if (this.scene.salud <= 0) {
+            this.salud = 0;
+            this.scene.verificaMuerte(); // Verificar si la salud llegó a cero y activar la lógica de muerte
+        } else {
+            this.scene.time.delayedCall(2000, () => {
+                this.tocandoCaca = false; // Permitir nuevas colisiones
+            });
+        }
         // Actualizar la barra de salud en pantalla
         this.scene.actualizarBarraSalud(this.scene.salud);
-    
+       /*
         // Revisar si la salud llegó a 0 para aplicar lógica de muerte
-        if (this.scene.salud <= 0) {
-            console.log('La abuela ha muerto');
-            this.scene.physics.pause(); // Detener el juego
-    
-            // Reproducir animación de muerte
-            player.anims.play('muerte', true);
-            player.setTint(0xff0000);
-    
-            // Reiniciar la escena después de un retraso
-            this.scene.time.delayedCall(2000, () => {
-                this.scene.scene.restart(); // Reiniciar el objeto escena
-            });
-        } else {
-            // Indicar visualmente que el jugador ha sido dañado
+        if (this.scene.salud > 0) {
+                     // Indicar visualmente que el jugador ha sido dañado
             player.setTint(0x964B00);
             this.scene.time.delayedCall(2000, () => {
                 player.clearTint();
                 this.tocandoCaca = false; // Permitir nuevas colisiones
             });
-        }
+        }*/
     
         // Destruir la caca
         if (caca && caca.body) {
             caca.body.enable = false;
             caca.destroy();
         }
+        
     }
     
 
@@ -80,6 +70,7 @@ export default class CollisionManager {
             patinete.removeAllListeners();
             patinete.destroy();
         }
+        this.scene.verificaMuerte(); 
     }
 
     colisionPaloma(player, paloma) {

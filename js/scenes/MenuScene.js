@@ -5,9 +5,11 @@ class MenuScene extends Phaser.Scene {
 
     preload() {
         this.load.image('menuBackground', 'assets/historia/menuBackground.png'); // Fondo del menú
+        this.load.audio('backgroundSound', 'assets/sonidos/backgroundSound.mp3');
     }
 
     create() {
+       
         // Fondo del menú
         this.add.image(this.scale.width / 2, this.scale.height / 2, 'menuBackground').setScale(1.08 *  window.innerHeight / 1080);
         const tamanio = 40 * window.innerHeight / 1080;

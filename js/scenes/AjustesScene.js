@@ -5,6 +5,7 @@ class AjustesScene extends Phaser.Scene {
 
     preload() {
         this.load.image('menuAjustes', 'assets/historia/menuAjustes.png');
+        this.load.image('backgroundMountain', 'assets/backgroundMountain.png'); // Fondo montañoso
     }
 
     create() {
@@ -102,7 +103,7 @@ class AjustesScene extends Phaser.Scene {
             this.scene.start('MenuScene');
         });
 
-        game.scale.on('resize', (gameSize) => {
+        this.game.scale.on('resize', (gameSize) => {
             const newAlturaEscala = gameSize.height / 1080;
             game.config.globalData.alturaEscala = newAlturaEscala;
             console.log(`Nueva escala global: ${newAlturaEscala}`);
