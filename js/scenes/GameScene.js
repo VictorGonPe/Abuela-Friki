@@ -853,6 +853,16 @@ gameOver() {
     this.player.setTint(0xff0000); // Cambiar color del jugador para indicar el final
     this.player.anims.stop(); // Detener cualquier animación del jugador
 
+     // Fondo negro semitransparente
+     const overlay = this.add.graphics();
+     overlay.fillStyle(0x000000, 0.7); // Color negro con 70% de opacidad
+     overlay.fillRect(
+         this.cameras.main.worldView.x,
+         this.cameras.main.worldView.y,
+         this.cameras.main.width,
+         this.cameras.main.height
+     );
+
     // Mostrar un texto de "Game Over"
     const gameOverText = this.add.text(
         this.cameras.main.worldView.x + this.cameras.main.width / 2,
@@ -892,7 +902,7 @@ gameOver() {
     if (this.backgroundSound && this.backgroundSound.isPlaying) {
         this.backgroundSound.stop();
     }
-/*
+
     // Opción de volver al menú principal (opcional)
     const menuButton = this.add.text(
         this.cameras.main.worldView.x + this.cameras.main.width / 2,
@@ -906,8 +916,14 @@ gameOver() {
     ).setOrigin(0.5).setInteractive();
 
     menuButton.on('pointerdown', () => {
+        this.vidas = 3; // Reiniciar las vidas
+        this.data.set('vidas', this.vidas); // Guardar las vidas
+        puntos = 0; // Reiniciar los puntos
+        salud = 100; // Restaurar la salud
+        galletasDisponibles = 10; // Reiniciar las galletas
+        isInvulnerable = false; // Reiniciar invulnerabilidad
         this.scene.start('MenuScene'); // Cambia a la escena del menú principal
-    });*/
+    });
 }
 
 plataformaDeUno(x, y) {

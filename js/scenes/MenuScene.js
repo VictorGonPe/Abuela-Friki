@@ -5,7 +5,7 @@ class MenuScene extends Phaser.Scene {
 
     preload() {
         this.load.image('menuBackground', 'assets/historia/menuBackground.png'); // Fondo del menú
-        this.load.audio('backgroundSound', 'assets/sonidos/backgroundSound.mp3');
+        
     }
 
     create() {
