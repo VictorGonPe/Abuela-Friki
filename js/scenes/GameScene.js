@@ -136,7 +136,7 @@ class GameScene extends Phaser.Scene {
     this.load.image('semaforo1','assets/imagenes/objetos/semaforo1.png');
 
     //__________________SONIDOS______________________
-    this.load.audio('backgroundSound', 'assets/sonidos/backgroundSound.mp3');
+    //this.load.audio('backgroundSound', 'assets/sonidos/backgroundSound.mp3');
     this.load.image('soundOn', 'assets/soundOn.png');
     this.load.image('soundOff', 'assets/soundOff.png');
     this.load.audio('abuelaSalto', 'assets/sonidos/abuelaSalto.mp3');
@@ -573,7 +573,7 @@ this.plataformaGrande(14250,550);
 
      this.backgroundSound = this.sound.add('backgroundSound', {
         loop: true,
-        volume: 0.2,
+        volume: 1,
     });
      
     // Iniciar la música si estaba encendida
