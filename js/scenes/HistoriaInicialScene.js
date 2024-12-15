@@ -31,7 +31,8 @@ class HistoriaInicialScene extends Phaser.Scene {
         textoFondo.fillRect(0, this.scale.height - 150 * window.innerHeight / 1080, this.scale.width , 180 * window.innerHeight / 1080); // Rectángulo centrado en la parte inferior
 
         // Crear texto centrado en la parte inferior
-        const texto = this.add.text(this.scale.width / 2 + 5 * window.innerHeight / 1080 , this.scale.height / 2 + 460 * window.innerHeight / 1080, '', {fontSize: tamanoFuente,color: '#ffffff', wordWrap: { width: this.scale.width - 100 },
+        const texto = this.add.text(this.scale.width / 2 + 5 * window.innerHeight / 1080 , this.scale.height / 2 + 460 * window.innerHeight / 1080, '', {fontFamily: 'Bangers',
+            padding: { left: 5, right: 5, top: 5, bottom: 5},fontSize: tamanoFuente,color: '#ffffff', wordWrap: { width: this.scale.width - 100 },
             align: 'center',
         }).setOrigin(0.5);
 

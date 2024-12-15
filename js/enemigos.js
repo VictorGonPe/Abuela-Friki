@@ -15,6 +15,7 @@ export default class Enemigos {
             const y = Phaser.Math.Between(100, this.scene.scale.height * 0.9 * this.altScale); // Altura entre 50px y la mitad de la pantalla
 
             const paloma = this.palomas.create(x, y, 'paloma').setScale(0.3 * this.altScale);
+            paloma.setDepth(1.5);
             paloma.play('volar'); // Animación de vuelo
             paloma.body.setAllowGravity(false); // Las palomas no son afectadas por la gravedad
             paloma.setVelocityX(Phaser.Math.Between(-150 * this.altScale, -500 * this.altScale)); // Velocidad inicial

@@ -17,7 +17,8 @@ class InicioScene extends Phaser.Scene {
 
         this.add.image(this.scale.width / 2, this.scale.height / 2 - 100 * window.innerHeight / 1080 , 'titulo').setScale(0.7 * window.innerHeight / 1080);
 
-        const texto = this.add.text(this.scale.width / 2,this.scale.height / 2 + 300 * window.innerHeight / 1080 ,'Presiona cualquier tecla para continuar',{ fontSize: tamanoFuente, color: '#ffffff' }).setOrigin(0.5);
+        const texto = this.add.text(this.scale.width / 2,this.scale.height / 2 + 300 * window.innerHeight / 1080 ,'Presiona cualquier tecla para continuar',{ fontSize: tamanoFuente, color: '#ffffff',fontFamily: 'Bangers',
+            padding: { left: 5, right: 5, top: 5, bottom: 5},}).setOrigin(0.5);
         const backGroundAudio = this.sound.add('backgroundSound', { loop: false });
         this.input.keyboard.on('keydown', () => {
 

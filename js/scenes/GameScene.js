@@ -303,7 +303,7 @@ this.plataformaGrande(14250,550);
     // __________________________________CREAR ABUELA___________________________________________
     //this.player = this.physics.add.sprite(100, 250, 'abuela').setScale(0.4);
     //this.player = this.physics.add.sprite(150 * altScale, 250 * altScale, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5,1);
-    this.player = this.physics.add.sprite(2050 * altScale, 250 * altScale, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5,1);
+    this.player = this.physics.add.sprite(2800 * altScale, 250 * altScale, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5,1);
     // 10500 Zona cafeteria //13500 Zona Sagrada //21000 Agbar obras
     // Ajustar el cuerpo físico del jugador
     this.player.body.setSize(150, 320).setOffset(50 * altScale, 50 * altScale); // Ajusta tamaño y desplazamiento
@@ -366,11 +366,10 @@ this.plataformaGrande(14250,550);
         key: 'volar',
         frames: this.anims.generateFrameNumbers('paloma', { start: 0, end: 1 }),
         frameRate: 9,
-        repeat: -1 // Animación en buclecxxxxxx
+        repeat: -1, // Animación en buclecxxxxxx
     });
-        
     //Creación de palomas
-    enemigosManager.crearPalomas(20);
+    enemigosManager.crearPalomas(15);
     // Crear colisión entre las palomas y la abuela
     this.physics.add.overlap(enemigosManager.palomas, this.player, this.colisionPaloma, null, this);
 
@@ -392,7 +391,7 @@ this.plataformaGrande(14250,550);
         frameRate: 6,
         repeat: -1 // Animación en bucle
     });
-    enemigosManager.crearPatinetes(20); //Crear patinetes
+    enemigosManager.crearPatinetes(5); //Crear patinetes
     // Crear colisiones entre los patinetes y el suelo
     this.physics.add.collider(enemigosManager.patinetes, platforms);
     this.physics.add.overlap(enemigosManager.patinetes, this.player, this.colisionPatinete, null, this); //overlap lanza un evento
@@ -405,7 +404,7 @@ this.plataformaGrande(14250,550);
 
     // __________________________________CACAS__________________________________________
 
-    enemigosManager.crearCacas(40); // Crear cacas
+    enemigosManager.crearCacas(5); // Crear cacas
 
     // Colisiones de cacas con el jugador usando CollisionManager
     this.physics.add.overlap(enemigosManager.cacas,this.player,collisionManager.colisionCaca.bind(collisionManager),null,this); // Manejado por CollisionManager
@@ -414,12 +413,14 @@ this.plataformaGrande(14250,550);
 
     // __________________________________GALLETAS__________________________________________
     // Crear un contenedor para mostrar la imagen de la galleta y el número de galletas
-    galletaIcono = this.add.image(45 * altScale, 150 * altScale, 'galleta').setScale(0.2 * altScale).setScrollFactor(0);
+    galletaIcono = this.add.image(45 * altScale, 150 * altScale, 'galleta').setScale(0.2 * altScale).setScrollFactor(0).setDepth(2);
     galletasTexto = this.add.text(85 * altScale, 140 * altScale, `${ galletasDisponibles}`, {
+        fontFamily: 'Bangers',
         fontSize: '30px',
         fill: '#ffffff',
-        fontFamily: 'Arial',
-    }).setScrollFactor(0).setScale(0.8 * altScale);
+        padding: { left: 5, right: 5, top: 5, bottom: 5}
+        //fontFamily: 'Arial',
+    }).setScrollFactor(0).setScale(0.8 * altScale).setDepth(2);
 
     // Crear grupo de frascos de galletas
     frascosGalletas = this.physics.add.group();
@@ -503,22 +504,22 @@ this.plataformaGrande(14250,550);
 
     // __________________________________PUNTOS, SALUD Y PASTILLAS__________________________________________
     // Mostrar los puntos en la esquina superior izquierda
-    puntosTexto = this.add.text(25  * altScale, 12  * altScale, `Puntos: ${puntos}`, {fontSize: '30px',fill: '#ffffff',fontFamily: 'Arial',}).setScrollFactor(0).setScale(0.8 * altScale); // Para que no se mueva con la cámara
+    puntosTexto = this.add.text(25  * altScale, 12  * altScale, `Puntos: ${puntos}`, {fontSize: '30px',fill: '#ffffff',fontFamily: 'Bangers', padding: { left: 5, right: 5, top: 5, bottom: 5},}).setScrollFactor(0).setScale(0.8 * altScale).setDepth(2); // Para que no se mueva con la cámara
     
-    indicadorVida = this.add.image(15 * altScale, 40 * altScale, 'indicadorVida').setOrigin(0,0).setScale(0.5 * altScale).setScrollFactor(0); //Para el montje de la imagen
+    indicadorVida = this.add.image(15 * altScale, 40 * altScale, 'indicadorVida').setOrigin(0,0).setScale(0.5 * altScale).setScrollFactor(0).setDepth(2); //Para el montje de la imagen
     
     // Crear un objeto de gráficos para la barra de salud
-    barraSalud = this.add.graphics().setScrollFactor(0).setScale(1 * altScale);
+    barraSalud = this.add.graphics().setScrollFactor(0).setScale(1 * altScale).setDepth(2);
 
-    indicadorVida2 = this.add.image(15 * altScale, 40 * altScale, 'indicadorVida2').setOrigin(0,0).setScale(0.5 * altScale).setScrollFactor(0);
+    indicadorVida2 = this.add.image(15 * altScale, 40 * altScale, 'indicadorVida2').setOrigin(0,0).setScale(0.5 * altScale).setScrollFactor(0).setDepth(2);
     
     // Dibujar la barra de salud inicial
     this.actualizarBarraSalud(this.salud);
 
     // Crear contenedor para las imágenes de las vidas
-    this.vidasImagen = this.add.image(15 * altScale, 190 * altScale, 'vidaIcono').setOrigin(0,0).setScale(0.6 * altScale).setScrollFactor(0);
+    this.vidasImagen = this.add.image(15 * altScale, 190 * altScale, 'vidaIcono').setOrigin(0,0).setScale(0.6 * altScale).setScrollFactor(0).setDepth(2);
     // Añadir texto de "Vidas"
-    this.textoVidas = this.add.text(90 * altScale, 210 * altScale, `${this.vidas}`, {fontSize: '30px', fill: '#ffffff', fontFamily: 'Arial'}).setScrollFactor(0).setScale(0.8 * altScale);
+    this.textoVidas = this.add.text(90 * altScale, 210 * altScale, `${this.vidas}`, {fontSize: '30px', fill: '#ffffff', fontFamily: 'Bangers', padding: { left: 5, right: 5, top: 5, bottom: 5}}).setScrollFactor(0).setScale(0.8 * altScale).setDepth(2);
 
 
     this.anims.create({
@@ -569,7 +570,7 @@ this.plataformaGrande(14250,550);
      .setOrigin(0.5)
      .setScrollFactor(0) // Fijo en la pantalla
      .setInteractive()
-     .setScale(0.3 * altScale);
+     .setScale(0.3 * altScale).setDepth(2);
 
       // Activar desactivar sonido
       soundButton.on('pointerdown', () => {
@@ -855,6 +856,7 @@ gameOver() {
 
      // Fondo negro semitransparente
      const overlay = this.add.graphics();
+     overlay.depth = 3;
      overlay.fillStyle(0x000000, 0.7); // Color negro con 70% de opacidad
      overlay.fillRect(
          this.cameras.main.worldView.x,
@@ -863,29 +865,48 @@ gameOver() {
          this.cameras.main.height
      );
 
+    //const tamaño = 64 * altScale;
+
     // Mostrar un texto de "Game Over"
     const gameOverText = this.add.text(
         this.cameras.main.worldView.x + this.cameras.main.width / 2,
         this.cameras.main.worldView.y + this.cameras.main.height / 2,
         'GAME OVER',
         {
-            fontSize: '64px',
+            fontSize: `${64  * altScale}px`,
             fill: '#ff0000',
-            fontFamily: 'Arial',
+            fontFamily: 'Bangers',
+            padding: { left: 5, right: 5, top: 5, bottom: 5},
         }
-    ).setOrigin(0.5);
+    ).setOrigin(0.5).setDepth(3);
+
+
 
     // Mostrar botón para reiniciar el juego
     const restartButton = this.add.text(
         this.cameras.main.worldView.x + this.cameras.main.width / 2,
-        this.cameras.main.worldView.y + this.cameras.main.height / 2 + 100,
-        'Click to Restart',
+        this.cameras.main.worldView.y + this.cameras.main.height / 2 * altScale + 100,
+        'Reiniciar',
         {
-            fontSize: '32px',
+            fontSize: `${32  * altScale}px`,
             fill: '#ffffff',
-            fontFamily: 'Arial',
+            fontFamily: 'Bangers',
+            padding: { left: 5, right: 5, top: 5, bottom: 5},
         }
-    ).setOrigin(0.5).setInteractive();
+    ).setOrigin(0.5).setInteractive().setDepth(3);
+
+    // Efecto al pasar el mouse sobre el botón
+    restartButton.on('pointerover', () => {
+        restartButton.setStyle({ color: '#FF0000' }); 
+        restartButton.setScale(1.2); // Aumenta el tamaño del texto
+    });
+    
+    // Efecto al salir del botón
+    restartButton.on('pointerout', () => {
+        restartButton.setStyle({ color: '#ffffff' }); // Vuelve al color original
+        restartButton.setScale(1); // Restaura el tamaño original
+    });
+    
 
     // Al hacer clic en el botón, reiniciar el juego
     restartButton.on('pointerdown', () => {
@@ -906,14 +927,27 @@ gameOver() {
     // Opción de volver al menú principal (opcional)
     const menuButton = this.add.text(
         this.cameras.main.worldView.x + this.cameras.main.width / 2,
-        this.cameras.main.worldView.y + this.cameras.main.height / 2 + 160,
-        'Main Menu',
+        this.cameras.main.worldView.y + this.cameras.main.height / 2 * altScale + 160,
+        'Menú Principal',
         {
-            fontSize: '32px',
+            fontSize: `${32  * altScale}px`,
             fill: '#ffffff',
-            fontFamily: 'Arial',
+            fontFamily: 'Bangers',
+            padding: { left: 5, right: 5, top: 5, bottom: 5},
         }
-    ).setOrigin(0.5).setInteractive();
+    ).setOrigin(0.5).setInteractive().setDepth(3);
+    
+    // Efecto al pasar el mouse sobre el botón
+    menuButton.on('pointerover', () => {
+        menuButton.setStyle({ color: '#FF0000' }); 
+        menuButton.setScale(1.2); // Aumenta el tamaño del texto
+    });
+    
+    // Efecto al salir del botón
+    menuButton.on('pointerout', () => {
+        menuButton.setStyle({ color: '#ffffff' }); // Vuelve al color original
+        menuButton.setScale(1); // Restaura el tamaño original
+    });
 
     menuButton.on('pointerdown', () => {
         this.vidas = 3; // Reiniciar las vidas
