@@ -64,7 +64,7 @@ class GameScene extends Phaser.Scene {
     this.load.image('monumento2', 'assets/torresMafre1.png');
     this.load.image('monumento3', 'assets/sagradaFamilia1.png');
     this.load.image('monumento4', 'assets/torreGlorias1.png');
-    this.load.image('monumento5', 'assets/tresTorres1.png');
+    this.load.image('monumento5', 'assets/arcoTriunfo.png');
     this.load.image('monumento6', 'assets/pedrera.png');
 
     this.load.image('nube1', 'assets/nube1.png', {frameWidth: 205, frameHeight: 98});
@@ -106,6 +106,13 @@ class GameScene extends Phaser.Scene {
     this.load.image('drogueria1','assets/edificios/drogueria1.png');
     this.load.image('pasteleria1','assets/edificios/pasteleria1.png');
     this.load.image('bar1','assets/edificios/bar1.png');
+    this.load.image('bloque1','assets/edificios/bloque1.png')
+    this.load.image('bloque2','assets/edificios/bloque2.png')
+    this.load.image('bloque3','assets/edificios/bloque3.png')
+    this.load.image('bloque4','assets/edificios/bloque4.png')
+    this.load.image('bloque5','assets/edificios/bloque5.png')
+    this.load.image('bloque6','assets/edificios/bloque6.png')
+    this.load.image('imserso1','assets/edificios/imserso1.png')
 
     //Objetos escenario
     this.load.image('senal1','assets/imagenes/obras/senal1.png');
@@ -189,6 +196,16 @@ class GameScene extends Phaser.Scene {
     const drogueria1 = this.add.image(12110 * altScale, window.innerHeight - 170 * altScale, 'drogueria1').setScale(0.6 * altScale).setOrigin(0.5, 1);
     const pasteleria1 = this.add.image(12600 * altScale, window.innerHeight - 140 * altScale, 'pasteleria1').setScale(0.6 * altScale).setOrigin(0.5, 1);
     const bar1 = this.add.image(11650 * altScale, window.innerHeight - 140 * altScale, 'bar1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    this.add.image(24100 * altScale, window.innerHeight - 140 * altScale, 'bloque4').setScale(0.9 * altScale).setOrigin(0.5, 1);
+    this.add.image(25580 * altScale, window.innerHeight - 140 * altScale, 'bloque2').setScale(0.9 * altScale).setOrigin(0.5, 1);
+    this.add.image(26500 * altScale, window.innerHeight - 140 * altScale, 'bloque1').setScale(0.8 * altScale).setOrigin(0.5, 1);
+    this.add.image(25300 * altScale, window.innerHeight - 140 * altScale, 'bloque6').setScale(0.5 * altScale).setOrigin(0.5, 1);
+    this.add.image(28000 * altScale, window.innerHeight - 140 * altScale, 'bloque2').setScale(0.8 * altScale).setOrigin(0.5, 1);
+    this.add.image(28780 * altScale, window.innerHeight - 140 * altScale, 'bloque3').setScale(0.8 * altScale).setOrigin(0.5, 1);
+    this.add.image(29600 * altScale, window.innerHeight - 140 * altScale, 'imserso1').setScale(0.8 * altScale).setOrigin(0.5, 1);
+   //29600 puerta de la tienda
+
+
     //__OBJETOS
     const senal2 = this.add.image(2750 * altScale, window.innerHeight - 115 * altScale, 'senal2').setScale(0.65 * altScale).setOrigin(0.5, 1);
     const vallas4 = this.add.image(8050 * altScale, window.innerHeight - 94 * altScale, 'vallas4').setScale(0.6 * altScale).setOrigin(0.5, 1).depth = 1;
@@ -303,7 +320,7 @@ this.plataformaGrande(14250,550);
     // __________________________________CREAR ABUELA___________________________________________
     //this.player = this.physics.add.sprite(100, 250, 'abuela').setScale(0.4);
     //this.player = this.physics.add.sprite(150 * altScale, 250 * altScale, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5,1);
-    this.player = this.physics.add.sprite(2800 * altScale, 250 * altScale, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5,1);
+    this.player = this.physics.add.sprite(150 * altScale, 250 * altScale, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5,1);
     // 10500 Zona cafeteria //13500 Zona Sagrada //21000 Agbar obras
     // Ajustar el cuerpo físico del jugador
     this.player.body.setSize(150, 320).setOffset(50 * altScale, 50 * altScale); // Ajusta tamaño y desplazamiento
@@ -391,7 +408,7 @@ this.plataformaGrande(14250,550);
         frameRate: 6,
         repeat: -1 // Animación en bucle
     });
-    enemigosManager.crearPatinetes(5); //Crear patinetes
+    enemigosManager.crearPatinetes(20); //Crear patinetes
     // Crear colisiones entre los patinetes y el suelo
     this.physics.add.collider(enemigosManager.patinetes, platforms);
     this.physics.add.overlap(enemigosManager.patinetes, this.player, this.colisionPatinete, null, this); //overlap lanza un evento
@@ -599,6 +616,7 @@ this.plataformaGrande(14250,550);
 
 
     this.actualizarBarraSalud = this.actualizarBarraSalud.bind(this);//Hace que la barra de salud este disponible en cualquier lugar de la escena
+    this.nivelCompletado = false;
     }
 
     //________________________________UPDATE__________________________________
@@ -608,6 +626,13 @@ this.plataformaGrande(14250,550);
         this.novimientosAbuela();  
         this.updateParallax(); //Controla desplazamientos, fondos, monumentos, enemigos, etc.
         //this.updateMovingPlatforms();
+
+
+        if (this.player.x >= 29600 * altScale && !this.nivelCompletado) {
+            this.nivelCompletado = true; // Asegurarte de que esto ocurra solo una vez
+            this.nivel1Completado(); // Llama a la función que maneja el fin del nivel
+        }
+        
 
         const limiteInferior = this.scale.height - 10; // Ajusta este valor según el diseño del nivel
         if (this.player.y > limiteInferior) {
@@ -633,7 +658,7 @@ colisionPaloma(player, paloma) {
     }
 
     this.salud -= 10; // Reducir la salud
-    if (this.salud < 0) salud = 0; // Asegurar que no sea negativa
+    if (this.salud < 0) this.salud = 0; // Asegurar que no sea negativa
     this.actualizarBarraSalud(this.salud); // Actualizar la barra de salud
 
     // Crear la animación de explosión en la posición de la paloma
@@ -740,8 +765,8 @@ actualizarBarraSalud(valor) {
 recogerPastilla(player, pastilla) {
     console.log('¡Has recogido una pastilla!');
     // Subir salud, pero no más de 100
-    salud = Math.min(this.salud + 20, 100);
-    this.actualizarBarraSalud(salud);
+    this.salud = Math.min(this.salud + 20, 100);
+    this.actualizarBarraSalud(this.salud);
     pastilla.destroy();
 
 }
@@ -1074,6 +1099,88 @@ verificaMuerte() {
         });
     }
 }
+
+nivel1Completado() {
+    // Pausar el juego
+    this.physics.pause();
+    // Detener cualquier animación activa de la abuela
+    this.player.anims.stop();
+    // Tween para hacer que la abuela desaparezca gradualmente
+    this.tweens.add({
+        targets: this.player, // realizarlo a player
+        alpha: 0, // Cambiar la opacidad a 0
+        duration: 1500, // Duración del efecto en milisegundos (1.5 segundos)
+        onComplete: () => {
+            this.player.setVisible(false); // Esconder el sprite después del tween
+            this.sound.stopAll();
+            this.cacaSaltoSound.stop();
+        
+            this.mostrarPantallaVictoria();
+        }
+    });
+
+
+
+}
+
+mostrarPantallaVictoria() {
+
+
+    // Fondo negro semitransparente
+    const overlay = this.add.graphics();
+    overlay.fillStyle(0x000000, 0.7); // Negro con 70% de opacidad
+    overlay.fillRect(
+        this.cameras.main.worldView.x,
+        this.cameras.main.worldView.y,
+        this.cameras.main.width,
+        this.cameras.main.height
+    );
+
+    // Mensaje de nivel completado
+    const message = this.add.text(
+        this.cameras.main.worldView.x + this.cameras.main.width / 2,
+        this.cameras.main.worldView.y + this.cameras.main.height / 2 - 50,
+        '¡Has pasado el nivel!\nViajando al siguiente destino.\n\n - En construcción -',
+        {
+            fontSize: '32px',
+            fill: '#ffffff',
+            fontFamily: 'Bangers',
+            padding: { left: 5, right: 5, top: 5, bottom: 5},
+            align: 'center',
+        }
+    ).setOrigin(0.5).setDepth(10);
+
+    // Botón para ir al menú principal
+    const menuButton = this.add.text(
+        this.cameras.main.worldView.x + this.cameras.main.width / 2,
+        this.cameras.main.worldView.y + this.cameras.main.height / 2 + 100,
+        'Ir al Menú',
+        {
+            fontSize: '36px',
+            fontFamily: 'Bangers',
+            backgroundColor: '#000000',
+            padding: { left: 10, right: 15, top: 10, bottom: 15},
+        }
+    ).setOrigin(0.5).setInteractive().setDepth(10);
+
+     // Efecto al pasar el mouse sobre el botón
+     menuButton.on('pointerover', () => {
+        menuButton.setStyle({ color: '#FF0000' }); 
+        menuButton.setScale(1.2); // Aumenta el tamaño del texto
+    });
+    
+    // Efecto al salir del botón
+    menuButton.on('pointerout', () => {
+        menuButton.setStyle({ color: '#ffffff' }); // Vuelve al color original
+        menuButton.setScale(1); // Restaura el tamaño original
+    });
+
+    menuButton.on('pointerdown', () => {
+        this.scene.start('MenuScene'); // Cambiar a la escena del menú principal
+    });
+
+} 
+
 
 }
 

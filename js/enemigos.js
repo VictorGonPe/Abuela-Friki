@@ -12,7 +12,7 @@ export default class Enemigos {
         this.palomas = this.scene.physics.add.group();
         for (let i = 0; i < cantidad; i++) {
             const x = Phaser.Math.Between(this.scene.scale.width, this.scene.physics.world.bounds.width);
-            const y = Phaser.Math.Between(100, this.scene.scale.height * 0.9 * this.altScale); // Altura entre 50px y la mitad de la pantalla
+            const y = Phaser.Math.Between(100, this.scene.scale.height * 0.8 * this.altScale); // Altura entre 50px y la mitad de la pantalla
 
             const paloma = this.palomas.create(x, y, 'paloma').setScale(0.3 * this.altScale);
             paloma.setDepth(1.5);
@@ -29,7 +29,7 @@ export default class Enemigos {
     actualizarPalomas(scrollX) {
         // Reposicionar palomas si salen de la pantalla
         this.palomas.getChildren().forEach(paloma => {
-            if (paloma.x < scrollX - 500) { // Si sale por el lado izquierdo de la cámara
+            if (paloma.x < scrollX - 500|| paloma.y < scrollY ) { // Si sale por el lado izquierdo de la cámara
                 paloma.x = scrollX + this.scene.scale.width + 50; // Reposicionar fuera del lado derecho
                 paloma.y = Phaser.Math.Between(50, this.scene.scale.height * 0.7); // Nueva altura aleatoria
                 paloma.setVelocityX(Phaser.Math.Between(-150 * this.altScale, -400 * this.altScale)); // Nueva velocidad
@@ -37,28 +37,44 @@ export default class Enemigos {
         });
     }
 
-    crearPatinetes(cantidad) {
+    crearPatinetes(cantidadInicial) {
         this.patinetes = this.scene.physics.add.group();
-        for (let i = 0; i < cantidad; i++) {
-            const x = Phaser.Math.Between(this.scene.scale.width, this.scene.physics.world.bounds.width);
-            const y = this.scene.scale.height - 300 * this.altScale; // Altura fija cercana al suelo
     
-            const patinete = this.patinetes.create(x, y, 'patinete').setScale(0.45 * this.altScale);
-            patinete.play('moverPatinete');
-            patinete.body.setAllowGravity(true); // gravedad
-            patinete.setVelocityX(Phaser.Math.Between(-100 * this.altScale, -500 * this.altScale)); // Velocidad inicial
-            patinete.body.setSize(patinete.width * 0.8, patinete.height * 0.7).setOffset(patinete.width * 0.1, patinete.height * 0.25); // Reduce el tamaño para colisiones
-            
+        // Generar patinetes iniciales
+        for (let i = 0; i < cantidadInicial; i++) {
+            this.generarPatinete();
         }
-        this.enemigos.push({ tipo: 'patinetes', grupo: this.patinetes }); // Guardar referencia en el array de enemigos
+    
+        // Evento para generar nuevos patinetes periódicamente
+        this.scene.time.addEvent({
+            delay: Phaser.Math.Between(20000, 40000), // Intervalo aleatorio entre 20 y 40 segundos
+            loop: true, // Hacer que el evento se repita
+            callback: () => {
+                this.generarPatinete(); // Crear un nuevo patinete
+            },
+        });
+    
+        // Guardar referencia al grupo en el array de enemigos
+        this.enemigos.push({ tipo: 'patinetes', grupo: this.patinetes });
+    }
+    
+    generarPatinete() {
+        const x = Phaser.Math.Between(this.scene.cameras.main.scrollX + this.scene.cameras.main.width, this.scene.physics.world.bounds.width); // Posición inicial fuera de la pantalla
+        const y = this.scene.scale.height - 300 * this.altScale; // Altura fija cercana al suelo
+    
+        const patinete = this.patinetes.create(x, y, 'patinete').setScale(0.45 * this.altScale);
+        patinete.play('moverPatinete');
+        patinete.body.setAllowGravity(true); // Activar gravedad
+        patinete.setVelocityX(Phaser.Math.Between(-100 * this.altScale, -500 * this.altScale)); // Velocidad inicial
+        patinete.body.setSize(patinete.width * 0.8, patinete.height * 0.7).setOffset(patinete.width * 0.1, patinete.height * 0.25); // Ajustar colisión
     }
     
 
     actualizarPatinetes(scrollX) {
         this.patinetes.getChildren().forEach(patinete => {
             // Si el patinete sale del borde izquierdo, reposicionarlo
-            if (patinete.x < scrollX - 650) {
-                patinete.x = scrollX + this.scene.scale.width + 50; // Reposicionar a la derecha
+            if (patinete.x < scrollX - 50) {
+                patinete.x = scrollX + this.scene.scale.width + 550; // Reposicionar a la derecha
                 patinete.setVelocityX(Phaser.Math.Between(-100 * this.altScale, -500 * this.altScale)); // Nueva velocidad
             }
         });

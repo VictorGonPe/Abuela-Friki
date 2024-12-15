@@ -18,7 +18,7 @@ export default class CollisionManager {
         // Reducir la salud del jugador
         this.scene.salud -= 15;
         if (this.scene.salud <= 0) {
-            this.salud = 0;
+            this.scene.salud = 0;
             this.scene.verificaMuerte(); // Verificar si la salud llegó a cero y activar la lógica de muerte
         } else {
             this.scene.time.delayedCall(2000, () => {
