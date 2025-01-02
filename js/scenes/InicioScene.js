@@ -6,7 +6,7 @@ class InicioScene extends Phaser.Scene {
 
     preload() {
         this.load.image('titulo', 'assets/titulo.png');
-        this.load.audio('backgroundSound', 'assets/sonidos/pruebaBackground.wav');
+        this.load.audio('backgroundSound', 'assets/sonidos/pruebaBackground.mp3');
     }
 
     create() {
@@ -27,7 +27,7 @@ class InicioScene extends Phaser.Scene {
             this.soundIsOn = true; //Hace que no se duplique el sonido al picar mas veces
             // Reproducir audio de fondo
             backGroundAudio.play()
-            backGroundAudio.Volume = 1;
+            backGroundAudio.Volume = 0.6;
             
             this.time.delayedCall(1400, () => {
                 backGroundAudio.stop(); 

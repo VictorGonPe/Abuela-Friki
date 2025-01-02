@@ -5,9 +5,6 @@
  * Descripción: Desarrollo Abuela Friki
  * Derechos de autor (c) 2024, Víctor González Pérez
 */
-//import Monumento from './monumento.js';
-//import Enemigos from './enemigos.js';
-//import CollisionManager from './collisionManager.js';
 
 import InicioScene from './scenes/InicioScene.js';
 import GameScene from './scenes/GameScene.js';

@@ -34,6 +34,16 @@ let jumpSound, cacaSaltoSound, colisionCacaSound, abuelaGolpeSound, choquePatine
 let cogerGalletasSound, lanzarGalletaSound;
 let gritoPajaros = [];
 
+let isTransformed = false;
+let dobleSalto = false;
+let saltosRestantes = 2; // saltos que puede realizar 
+let saltando = false; // Para evitar saltos múltiples al mantener pulsada la tecla
+
+let barraTransformacion; // barra de energía
+let tiempoTransformacion = 60000; 
+let transformacionRestante = tiempoTransformacion; // Tiempo restante en milisegundos
+
+
 const LEVEL_WIDTH = 30000 * altScale; // Ancho total del nivel
 
 
@@ -55,6 +65,14 @@ class GameScene extends Phaser.Scene {
     this.load.spritesheet('abuelaMovimiento2', 'assets/abuelaSalto.png', {frameWidth: 363,frameHeight: 374});
     this.load.spritesheet('abuelaQuieta', 'assets/abuelaIdle.png', {frameWidth: 363,frameHeight: 378});
     this.load.spritesheet('abuelaMuerte', 'assets/abuelaMuerte.png', {frameWidth: 363,frameHeight: 378});
+
+    
+    this.load.spritesheet('abuelaTWukong', 'assets/abuelaTWukong.png', {frameWidth: 452,frameHeight: 610});
+    this.load.spritesheet('abuelaMov1Wukong', 'assets/abuelaAndarWukongPrueba.png', {frameWidth: 362,frameHeight: 470});
+    this.load.spritesheet('abuelaQuietaWukong', 'assets/abuelaIdleWukong.png', {frameWidth: 450,frameHeight: 470});
+    this.load.spritesheet('abuelaMov2Wukong', 'assets/abuelaSaltoWukong.png', {frameWidth: 450,frameHeight: 470});
+
+    this.load.image('particulas','assets/particulas.png');
     
     this.load.image('plataformasL', 'assets/plataformaBcnIzq.png'); // Cargar plataformas
     this.load.image('plataformasR', 'assets/plataformaBcnDer.png'); 
@@ -75,10 +93,11 @@ class GameScene extends Phaser.Scene {
     this.load.image('indicadorVida2', 'assets/indicadorVida2.png');
     this.load.image('vidaIcono', 'assets/vidaIcono.png'); //imagen para las vidas
 
-
+    //OBJETOS-----
     this.load.spritesheet('paracetamol', 'assets/paracetamol.png', {frameWidth: 550, frameHeight: 520});
     this.load.image('galleta', 'assets/galleta.png');
     this.load.image('frascoGalletas', 'assets/frascoGalletas.png');
+    this.load.spritesheet('lunaWukong', 'assets/lunaWukong.png', {frameWidth: 420, frameHeight: 390});
 
 
     this.load.spritesheet('paloma', 'assets/paloma1.png', {frameWidth: 370, frameHeight: 450});
@@ -115,28 +134,28 @@ class GameScene extends Phaser.Scene {
     this.load.image('imserso1','assets/edificios/imserso1.png')
 
     //Objetos escenario
-    this.load.image('senal1','assets/imagenes/obras/senal1.png');
-    this.load.image('senal2','assets/imagenes/obras/senal2.png');
-    this.load.image('senal3','assets/imagenes/obras/senal3.png');
-    this.load.image('cono1','assets/imagenes/obras/cono1.png');
-    this.load.image('cono2','assets/imagenes/obras/cono2.png');
-    this.load.image('cono3','assets/imagenes/obras/cono3.png');
-    this.load.image('vallas2','assets/imagenes/obras/vallas2.png');
-    this.load.image('vallas3','assets/imagenes/obras/vallas3.png');
-    this.load.image('vallas4','assets/imagenes/obras/vallas4.png');
-    this.load.image('tierra1','assets/imagenes/obras/tierra1.png');
-    this.load.image('tierra2','assets/imagenes/obras/tierra2.png');
-    this.load.image('carretilla1','assets/imagenes/obras/carretilla1.png');
+    this.load.image('senal1','assets/senal1.png');
+    this.load.image('senal2','assets/senal2.png');
+    this.load.image('senal3','assets/senal3.png');
+    this.load.image('cono1','assets/cono1.png');
+    this.load.image('cono2','assets/cono2.png');
+    this.load.image('cono3','assets/cono3.png');
+    this.load.image('vallas2','assets/vallas2.png');
+    this.load.image('vallas3','assets/vallas3.png');
+    this.load.image('vallas4','assets/vallas4.png');
+    this.load.image('tierra1','assets/tierra1.png');
+    this.load.image('tierra2','assets/tierra2.png');
+    this.load.image('carretilla1','assets/carretilla1.png');
 
-    this.load.image('pivote2','assets/imagenes/objetos/pivote2.png');
-    this.load.image('basura1','assets/imagenes/objetos/basura1.png');
-    this.load.image('basura2','assets/imagenes/objetos/basura2.png');
-    this.load.image('buzon1','assets/imagenes/objetos/buzon1.png');
-    this.load.image('bocaIncendios1','assets/imagenes/objetos/bocaIncendios1.png');
-    this.load.image('semaforo1','assets/imagenes/objetos/semaforo1.png');
+    this.load.image('pivote2','assets/pivote2.png');
+    this.load.image('basura1','assets/basura1.png');
+    this.load.image('basura2','assets/basura2.png');
+    this.load.image('buzon1','assets/buzon1.png');
+    this.load.image('bocaIncendios1','assets/bocaIncendios1.png');
+    this.load.image('semaforo1','assets/semaforo1.png');
 
     //__________________SONIDOS______________________
-    //this.load.audio('backgroundSound', 'assets/sonidos/backgroundSound.mp3');
+    this.load.audio('backgroundSound', 'assets/sonidos/pruebaBackground.mp3');
     this.load.image('soundOn', 'assets/soundOn.png');
     this.load.image('soundOff', 'assets/soundOff.png');
     this.load.audio('abuelaSalto', 'assets/sonidos/abuelaSalto.mp3');
@@ -152,7 +171,7 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
-    console.log(this.textures.list);
+
         //____________________________CREATE__________________________________________________________________________________________
     // Definir el tamaño del mundo del juego y de la camara
     this.physics.world.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
@@ -235,9 +254,6 @@ class GameScene extends Phaser.Scene {
 
    
     
-
-   
-
 
     // Crear grupo de plataformas, incluido el suelo__________________SUELOS_______________________________
     platforms = this.physics.add.staticGroup();
@@ -333,7 +349,6 @@ this.plataformaGrande(14250,550);
     // Hacer que la cámara siga al jugador
     this.cameras.main.startFollow(this.player);
 
-    
 
     // Anims: propiedad de phaser para animar. Animaciones de la abuela
     this.anims.create({
@@ -369,6 +384,38 @@ this.plataformaGrande(14250,550);
         frames: this.anims.generateFrameNumbers('abuelaMuerte', { start: 0, end: 5 }), // Cambia los valores según tu spritesheet
         frameRate: 10,
         repeat: -1 // Sin bucle, se ejecuta una vez
+    });
+
+    // Animaciones de la transformación
+    this.anims.create({
+        key: 'transformWukong',
+        frames: this.anims.generateFrameNumbers('abuelaTWukong', { start: 0, end: 8 }),
+        frameRate: 8,
+        repeat: 0
+    });
+
+    // Crear la animación de idle (quieta) en la forma transformada
+    this.anims.create({
+        key: 'idleWukong',
+        frames: this.anims.generateFrameNumbers('abuelaQuietaWukong', { start: 0, end: 12 }),
+        frameRate: 4,
+        repeat: -1
+    });
+
+    // Crear la animación de andar en la forma transformada
+    this.anims.create({
+        key: 'walkWukong',
+        frames: this.anims.generateFrameNumbers('abuelaMov1Wukong', { start: 0, end: 20 }),
+        frameRate: 30,
+        repeat: -1
+    });
+
+    // Crear la animación de andar en la forma transformada
+    this.anims.create({
+        key: 'jumpWukong',
+        frames: this.anims.generateFrameNumbers('abuelaMov2Wukong', { start: 0, end: 6 }),
+        frameRate: 14,
+        repeat: 0
     });
 
    
@@ -518,8 +565,25 @@ this.plataformaGrande(14250,550);
         }
     };
  
+    //____________________________LUNA_WUKONG___________________________
+    // Crear un grupo de físicas para el objeto lunaWukong
+    this.lunasWukong = this.physics.add.group({
+        allowGravity: true, // Permitir gravedad
+        bounceY: 0.5,       // Rebote ligero si cae
+        collideWorldBounds: true // Evitar que salga del mundo
+    });
 
-    // __________________________________PUNTOS, SALUD Y PASTILLAS__________________________________________
+    // Posicionar una lunaWukong en una coordenada específica
+    this.crearLunaWukong(400); 
+
+    // Recoger objeto
+    this.physics.add.overlap(this.player, this.lunasWukong, this.recogerLunaWukong, null, this);
+
+    // Colisiones plataformas
+    this.physics.add.collider(this.lunasWukong, platforms);
+
+
+    // __________________________________PUNTOS, SALUD, PASTILLAS y TRANSFORMACIÓN__________________________________________
     // Mostrar los puntos en la esquina superior izquierda
     puntosTexto = this.add.text(25  * altScale, 12  * altScale, `Puntos: ${puntos}`, {fontSize: '30px',fill: '#ffffff',fontFamily: 'Bangers', padding: { left: 5, right: 5, top: 5, bottom: 5},}).setScrollFactor(0).setScale(0.8 * altScale).setDepth(2); // Para que no se mueva con la cámara
     
@@ -546,7 +610,7 @@ this.plataformaGrande(14250,550);
         repeat: -1 // Animación en bucle
     });
 
-    // Crear grupo de pastillas
+    // Crear grupo de pastillas___________________________________________
     pastillas = this.physics.add.group();
 
     this.generarPastillas(3); // Genera 3 pastillas en posiciones aleatorias
@@ -564,6 +628,20 @@ this.plataformaGrande(14250,550);
     valla = this.add.image(5744 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
     valla = this.add.image(5852 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
 
+    //BARRA TRANSFORMACIÓN------------------------------------
+    /*
+    // Crear la barra de transformación debajo de la barra de vida
+    barraTransformacion = this.add.graphics().setScrollFactor(0).setScale(1 * altScale).setDepth(2);
+
+    // Dibujar el fondo de la barra
+    barraTransformacion.fillStyle(0x000000); // Fondo negro
+    barraTransformacion.fillRect(80, 95, 140, 25); // Justo debajo de la barra de salud
+
+    // Dibujar la barra azul inicial
+    barraTransformacion.fillStyle(0x0000ff); // Azul
+    barraTransformacion.fillRect(80, 95, 140, 25);
+*/
+
 
      //__________________________SONIDOS___________________ 
     //Crear al final para tener todas las variables asociadas definidas
@@ -573,7 +651,7 @@ this.plataformaGrande(14250,550);
 
      this.backgroundSound = this.sound.add('backgroundSound', {
         loop: true,
-        volume: 1,
+        volume: 0.3,
     });
      
     // Iniciar la música si estaba encendida
@@ -623,9 +701,15 @@ this.plataformaGrande(14250,550);
     update() {
     
        
-        this.novimientosAbuela();  
+        this.movimientosAbuela();  
         this.updateParallax(); //Controla desplazamientos, fondos, monumentos, enemigos, etc.
         //this.updateMovingPlatforms();
+
+        
+        // Restablecer el doble salto cuando toque el suelo
+        if (this.player.body.touching.down) {
+            dobleSalto = false;
+        }
 
 
         if (this.player.x >= 29600 * altScale && !this.nivelCompletado) {
@@ -640,12 +724,43 @@ this.plataformaGrande(14250,550);
         }
 
         this.verificaMuerte();
+
+        //Reduce el tiempo y actualiza la barra__________________________________________
+        if (isTransformed) {
+            transformacionRestante -= this.game.loop.delta; // Reducir tiempo basado en el delta
+            if (transformacionRestante <= 0) {
+                transformacionRestante = 0;
+                this.revertirTransformacion(); // Revertir transformación cuando se acabe el tiempo
+            }
+        
+            // Calcular el ancho actual de la barra basado en el tiempo restante
+            const anchoBarra = (140 * transformacionRestante) / tiempoTransformacion;
+
+            if (isTransformed) {
+                transformacionRestante -= this.game.loop.delta; // Reducir tiempo restante
+                if (transformacionRestante <= 0) {
+                    transformacionRestante = 0;
+                    this.revertirTransformacion(); // Revertir cuando el tiempo se acabe
+                }
+        
+                this.dibujarBarraTransformacion(); // Actualizar la barra en cada frame
+            }
+        /*
+            // Actualizar la barra
+            barraTransformacion.clear();
+            barraTransformacion.fillStyle(0x000000); // Fondo negro
+            barraTransformacion.fillRect(80, 95, 140, 25); // Fondo
+        
+            barraTransformacion.fillStyle(0x0000ff); // Azul
+            barraTransformacion.fillRect(80, 95, anchoBarra, 25); // Progreso
+            */
+        }
         
     
     }
 
 
-//___________________________________METODOS_________________________________
+//___________________________________METODOS GAME_________________________________
 
 colisionPaloma(player, paloma) {
 
@@ -790,59 +905,94 @@ generarFrascosGalletas(cantidad) {
     }
 }
 
-novimientosAbuela() {
+movimientosAbuela() {
     //******* MOVIMIENTOS ********/
     if (currentControl === 'keyboard') {
 
-        // Bloquear movimientos si el jugador ha muerto
-        if (this.haMuerto) {
+        // Bloquear movimientos si el jugador ha muerto o está transformándose
+        if (this.haMuerto || this.isTransforming) {
             this.player.setVelocityX(0); // Detener el movimiento horizontal
             return;
         }
-        // Controlar si el jugador está en el aire
-        //console.log(this.player.body.touching.down);
+
+        // Controlar si el jugador está en el suelo
         let isOnGround = this.player.body.touching.down;
+
+        // Si toca el suelo, restablecer los saltos restantes (Doble Salto)
+        if (isOnGround) {
+            saltosRestantes = 2;
+            saltando = false; // Reiniciar estado de salto
+            dobleSalto = false; // Restablecer estado de doble salto
+        }
 
         // ABUELA -- Movimiento horizontal
         if (cursors.left.isDown) {
             this.player.setVelocityX(-300 * altScale);
-            if (isOnGround) this.player.anims.play('left', true);
+            if (isOnGround) this.player.anims.play(isTransformed ? 'walkWukong' : 'left', true);
             this.player.flipX = true;
-            //console.log('Mira a la izquierda');
-            this.player.body.setOffset(150, 50); // Al hacer el flipX es necesario jugar con los offset para centrar cuerpo físico
         } else if (cursors.right.isDown) {
             this.player.setVelocityX(300 * altScale);
-            if (isOnGround) this.player.anims.play('right', true);
+            if (isOnGround) this.player.anims.play(isTransformed ? 'walkWukong' : 'right', true);
             this.player.flipX = false;
-            this.player.body.setOffset(50, 50);
         } else {
             this.player.setVelocityX(0);
-            if (isOnGround) this.player.anims.play('abuelaIdle', true); // Animación de reposo si está en el suelo
-            if (this.player.flipX == true){  //Mira izquierda o derecha
-                this.player.body.setOffset(150, 50);
-            }else{
-                this.player.body.setOffset(50, 50);
+            // Animación idle según el estado de transformación
+            if (isOnGround) {
+                this.player.anims.play(isTransformed ? 'idleWukong' : 'abuelaIdle', true);
             }
         }
 
-        // ABUELA -- Salto 
-        if (cursors.up.isDown && isOnGround) {
-            this.player.setVelocityY(-700  * altScale);
-            this.player.anims.play('jump'); // Reproducir animación de salto una vez
-            this.player.body.setOffset(150, 50);
-            if (this.isSoundOn) { // Reproducir el sonido de salto si el sonido está activado
-                console.log('sonido activado');
-                this.jumpSound.play();
+        // Lógica de salto
+        if (Phaser.Input.Keyboard.JustDown(cursors.up) || (!saltando && cursors.up.isDown)) {
+            if (isOnGround) {
+                // Salto normal
+                this.player.setVelocityY(-700 * altScale);
+                this.player.anims.play(isTransformed ? 'jumpWukong' : 'jump', true);
+                saltosRestantes--; // Reducir los saltos restantes
+                saltando = true; // Marcar que el personaje está saltando
+            } else if (isTransformed && saltosRestantes > 0) {
+                // Doble salto solo en estado transformado
+                this.player.setVelocityY(-900 * altScale);
+                this.player.anims.play('jumpWukong', true);
+
+                // Efectos visuales o sonoros
+                const emisorParticulas = this.add.particles('particulas').createEmitter({
+                    x: this.player.x,
+                    y: this.player.y,
+                    speed: { min: -100, max: 100 },
+                    lifespan: 500,
+                    quantity: 1,
+                    scale: { start: 1, end: 0 }, // Las partículas se hacen más pequeñas
+                    
+                }).setScale(0.3 * altScale);
+
+                // Hacer que las partículas sigan al jugador
+                emisorParticulas.startFollow(this.player);
+
+                // Configurar para que el emisor dure solo un instante
+                this.time.delayedCall(1000, () => {
+                    emisorParticulas.stop(); // Detener emisión de partículas
+                    emisorParticulas.manager.destroy(); // Eliminar el sistema de partículas para liberar memoria
+                });
+
+                saltosRestantes--; // Reducir saltos restantes
             }
         }
-        
+
+        // Detectar cuando se suelta la tecla de salto para reiniciar el estado de salto
+        if (Phaser.Input.Keyboard.JustUp(cursors.up)) {
+            saltando = false;
+        }
+
         // ABUELA -- Lanzar galleta
         if (Phaser.Input.Keyboard.JustDown(this.keys.lanzarGalleta)) {
             this.lanzarGalleta(); // Lógica para lanzar galleta
         }
-        
     }
-}   
+}
+
+
+
 
 updateParallax() {
     // Fondos parallax
@@ -1065,7 +1215,10 @@ verificaMuerte() {
     if (this.salud <= 0 && !this.haMuerto)  {
         this.haMuerto = true;
         this.vidas--;
+        isTransformed = false; // Volver a estado normal
         this.data.set('vidas', this.vidas); // Guardar vidas en `data` 
+        //Restarua el cuerpo físico si viene de Wukong
+        this.player.body.setSize(150, 320).setOffset(50 * altScale, 50 * altScale);
 
         if (this.textoVidas) {
             this.textoVidas.setText(`${this.vidas}`);
@@ -1180,6 +1333,112 @@ mostrarPantallaVictoria() {
     });
 
 } 
+
+crearLunaWukong(x) {
+    // Crear la luna en la posición `x` y una posición temporal en `y`
+    const luna = this.lunasWukong.create(x * altScale, window.innerHeight - 200 * altScale, 'lunaWukong')
+        .setScale(0.15  * altScale)
+        .setBounce(0.5);
+
+    // Ajustar la posición `y` para que esté sobre una plataforma o el suelo
+    luna.body.setSize(300, 300); // Ajustar el cuerpo físico si es necesario
+    luna.body.allowGravity = true; // Habilitar gravedad
+    luna.setInteractive();
+
+    // Reproducir animación (si existe)
+    this.anims.create({
+        key: 'brillarLunaWukong',
+        frames: this.anims.generateFrameNumbers('lunaWukong', { start: 0, end: 5 }), // Ajusta los frames disponibles
+        frameRate: 8,
+        repeat: -1
+    });
+    luna.play('brillarLunaWukong');
+
+    console.log(`Luna Wukong creada en X: ${x}`);
+}
+
+
+recogerLunaWukong(player, luna) {
+    luna.destroy(); // Eliminar la luna
+
+    if (!isTransformed) {
+        isTransformed = true; // Controlar el estado de transformación
+        this.isTransforming = true; // Indicar que la transformación está en curso
+        transformacionRestante = tiempoTransformacion; // Reiniciar el tiempo de transformación
+
+         // Crear la barra de transformación al recoger la luna
+         if (!barraTransformacion) {
+            barraTransformacion = this.add.graphics().setScrollFactor(0).setDepth(2);
+        }
+
+        this.dibujarBarraTransformacion();
+
+        this.physics.pause(); // Pausar la física de toda la escena
+        this.input.enabled = false; // Deshabilitar las entradas mientras ocurre la transformación
+
+        this.player.play('transformWukong'); // Llama a la animación
+
+        this.player.once('animationcomplete', (anim) => {
+            if (anim.key === 'transformWukong') {
+                this.player.setOrigin(0.5, 1); // Asegúrate de que el origen sea coherente
+                
+                this.player.play('idleWukong', true); // Cambiar a idleWukong manualmente
+                this.player.body.setOffset(140 * altScale ,130 * altScale);
+                //player.body.setSize(150 * altScale, 300 * altScale).setOffset(140 * altScale, 130 * altScale);
+
+                this.isTransforming = false; // Finalizar transformación
+                this.physics.resume(); // Reanudar la física
+                this.input.enabled = true; // Reanudar las entradas
+            }
+        });
+        /*
+        // En caso de problemas con el evento
+        this.time.delayedCall(3000, () => {
+            if (this.isTransforming) {
+                console.log(" Forzando a 'idleWukong' tras transformación.");
+                player.play('idleWukong', true);
+                player.body.setSize(150, 320).setOffset(50 * altScale, 50 * altScale);
+                this.isTransforming = false;
+                this.physics.resume();
+                this.input.enabled = true;
+            }
+        });*/
+    }
+}
+
+revertirTransformacion() {
+    isTransformed = false; // Cambiar el estado a la abuela normal
+
+    // Cambiar el sprite y animación de vuelta a la abuela normal
+    this.player.setTexture('abuelaMovimiento1');
+    this.player.play('abuelaIdle');
+
+    // Restablecer el cuerpo físico
+    this.player.body.setSize(150, 320).setOffset(50 * altScale, 50 * altScale);
+
+    // Eliminar la barra de transformación
+    barraTransformacion.clear();
+
+    transformacionRestante = tiempoTransformacion; // Reiniciar el tiempo
+}
+
+dibujarBarraTransformacion() {
+    //const x = this.vidasImagen.x + this.vidasImagen.displayWidth / 2 + 10; // Centrada bajo la imagen de vidas
+    const x = 15 * altScale;
+    const y = 265 * altScale;
+
+    const anchoBarra = (180 * transformacionRestante) / tiempoTransformacion;
+
+    barraTransformacion.clear();
+    // Fondo negro
+    barraTransformacion.fillStyle(0x000000);
+    barraTransformacion.fillRect(x, y, 180, 25);
+
+    // Barra azul
+    barraTransformacion.fillStyle(0x0000ff);
+    barraTransformacion.fillRect(x, y, anchoBarra, 25);
+}
+
 
 
 }
