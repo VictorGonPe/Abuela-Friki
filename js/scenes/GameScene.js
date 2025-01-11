@@ -40,7 +40,7 @@ let saltosRestantes = 2; // saltos que puede realizar
 let saltando = false; // Para evitar saltos múltiples al mantener pulsada la tecla
 
 let barraTransformacion; // barra de energía
-let tiempoTransformacion = 60000; 
+let tiempoTransformacion = 10000; 
 let transformacionRestante = tiempoTransformacion; // Tiempo restante en milisegundos
 
 
@@ -334,12 +334,11 @@ this.plataformaGrande(14250,550);
    
 
     // __________________________________CREAR ABUELA___________________________________________
-    //this.player = this.physics.add.sprite(100, 250, 'abuela').setScale(0.4);
-    //this.player = this.physics.add.sprite(150 * altScale, 250 * altScale, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5,1);
-    this.player = this.physics.add.sprite(150 * altScale, 250 * altScale, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5,1);
+
+    this.player = this.physics.add.sprite(130, 320, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5 * altScale,1 * altScale);
     // 10500 Zona cafeteria //13500 Zona Sagrada //21000 Agbar obras
     // Ajustar el cuerpo físico del jugador
-    this.player.body.setSize(150, 320).setOffset(50 * altScale, 50 * altScale); // Ajusta tamaño y desplazamiento
+    this.player.body.setSize(130, 320).setOffset(50 * altScale, 50 * altScale); // Ajusta tamaño y desplazamiento
     // Configurar físicas del jugador
     this.player.setBounce(0.2);
     this.player.setCollideWorldBounds(true); //Evita que se salgo de los limites del escenario
@@ -483,7 +482,7 @@ this.plataformaGrande(14250,550);
         fontSize: '30px',
         fill: '#ffffff',
         padding: { left: 5, right: 5, top: 5, bottom: 5}
-        //fontFamily: 'Arial',
+        //fontFamily: 'Arial',xx
     }).setScrollFactor(0).setScale(0.8 * altScale).setDepth(2);
 
     // Crear grupo de frascos de galletas
@@ -544,7 +543,7 @@ this.plataformaGrande(14250,550);
 
     this.lanzarGalleta = () => {
         if (galletasDisponibles > 0) {
-            const galleta = this.galletas.create(this.player.x, this.player.y - 45 * altScale, 'galleta').setScale(0.15 * altScale);
+            const galleta = this.galletas.create(this.player.x, this.player.y - 85 * altScale, 'galleta').setScale(0.15 * altScale);
             galleta.setVelocityX(this.player.flipX ? -800 * altScale : 800 * altScale); // Dirección según la orientación del jugador
             galleta.body.allowGravity = false; // Desactivar gravedad de la galleta
 
@@ -651,7 +650,7 @@ this.plataformaGrande(14250,550);
 
      this.backgroundSound = this.sound.add('backgroundSound', {
         loop: true,
-        volume: 0.3,
+        volume: 0.2,
     });
      
     // Iniciar la música si estaba encendida
@@ -725,39 +724,25 @@ this.plataformaGrande(14250,550);
 
         this.verificaMuerte();
 
-        //Reduce el tiempo y actualiza la barra__________________________________________
-        if (isTransformed) {
-            transformacionRestante -= this.game.loop.delta; // Reducir tiempo basado en el delta
-            if (transformacionRestante <= 0) {
-                transformacionRestante = 0;
-                this.revertirTransformacion(); // Revertir transformación cuando se acabe el tiempo
-            }
-        
             // Calcular el ancho actual de la barra basado en el tiempo restante
-            const anchoBarra = (140 * transformacionRestante) / tiempoTransformacion;
+            //const anchoBarra = (140 * transformacionRestante) / tiempoTransformacion;
 
-            if (isTransformed) {
-                transformacionRestante -= this.game.loop.delta; // Reducir tiempo restante
+            if (isTransformed && barraTransformacion) {
+                transformacionRestante -= this.game.loop.delta; // Reducir tiempo segun frames
                 if (transformacionRestante <= 0) {
                     transformacionRestante = 0;
                     this.revertirTransformacion(); // Revertir cuando el tiempo se acabe
                 }
         
-                this.dibujarBarraTransformacion(); // Actualizar la barra en cada frame
+                // Verificar si la barra existe antes de intentar dibujarla
+                if (barraTransformacion) {
+                    this.dibujarBarraTransformacion();
+                }
             }
-        /*
-            // Actualizar la barra
-            barraTransformacion.clear();
-            barraTransformacion.fillStyle(0x000000); // Fondo negro
-            barraTransformacion.fillRect(80, 95, 140, 25); // Fondo
-        
-            barraTransformacion.fillStyle(0x0000ff); // Azul
-            barraTransformacion.fillRect(80, 95, anchoBarra, 25); // Progreso
-            */
-        }
+    }
         
     
-    }
+    
 
 
 //___________________________________METODOS GAME_________________________________
@@ -928,18 +913,27 @@ movimientosAbuela() {
         // ABUELA -- Movimiento horizontal
         if (cursors.left.isDown) {
             this.player.setVelocityX(-300 * altScale);
-            if (isOnGround) this.player.anims.play(isTransformed ? 'walkWukong' : 'left', true);
+            if (isOnGround) this.player.anims.play(isTransformed ? 'walkWukong' : 'left', true); // Alterna entre las anim..
             this.player.flipX = true;
+            if(!isTransformed) {
+                this.player.body.setOffset(180, 50); //Compensa el desplazamiento del cuerpo físico abuela Normal ,al no ser centro img
+            }
         } else if (cursors.right.isDown) {
             this.player.setVelocityX(300 * altScale);
             if (isOnGround) this.player.anims.play(isTransformed ? 'walkWukong' : 'right', true);
             this.player.flipX = false;
+            if(!isTransformed) {
+                this.player.body.setOffset(50 ,50);
+            }
+   
         } else {
             this.player.setVelocityX(0);
             // Animación idle según el estado de transformación
             if (isOnGround) {
                 this.player.anims.play(isTransformed ? 'idleWukong' : 'abuelaIdle', true);
+
             }
+
         }
 
         // Lógica de salto
@@ -1360,6 +1354,7 @@ crearLunaWukong(x) {
 
 recogerLunaWukong(player, luna) {
     luna.destroy(); // Eliminar la luna
+    this.player.body.setSize(130 * altScale, 150 * altScale).setOffset(100 * altScale, 100 * altScale);
 
     if (!isTransformed) {
         isTransformed = true; // Controlar el estado de transformación
@@ -1367,42 +1362,32 @@ recogerLunaWukong(player, luna) {
         transformacionRestante = tiempoTransformacion; // Reiniciar el tiempo de transformación
 
          // Crear la barra de transformación al recoger la luna
-         if (!barraTransformacion) {
-            barraTransformacion = this.add.graphics().setScrollFactor(0).setDepth(2);
-        }
+        barraTransformacion = this.add.graphics().setScrollFactor(0).setDepth(2);
+
 
         this.dibujarBarraTransformacion();
 
         this.physics.pause(); // Pausar la física de toda la escena
         this.input.enabled = false; // Deshabilitar las entradas mientras ocurre la transformación
 
+        
         this.player.play('transformWukong'); // Llama a la animación
+        
 
         this.player.once('animationcomplete', (anim) => {
             if (anim.key === 'transformWukong') {
-                this.player.setOrigin(0.5, 1); // Asegúrate de que el origen sea coherente
-                
                 this.player.play('idleWukong', true); // Cambiar a idleWukong manualmente
-                this.player.body.setOffset(140 * altScale ,130 * altScale);
-                //player.body.setSize(150 * altScale, 300 * altScale).setOffset(140 * altScale, 130 * altScale);
-
+                if (this.isTransforming == true) {
+                    //this.player.body.setOffset(140 * altScale ,80 * altScale);
+                    this.player.body.setSize(130, 320).setOffset(150 * altScale, 150 * altScale);
+                }
+                
+                //this.player.body.setSize(150 * altScale, 250 * altScale).setOffset(100 * altScale, 110 * altScale);
                 this.isTransforming = false; // Finalizar transformación
                 this.physics.resume(); // Reanudar la física
                 this.input.enabled = true; // Reanudar las entradas
             }
         });
-        /*
-        // En caso de problemas con el evento
-        this.time.delayedCall(3000, () => {
-            if (this.isTransforming) {
-                console.log(" Forzando a 'idleWukong' tras transformación.");
-                player.play('idleWukong', true);
-                player.body.setSize(150, 320).setOffset(50 * altScale, 50 * altScale);
-                this.isTransforming = false;
-                this.physics.resume();
-                this.input.enabled = true;
-            }
-        });*/
     }
 }
 
@@ -1412,12 +1397,13 @@ revertirTransformacion() {
     // Cambiar el sprite y animación de vuelta a la abuela normal
     this.player.setTexture('abuelaMovimiento1');
     this.player.play('abuelaIdle');
-
+    
     // Restablecer el cuerpo físico
-    this.player.body.setSize(150, 320).setOffset(50 * altScale, 50 * altScale);
+    this.player.body.setSize(130, 320).setOffset(50 * altScale, 50 * altScale);
 
     // Eliminar la barra de transformación
     barraTransformacion.clear();
+    barraTransformacion = null; // Eliminar referencia de la memoria
 
     transformacionRestante = tiempoTransformacion; // Reiniciar el tiempo
 }

@@ -19,15 +19,23 @@ class InicioScene extends Phaser.Scene {
 
         const texto = this.add.text(this.scale.width / 2,this.scale.height / 2 + 300 * window.innerHeight / 1080 ,'Presiona cualquier tecla para continuar',{ fontSize: tamanoFuente, color: '#ffffff',fontFamily: 'Bangers',
             padding: { left: 5, right: 5, top: 5, bottom: 5},}).setOrigin(0.5);
-        const backGroundAudio = this.sound.add('backgroundSound', { loop: false });
+        //const backGroundAudio = this.sound.add('backgroundSound', { loop: false });
+
+        const backGroundAudio = this.sound.add('backgroundSound', {
+            loop: true,
+            volume: 0.2,
+            loop: false ,
+        });
+
         this.input.keyboard.on('keydown', () => {
 
             if (this.soundIsOn) return; //salir si suena
 
             this.soundIsOn = true; //Hace que no se duplique el sonido al picar mas veces
             // Reproducir audio de fondo
-            backGroundAudio.play()
-            backGroundAudio.Volume = 0.6;
+            //backGroundAudio.Volume = 1;
+            backGroundAudio.play();
+            
             
             this.time.delayedCall(1400, () => {
                 backGroundAudio.stop(); 
