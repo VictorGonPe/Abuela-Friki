@@ -11,6 +11,7 @@ import GameScene from './scenes/GameScene.js';
 import HistoriaInicialScene from './scenes/HistoriaInicialScene.js';
 import MenuScene from './scenes/MenuScene.js';
 import AjustesScene from './scenes/AjustesScene.js';
+import ControlesScene from './scenes/ControlesScene.js';
 
 
 
@@ -27,7 +28,7 @@ var config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 980 * window.innerHeight / 1080}, // gravedad de la tierra * por la escala de la pantalla
-            debug: true  // Activar el modo de depuración para ver colisiones y límites
+            debug: false   // Activar el modo de depuración para ver colisiones y límites
         }
     },
     /*
@@ -36,7 +37,7 @@ var config = {
     }
     */
    //Especie de máquina de estados
-    scene: [InicioScene, HistoriaInicialScene, MenuScene, GameScene, AjustesScene],
+    scene: [InicioScene, HistoriaInicialScene, MenuScene, ControlesScene, GameScene, AjustesScene],
 };
 
 

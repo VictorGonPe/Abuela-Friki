@@ -32,6 +32,7 @@ let soundButton; // Referencia al botón
 let isSoundOn; // Estado inicial del sonido
 let jumpSound, cacaSaltoSound, colisionCacaSound, abuelaGolpeSound, choquePatineteSound;
 let cogerGalletasSound, lanzarGalletaSound;
+let gritoTransformacion;
 let gritoPajaros = [];
 
 let isTransformed = false;
@@ -40,7 +41,7 @@ let saltosRestantes = 2; // saltos que puede realizar
 let saltando = false; // Para evitar saltos múltiples al mantener pulsada la tecla
 
 let barraTransformacion; // barra de energía
-let tiempoTransformacion = 10000; 
+let tiempoTransformacion = 60000; 
 let transformacionRestante = tiempoTransformacion; // Tiempo restante en milisegundos
 
 
@@ -167,6 +168,7 @@ class GameScene extends Phaser.Scene {
     this.load.audio('lanzarGalleta', 'assets/sonidos/lanzarGalleta.wav');
     this.load.audio('gritoPajaro1', 'assets/sonidos/gritoPajaro1.wav');
     this.load.audio('gritoPajaro2', 'assets/sonidos/gritoPajaro2.wav');
+    this.load.audio('gritoTransformacion', 'assets/sonidos/scream2.mp3');
 
     }
 
@@ -573,7 +575,7 @@ this.plataformaGrande(14250,550);
     });
 
     // Posicionar una lunaWukong en una coordenada específica
-    this.crearLunaWukong(400); 
+    this.crearLunaWukong(14000); 
 
     // Recoger objeto
     this.physics.add.overlap(this.player, this.lunasWukong, this.recogerLunaWukong, null, this);
@@ -641,7 +643,7 @@ this.plataformaGrande(14250,550);
     barraTransformacion.fillRect(80, 95, 140, 25);
 */
 
-
+ 
      //__________________________SONIDOS___________________ 
     //Crear al final para tener todas las variables asociadas definidas
     // Recuperar el estado del sonido por defecto "data".
@@ -650,7 +652,7 @@ this.plataformaGrande(14250,550);
 
      this.backgroundSound = this.sound.add('backgroundSound', {
         loop: true,
-        volume: 0.2,
+        volume: 0.15,
     });
      
     // Iniciar la música si estaba encendida
@@ -687,9 +689,10 @@ this.plataformaGrande(14250,550);
     this.colisionCacaSound = this.sound.add('colisionCacaAsco', { volume: 0.3 });
     this.abuelaGolpeSound = this.sound.add('abuelaGolpe', { volume: 0.3 });
     this.choquePatineteSound = this.sound.add('choquePatinete', { volume: 1 });
-    this.cogerGalletasSound = this.sound.add('cogerGalletas', { volume: 0.5 });
+    this.cogerGalletasSound = this.sound.add('cogerGalletas', { volume: 0.7 });
     this.lanzarGalletaSound = this.sound.add('lanzarGalleta', { volume: 0.3 });
     this.gritoPajaros = [this.sound.add('gritoPajaro1', { volume: 0.5 }), this.sound.add('gritoPajaro2', { volume: 0.5 })];
+    this.gritoTransformacion = this.sound.add('gritoTransformacion', {volume: 0.5});
 
 
     this.actualizarBarraSalud = this.actualizarBarraSalud.bind(this);//Hace que la barra de salud este disponible en cualquier lugar de la escena
@@ -940,12 +943,14 @@ movimientosAbuela() {
         if (Phaser.Input.Keyboard.JustDown(cursors.up) || (!saltando && cursors.up.isDown)) {
             if (isOnGround) {
                 // Salto normal
+                this.jumpSound.play();
                 this.player.setVelocityY(-700 * altScale);
                 this.player.anims.play(isTransformed ? 'jumpWukong' : 'jump', true);
                 saltosRestantes--; // Reducir los saltos restantes
                 saltando = true; // Marcar que el personaje está saltando
             } else if (isTransformed && saltosRestantes > 0) {
                 // Doble salto solo en estado transformado
+                this.jumpSound.play();
                 this.player.setVelocityY(-900 * altScale);
                 this.player.anims.play('jumpWukong', true);
 
@@ -1348,13 +1353,14 @@ crearLunaWukong(x) {
     });
     luna.play('brillarLunaWukong');
 
-    console.log(`Luna Wukong creada en X: ${x}`);
+    //console.log(`Luna Wukong creada en X: ${x}`);
 }
 
 
 recogerLunaWukong(player, luna) {
     luna.destroy(); // Eliminar la luna
     this.player.body.setSize(130 * altScale, 150 * altScale).setOffset(100 * altScale, 100 * altScale);
+    this.gritoTransformacion.play();
 
     if (!isTransformed) {
         isTransformed = true; // Controlar el estado de transformación

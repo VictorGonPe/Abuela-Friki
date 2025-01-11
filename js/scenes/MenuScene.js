@@ -69,7 +69,7 @@ class MenuScene extends Phaser.Scene {
 
 
         // Acciones de los botones
-        startButton.on('pointerdown', () => this.scene.start('GameScene')); // Cambia a la escena del juego
+        startButton.on('pointerdown', () => this.scene.start('ControlesScene')); // Cambia a la escena del juego
         settingsButton.on('pointerdown', () => this.scene.start('AjustesScene')); // Cambia a ajustes
     }
 }
