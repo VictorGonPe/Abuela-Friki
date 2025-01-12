@@ -166,6 +166,7 @@ class GameScene extends Phaser.Scene {
     this.load.audio('choquePatinete', 'assets/sonidos/lauraPatinete2.mp3');
     this.load.audio('cogerGalletas', 'assets/sonidos/cogerGalletas.mp3');
     this.load.audio('lanzarGalleta', 'assets/sonidos/lanzarGalleta.wav');
+    this.load.audio('gritoPatinete', 'assets/sonidos/gritoPatinete.wav');
     this.load.audio('gritoPajaro1', 'assets/sonidos/gritoPajaro1.wav');
     this.load.audio('gritoPajaro2', 'assets/sonidos/gritoPajaro2.wav');
     this.load.audio('gritoTransformacion', 'assets/sonidos/scream2.mp3');
@@ -466,6 +467,7 @@ this.plataformaGrande(14250,550);
     if (this.sys.game.device.input.touch) {
         createTouchControls(this);
     }
+    this.gritoPatineteSound = this.sound.add('gritoPatinete', { volume: 0.5 });
 
     // __________________________________CACAS__________________________________________
 
@@ -541,6 +543,11 @@ this.plataformaGrande(14250,550);
     this.physics.add.overlap(this.galletas, enemigosManager.patinetes, (galleta, patinete) => {
         galleta.destroy(); // Elimina la galleta
         patinete.destroy(); // Elimina el patinete
+        // Reproducir sonido de grito al destruir un patinete
+        if (this.isSoundOn && this.gritoPatineteSound) {
+            this.gritoPatineteSound.play();
+        }
+        
     }); 
 
     this.lanzarGalleta = () => {

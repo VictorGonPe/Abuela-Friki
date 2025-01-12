@@ -113,9 +113,9 @@ class AjustesScene extends Phaser.Scene {
         this.scale.on('resize', () => this.redimensionarElementos());
     }
 
-    /**
-     * Método para redimensionar elementos al cambiar tamaño de pantalla
-     */
+    
+    // Método para redimensionar elementos al cambiar tamaño de pantalla
+     
     redimensionarElementos() {
         const newWidth = this.scale.width;
         const newHeight = this.scale.height;
