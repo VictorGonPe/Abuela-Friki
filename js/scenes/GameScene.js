@@ -44,6 +44,8 @@ let barraTransformacion; // barra de energía
 let tiempoTransformacion = 60000; 
 let transformacionRestante = tiempoTransformacion; // Tiempo restante en milisegundos
 
+let alturaSuelo;
+let sueloAltura = 50 * altScale;
 
 const LEVEL_WIDTH = 30000 * altScale; // Ancho total del nivel
 
@@ -58,7 +60,7 @@ class GameScene extends Phaser.Scene {
     preload() {
     this.load.image('backgroundMountain', 'assets/backgroundMountain.png'); // Fondo montañoso
     this.load.image('backgroundCiudad', 'assets/backgroundCiudadCompleto.png'); // Fondo ciudad
-    this.load.image('cesped', 'assets/cesped1.png'); // césped frontal
+    this.load.image('cesped', 'assets/cesped2.png'); // césped frontal
     this.load.image('suelo', 'assets/platform.png'); // Cargar suelo
     //this.load.spritesheet('abuela', 'assets/abuelaSprite2.png', { frameWidth: 294, frameHeight: 378 }); 
     //this.load.spritesheet('abuelaMovimiento','assets/abuelaSpriteSheet.png', {frameWidth: 363, frameHeight: 378});
@@ -185,14 +187,29 @@ class GameScene extends Phaser.Scene {
     this.vidas = this.data.get('vidas') !== undefined ? this.data.get('vidas') : 3;
     this.haMuerto = false;
 
+    this.add.rectangle(0, 0, LEVEL_WIDTH, this.scale.height, 0xFFCC00)
+    .setOrigin(0, 0)
+    .setAlpha(0.2) // Establecer opacidad al 30%
+    .setDepth(0.5); // Ajustar profundidad
+
 
     // Fondo azul cielo que ocupa todo el nivel ________________________FONDOS___________________________________
     this.add.rectangle(0, 0, LEVEL_WIDTH, window.innerHeight, 0x42aaff).setOrigin(0, 0);
     // Fondo montañoso que se moverá lentamente
-    backgroundMountain = this.add.tileSprite(0, window.innerHeight - 50, LEVEL_WIDTH / altScale, 1080, 'backgroundMountain').setOrigin(0, 1).setScrollFactor(0).setScale(1 * altScale);
+    backgroundMountain = this.add.tileSprite(0, window.innerHeight - (40 * altScale), LEVEL_WIDTH / altScale, 1080, 'backgroundMountain').setOrigin(0, 1).setScrollFactor(0).setScale(1 * altScale);
     // Fondo de ciudad que se moverá más rápido
-    backgroundCiudad = this.add.tileSprite(0, window.innerHeight - 50, LEVEL_WIDTH / altScale, 1080, 'backgroundCiudad').setOrigin(0, 1).setScrollFactor(0).setScale(1 * altScale);
-    backgroundCesped = this.add.tileSprite(0, window.innerHeight - (0 * altScale), LEVEL_WIDTH / altScale,220 * altScale, 'cesped').setOrigin(0, 1).setScale(1* altScale);
+    backgroundCiudad = this.add.tileSprite(0, window.innerHeight - (40 * altScale), LEVEL_WIDTH / altScale, 1080, 'backgroundCiudad').setOrigin(0, 1).setScrollFactor(0).setScale(1 * altScale);
+    backgroundCesped = this.add.tileSprite(
+    0, 
+    window.innerHeight - (40 * altScale), // Altura total del lienzo
+    LEVEL_WIDTH / altScale, // Ancho del sprite
+    1080,  // Ajustar la altura al fondo disponible
+    'cesped' 
+    )
+    .setOrigin(0, 1) // Anclar en la parte inferior
+    .setScale(1 * altScale);
+
+    
     //Instancia y creacion de monumentos
     monumentoManager = new Monumento(this, altScale); //Esta escena y la escala
     monumentoManager.crearMonumentos();
@@ -230,14 +247,13 @@ class GameScene extends Phaser.Scene {
 
     //__OBJETOS
     const senal2 = this.add.image(2750 * altScale, window.innerHeight - 115 * altScale, 'senal2').setScale(0.65 * altScale).setOrigin(0.5, 1);
-    const vallas4 = this.add.image(8050 * altScale, window.innerHeight - 94 * altScale, 'vallas4').setScale(0.6 * altScale).setOrigin(0.5, 1).depth = 1;
+    const vallas4 = this.add.image(8050 * altScale, window.innerHeight - 94 * altScale, 'vallas4').setScale(0.6 * altScale).setOrigin(0.5, 1).setDepth(1.5);
     const cono1 = this.add.image(7960 * altScale, window.innerHeight - 120 * altScale, 'cono1').setScale(0.6 * altScale).setOrigin(0.5, 1);
     const semaforo1 = this.add.image(10250 * altScale, window.innerHeight - 115 * altScale, 'semaforo1').setScale(0.6 * altScale).setOrigin(0.5, 1);
 
     const buzon1 = this.add.image(10400 * altScale, window.innerHeight - 120 * altScale, 'buzon1').setScale(0.7 * altScale).setOrigin(0.5, 1).flipX = true;
-    this.tierra1 = this.add.image(12980 * altScale, window.innerHeight - 90 * altScale, 'tierra1').setScale(0.5 * altScale).setOrigin(0.5, 1);
+    this.tierra1 = this.add.image(12980 * altScale, window.innerHeight - 90 * altScale, 'tierra1').setScale(0.5 * altScale).setOrigin(0.5, 1).setDepth(1.5);
     this.tierra1.flipX = true
-    this.tierra1.depth = 1;
 
     this.crearPivote(13450,16350); //Sagrada Familia = 13450 a 16350
     const bocaIncendios1 = this.add.image(14400 * altScale, window.innerHeight - 140 * altScale, 'bocaIncendios1').setScale(0.5 * altScale).setOrigin(0.5, 1);
@@ -245,15 +261,15 @@ class GameScene extends Phaser.Scene {
     const basura12 = this.add.image(16200 * altScale, window.innerHeight - 120 * altScale, 'basura2').setScale(0.5 * altScale).setOrigin(0.5, 1).flipX = true;
 
     //Tramo obras agujeros 21100
-    const senal1 = this.add.image(21300 * altScale, window.innerHeight - 95 * altScale, 'senal1').setScale(0.7 * altScale).setOrigin(0.5, 1).depth = 1;
+    const senal1 = this.add.image(21300 * altScale, window.innerHeight - 95 * altScale, 'senal1').setScale(0.7 * altScale).setOrigin(0.5, 1).setDepth(1.5);
     this.add.image(21450 * altScale, window.innerHeight - 130 * altScale, 'carretilla1').setScale(0.5 * altScale).setOrigin(0.5, 1);
     this.add.image(21650 * altScale, window.innerHeight - 130 * altScale, 'vallas3').setScale(0.6 * altScale).setOrigin(0.5, 1);
     this.add.image(23600 * altScale, window.innerHeight - 130 * altScale, 'vallas3').setScale(0.6 * altScale).setOrigin(0.5, 1).flipX = true;
     this.ponerVallasObra(21750,23500);
     this.add.image(23700 * altScale, window.innerHeight - 110 * altScale, 'senal3').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    this.add.image(23755 * altScale, window.innerHeight - 95 * altScale, 'tierra2').setScale(0.6 * altScale).setOrigin(0.5, 1).depth = 1;
+    this.add.image(23755 * altScale, window.innerHeight - 95 * altScale, 'tierra2').setScale(0.6 * altScale).setOrigin(0.5, 1).setDepth(1.5);
     this.add.image(21590 * altScale, window.innerHeight - 120 * altScale, 'cono3').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    this.add.image(23830 * altScale, window.innerHeight - 98 * altScale, 'cono2').setScale(0.6 * altScale).setOrigin(0.5, 1).depth = 1;
+    this.add.image(23830 * altScale, window.innerHeight - 98 * altScale, 'cono2').setScale(0.6 * altScale).setOrigin(0.5, 1).setDepth(1.5);
 
    
     
@@ -296,9 +312,10 @@ bloquesYHuecos.forEach((bloque) => {
         // Creo bloque de suelo usando los valores de "x" y "ancho" escalados AltScale
         platforms.create(
             bloque.x * altScale + (bloque.ancho * altScale) / 2, // Centrar el bloque en su posición escalada
-            window.innerHeight - 50 * altScale, // Altura ajustada
+            alturaSuelo = window.innerHeight - 50 * altScale, // Altura ajustada
             'suelo'
         )
+        
         .setDisplaySize(bloque.ancho * altScale, 140 * altScale) // Ajustar tamaño del bloque
         .refreshBody();
     }
@@ -338,7 +355,7 @@ this.plataformaGrande(14250,550);
 
     // __________________________________CREAR ABUELA___________________________________________
 
-    this.player = this.physics.add.sprite(130, 320, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5 * altScale,1 * altScale);
+    this.player = this.physics.add.sprite(130, 320, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5 * altScale,1 * altScale).setDepth(1);
     // 10500 Zona cafeteria //13500 Zona Sagrada //21000 Agbar obras
     // Ajustar el cuerpo físico del jugador
     this.player.body.setSize(130, 320).setOffset(50 * altScale, 50 * altScale); // Ajusta tamaño y desplazamiento
@@ -552,7 +569,10 @@ this.plataformaGrande(14250,550);
 
     this.lanzarGalleta = () => {
         if (galletasDisponibles > 0) {
-            const galleta = this.galletas.create(this.player.x, this.player.y - 85 * altScale, 'galleta').setScale(0.15 * altScale);
+
+            if (window.innerHeight < 1000) this.player.setOrigin(0.5, 1);
+
+            const galleta = this.galletas.create(this.player.x, this.player.y - this.player.displayHeight / 2, 'galleta').setScale(0.15 * altScale);
             galleta.setVelocityX(this.player.flipX ? -800 * altScale : 800 * altScale); // Dirección según la orientación del jugador
             galleta.body.allowGravity = false; // Desactivar gravedad de la galleta
 
@@ -578,11 +598,12 @@ this.plataformaGrande(14250,550);
     this.lunasWukong = this.physics.add.group({
         allowGravity: true, // Permitir gravedad
         bounceY: 0.5,       // Rebote ligero si cae
-        collideWorldBounds: true // Evitar que salga del mundo
+        collideWorldBounds: true, // Evitar que salga del mundo
+        setDepth: 1
     });
 
     // Posicionar una lunaWukong en una coordenada específica
-    this.crearLunaWukong(14000); 
+    this.crearLunaWukong(400); 
 
     // Recoger objeto
     this.physics.add.overlap(this.player, this.lunasWukong, this.recogerLunaWukong, null, this);
@@ -628,13 +649,13 @@ this.plataformaGrande(14250,550);
     this.physics.add.overlap(this.player, pastillas, this.recogerPastilla, null, this); //abuela recoje pastilla
 
        
-    let valla = this.add.image(5504 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1); //Colegio
-    valla = this.add.image(5312 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
-    valla = this.add.image(5420 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
-    valla = this.add.image(5528 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
-    valla = this.add.image(5636 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
-    valla = this.add.image(5744 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
-    valla = this.add.image(5852 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1);
+    let valla = this.add.image(5504 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5); //Colegio
+    valla = this.add.image(5312 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
+    valla = this.add.image(5420 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
+    valla = this.add.image(5528 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
+    valla = this.add.image(5636 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
+    valla = this.add.image(5744 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
+    valla = this.add.image(5852 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
 
     //BARRA TRANSFORMACIÓN------------------------------------
     /*
@@ -885,7 +906,7 @@ generarPastillas(cantidad) {
     for (let i = 0; i < cantidad; i++) {
         const x = Phaser.Math.Between(100, LEVEL_WIDTH - 100);
         const y = Phaser.Math.Between(100, window.innerHeight - 200);
-        const pastilla = pastillas.create(x, y, 'paracetamol').setScale(0.1 * altScale).setBounce(0.5);
+        const pastilla = pastillas.create(x, y, 'paracetamol').setScale(0.1 * altScale).setBounce(0.5).setDepth(1);
         //pastilla.body.setAllowGravity(false);
         pastilla.play('brillarParacetamol'); // Reproducir la animación
     }
@@ -1206,7 +1227,7 @@ colisionPlataformas() {
 
 crearPivote(x,y) { //Sagrada Familia = 13450 a 16350
     for (x; x <= y; x += 100){
-        this.add.image(x * altScale, window.innerHeight - 105 * altScale, 'pivote2').setScale(0.5 * altScale).setOrigin(0.5, 1).depth = 1;
+        this.add.image(x * altScale, window.innerHeight - 105 * altScale, 'pivote2').setScale(0.5 * altScale).setOrigin(0.5, 1).setDepth(1.1);
     }   
 }
 

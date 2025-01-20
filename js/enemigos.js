@@ -62,7 +62,7 @@ export default class Enemigos {
         const x = Phaser.Math.Between(this.scene.cameras.main.scrollX + this.scene.cameras.main.width, this.scene.physics.world.bounds.width); // Posición inicial fuera de la pantalla
         const y = this.scene.scale.height - 300 * this.altScale; // Altura fija cercana al suelo
     
-        const patinete = this.patinetes.create(x, y, 'patinete').setScale(0.45 * this.altScale);
+        const patinete = this.patinetes.create(x, y, 'patinete').setScale(0.45 * this.altScale).setDepth(1);
         patinete.play('moverPatinete');
         patinete.body.setAllowGravity(true); // Activar gravedad
         patinete.setVelocityX(Phaser.Math.Between(-100 * this.altScale, -500 * this.altScale)); // Velocidad inicial
@@ -88,7 +88,7 @@ export default class Enemigos {
             const x = Phaser.Math.Between(this.scene.scale.width, this.scene.physics.world.bounds.width -3000);
             const y = this.scene.scale.height - 400 * this.altScale; // Posición inicial cercana al suelo
     
-            const caca = this.cacas.create(x, y, 'caca').setScale(0.2 * this.altScale);
+            const caca = this.cacas.create(x, y, 'caca').setScale(0.2 * this.altScale).setDepth(1);
             caca.body.setAllowGravity(true); 
             caca.setBounce(0.2); // Rebote suave al tocar el suelo
             caca.body.setSize(caca.width * 0.8, caca.height * 0.8).setOffset(caca.width * 0.1, caca.height * 0.1);
