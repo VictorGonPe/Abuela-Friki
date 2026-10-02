@@ -38,17 +38,42 @@ export default class Enemigos {
     }
 
     generarPaloma() {
+        // 1 de cada 4 palomas es roja
+        const esRoja = Phaser.Math.Between(1, 4) === 1;
+
         const scrollX = this.scene.cameras.main.scrollX;
         const x = scrollX + this.scene.scale.width + Phaser.Math.Between(50, 300);
-        const y = Phaser.Math.Between(100, this.scene.scale.height * 0.7);
+        const y = Phaser.Math.Between(100, this.scene.scale.height * 0.5);
 
         const paloma = this.palomas.create(x, y, 'paloma').setScale(0.3 * this.altScale);
         paloma.setDepth(1.5);
         paloma.play('volar');
         paloma.body.setAllowGravity(false);
-        paloma.setVelocityX(Phaser.Math.Between(-150 * this.altScale, -500 * this.altScale));
         paloma.body.setSize(paloma.width * 0.7, paloma.height * 0.3)
             .setOffset(paloma.width * 0.07, paloma.height * 0.35);
+
+        if (esRoja) {
+            paloma.setTint(0xff4444);
+            paloma.setVelocityX(Phaser.Math.Between(-400 * this.altScale, -700 * this.altScale));
+            paloma.esRoja = true;
+            paloma.alturaVuelo = y;
+            paloma.enPicado = false;
+            this.programarPicado(paloma);
+        } else {
+            paloma.setVelocityX(Phaser.Math.Between(-150 * this.altScale, -500 * this.altScale));
+        }
+    }
+
+    programarPicado(paloma) {
+        this.scene.time.delayedCall(Phaser.Math.Between(1500, 3500), () => {
+            if (!paloma.active) return;
+            // Iniciar picado hacia la Y del jugador
+            const jugador = this.scene.player;
+            if (!jugador || !jugador.active) return;
+
+            paloma.enPicado = true;
+            paloma.setVelocityY((jugador.y - paloma.y) * 1.5);
+        });
     }
 
     actualizarPalomas(scrollX) {
@@ -56,6 +81,22 @@ export default class Enemigos {
             // Destruir palomas que salen por la izquierda (el spawner crea nuevas)
             if (paloma.x < scrollX - 500 || paloma.y < 0) {
                 paloma.destroy();
+                return;
+            }
+
+            // Paloma roja: volver a altura de vuelo tras el picado
+            if (paloma.esRoja && paloma.enPicado) {
+                if (paloma.y >= paloma.alturaVuelo + 100) {
+                    // Ha bajado lo suficiente, volver arriba
+                    paloma.setVelocityY(-300 * this.altScale);
+                }
+                if (paloma.body.velocity.y < 0 && paloma.y <= paloma.alturaVuelo) {
+                    // Ha vuelto a su altura, estabilizar y programar nuevo picado
+                    paloma.y = paloma.alturaVuelo;
+                    paloma.setVelocityY(0);
+                    paloma.enPicado = false;
+                    this.programarPicado(paloma);
+                }
             }
         });
     }
