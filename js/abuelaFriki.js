@@ -28,7 +28,7 @@ var config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 980 * window.innerHeight / 1080}, // gravedad de la tierra * por la escala de la pantalla
-            debug: true   // Activar el modo de depuración para ver colisiones y límites
+            debug: false   // Activar el modo de depuración para ver colisiones y límites
         }
     },
     /*

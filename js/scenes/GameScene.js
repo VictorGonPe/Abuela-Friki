@@ -358,7 +358,7 @@ this.plataformaGrande(14250,550);
     this.player = this.physics.add.sprite(130, 320, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5 * altScale,1 * altScale).setDepth(1);
     // 10500 Zona cafeteria //13500 Zona Sagrada //21000 Agbar obras
     // Ajustar el cuerpo físico del jugador
-    this.player.body.setSize(130, 320).setOffset(50 * altScale, 50 * altScale); // Ajusta tamaño y desplazamiento
+    this.player.body.setSize(130, 320).setOffset(50 * altScale, 70 * altScale); // Ajusta tamaño y desplazamiento
     // Configurar físicas del jugador
     this.player.setBounce(0.2);
     this.player.setCollideWorldBounds(true); //Evita que se salgo de los limites del escenario
@@ -602,14 +602,17 @@ this.plataformaGrande(14250,550);
         setDepth: 1
     });
 
+    
+
     // Posicionar una lunaWukong en una coordenada específica
-    this.crearLunaWukong(400); 
+    this.crearLunaWukong(10550); 
 
     // Recoger objeto
     this.physics.add.overlap(this.player, this.lunasWukong, this.recogerLunaWukong, null, this);
 
     // Colisiones plataformas
     this.physics.add.collider(this.lunasWukong, platforms);
+    
 
 
     // __________________________________PUNTOS, SALUD, PASTILLAS y TRANSFORMACIÓN__________________________________________
@@ -647,6 +650,7 @@ this.plataformaGrande(14250,550);
     // Colisiones entre las pastillas y las plataformas
     this.physics.add.collider(pastillas, platforms);
     this.physics.add.overlap(this.player, pastillas, this.recogerPastilla, null, this); //abuela recoje pastilla
+    
 
        
     let valla = this.add.image(5504 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5); //Colegio
@@ -961,6 +965,7 @@ movimientosAbuela() {
             this.player.setVelocityX(0);
             // Animación idle según el estado de transformación
             if (isOnGround) {
+                this.player.setOrigin(0.5,1);
                 this.player.anims.play(isTransformed ? 'idleWukong' : 'abuelaIdle', true);
 
             }
@@ -1404,8 +1409,8 @@ recogerLunaWukong(player, luna) {
         this.physics.pause(); // Pausar la física de toda la escena
         this.input.enabled = false; // Deshabilitar las entradas mientras ocurre la transformación
 
-        
         this.player.play('transformWukong'); // Llama a la animación
+        //this.player.setOrigin(0.5, 1);
         
 
         this.player.once('animationcomplete', (anim) => {
