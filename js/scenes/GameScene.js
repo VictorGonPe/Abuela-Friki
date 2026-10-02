@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 import Monumento from '../monumento.js';
 import Enemigos from '../enemigos.js';
 import CollisionManager from '../collisionManager.js';

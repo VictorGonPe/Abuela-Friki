@@ -1,3 +1,5 @@
+import Phaser from 'phaser';
+
 export default class Enemigos {
     constructor(scene, altScale) {
         this.scene = scene; // Referencia a la escena de Phaser

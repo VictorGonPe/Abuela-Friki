@@ -1,3 +1,5 @@
+import Phaser from 'phaser';
+
 export default class CollisionManager {
     constructor(scene, player, altScale) {
         this.scene = scene;

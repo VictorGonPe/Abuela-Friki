@@ -6,6 +6,8 @@
  * Derechos de autor (c) 2024, Víctor González Pérez
 */
 
+import Phaser from 'phaser';
+import '@fontsource/bangers';
 import InicioScene from './scenes/InicioScene.js';
 import GameScene from './scenes/GameScene.js';
 import HistoriaInicialScene from './scenes/HistoriaInicialScene.js';
@@ -41,7 +43,9 @@ var config = {
 };
 
 
-const game = new Phaser.Game(config); // Inicializo el juego
+document.fonts.load('1em Bangers').then(() => {
+    new Phaser.Game(config); // Inicializo el juego
+});
 
 
 

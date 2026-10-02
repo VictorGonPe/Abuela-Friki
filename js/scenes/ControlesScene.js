@@ -1,3 +1,5 @@
+import Phaser from 'phaser';
+
 class ControlesScene extends Phaser.Scene {
     constructor() {
         super({ key: 'ControlesScene' });

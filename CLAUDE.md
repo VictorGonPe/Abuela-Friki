@@ -9,14 +9,16 @@ El plan por fases y el diagnóstico del código están en `docs/plan-multiplataf
 ## Stack
 
 - **Phaser 3.55.2, versión exacta.** No la subas sin que Víctor lo pida: el código usa `this.add.particles(...).createEmitter(...)`, que se eliminó en Phaser 3.60. Usa siempre la API y la documentación de 3.55.
-- JavaScript con módulos ES. Sin TypeScript, sin bundler y sin `package.json` (la Fase 1 del plan añade Vite).
-- Phaser se carga como global `Phaser` desde un CDN en `index.html`; los archivos del juego no lo importan.
+- JavaScript con módulos ES. Vite como bundler (`package.json` presente desde la Fase 1).
+- Phaser se importa como módulo ES: `import Phaser from 'phaser'` en cada archivo que lo use.
 - Físicas Arcade. No uses Matter.
 - Empaquetado previsto: Capacitor para iOS y Android, Electron para Mac y PC. No se cambia de motor.
 
 ## Ejecutar y verificar
 
-- No hay build ni tests automáticos. Sirve la raíz con un servidor estático: `npx serve .` o `python3 -m http.server 8000`. Abrir `index.html` con `file://` no funciona porque los módulos ES lo bloquean.
+- `npm run dev` — servidor de desarrollo en `http://localhost:5173`.
+- `npm run build` — compila en `dist/`. `npm run preview` sirve `dist/` en local.
+- `npm run lint` — comprueba errores; solo deben aparecer los dos errores conocidos (`game` en AjustesScene y `createTouchControls` en GameScene).
 - Verificar un cambio significa cargar el juego, recorrer el flujo afectado y comprobar que la consola no tiene errores. Con el MCP de Playwright (`.mcp.json`) puedes abrirlo y hacer capturas tú mismo.
 - Hazlo antes de dar una tarea por terminada. Si no has podido verificar algo, dilo claramente en lugar de darlo por bueno.
 - Para probar el táctil en escritorio usa la emulación de dispositivo del navegador.
@@ -25,7 +27,7 @@ El plan por fases y el diagnóstico del código están en `docs/plan-multiplataf
 ## Estructura
 
 ```
-index.html              Carga Phaser (CDN), la fuente Bangers y js/abuelaFriki.js
+index.html              Entrada del juego (Vite la procesa)
 css/styles.css          Estilos de la página
 js/abuelaFriki.js       Configuración de Phaser y lista de escenas
 js/scenes/              Una escena por archivo; la clave de escena es el nombre de la clase
@@ -33,12 +35,12 @@ js/scenes/              Una escena por archivo; la clave de escena es el nombre 
   HistoriaInicialScene.js Intro narrada (3 imágenes y audio)
   MenuScene.js            Menú principal
   ControlesScene.js       Pantalla de controles
-  GameScene.js            Nivel 1 (Barcelona): 1470 líneas, casi toda la lógica
+  GameScene.js            Nivel 1 (Barcelona): ~1470 líneas, casi toda la lógica
   AjustesScene.js         Ajustes (todavía no se guardan ni se aplican)
 js/enemigos.js          Clase Enemigos: palomas, patinetes y cacas
 js/collisionManager.js  Clase CollisionManager: solo se usa colisionCaca
 js/monumento.js         Clase Monumento: monumentos con parallax
-assets/                 Imágenes y sonidos (103 MB)
+public/assets/          Imágenes y sonidos (103 MB)
 docs/                   Plan y registro de decisiones
 tools/                  Scripts de apoyo
 ```
