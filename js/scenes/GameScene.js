@@ -3,6 +3,7 @@ import Monumento from '../monumento.js';
 import Enemigos from '../enemigos.js';
 import CollisionManager from '../collisionManager.js';
 import entrada from '../entrada.js';
+import { BARCELONA } from '../niveles/barcelona.js';
 
 const altScale = 1; // Siempre 1: altura de diseño fija a 1080px (Phaser.Scale.FIT)
 var player;
@@ -47,7 +48,7 @@ let transformacionRestante = tiempoTransformacion; // Tiempo restante en miliseg
 let alturaSuelo;
 const sueloAltura = 50;
 
-const LEVEL_WIDTH = 30000; // Ancho total del nivel
+const LEVEL_WIDTH = BARCELONA.anchoNivel; // Ancho total del nivel (definido en barcelona.js)
 
 
 class GameScene extends Phaser.Scene {
@@ -230,60 +231,18 @@ class GameScene extends Phaser.Scene {
 
 
     //__________________CREAR ESCENARIO____________________
-    //__TIENDAS
-    const cartelBarcelona = this.add.image(400 * altScale, this.scale.height - 120 * altScale, 'cartelBarcelona').setScale(0.5 * altScale).setOrigin(0.5, 1);
-    const quiosco1 = this.add.image(1000 * altScale, this.scale.height - 140 * altScale, 'quiosco1').setScale(0.7 * altScale).setOrigin(0.5, 1);
-    const pescaderia1 = this.add.image(2250 * altScale, this.scale.height - 170 * altScale, 'pescaderia1').setScale(0.57 * altScale).setOrigin(0.5, 1);
-    const tiendaComic1 = this.add.image(1750 * altScale, this.scale.height - 140 * altScale, 'tiendaComic1').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    const carniceria1 = this.add.image(3430 * altScale, this.scale.height - 170 * altScale, 'carniceria1').setScale(0.55 * altScale).setOrigin(0.5, 1);
-    const panaderia1 = this.add.image(2870 * altScale, this.scale.height - 140 * altScale, 'panaderia1').setScale(0.7 * altScale).setOrigin(0.5, 1);
-    const carpinteria1 = this.add.image(4470 * altScale, this.scale.height - 170 * altScale, 'carpinteria1').setScale(0.55 * altScale).setOrigin(0.5, 1);
-    const badulaque1 = this.add.image(3940 * altScale, this.scale.height - 140 * altScale, 'badulaque1').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    const colegio1 = this.add.image(5600 * altScale, this.scale.height - 180 * altScale, 'colegio1').setScale(0.7 * altScale).setOrigin(0.5, 1);
-    const informatica1 = this.add.image(5000 * altScale, this.scale.height - 140 * altScale, 'informatica1').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    const heladeria1 = this.add.image(6100 * altScale, this.scale.height - 120 * altScale, 'heladeria1').setScale(0.7 * altScale).setOrigin(0.5, 1);
-    const colmado1 = this.add.image(7600 * altScale, this.scale.height - 170 * altScale, 'colmado1').setScale(0.5 * altScale).setOrigin(0.5, 1);
-    const floristeria1 = this.add.image(7100 * altScale, this.scale.height - 120 * altScale, 'floristeria1').setScale(0.7 * altScale).setOrigin(0.5, 1);
-    const carniceria2 = this.add.image(11200 * altScale, this.scale.height - 170 * altScale, 'carniceria2').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    const cafeteria1 = this.add.image(10750 * altScale, this.scale.height - 140 * altScale, 'cafeteria1').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    const drogueria1 = this.add.image(12110 * altScale, this.scale.height - 170 * altScale, 'drogueria1').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    const pasteleria1 = this.add.image(12600 * altScale, this.scale.height - 140 * altScale, 'pasteleria1').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    const bar1 = this.add.image(11650 * altScale, this.scale.height - 140 * altScale, 'bar1').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    this.add.image(24100 * altScale, this.scale.height - 140 * altScale, 'bloque4').setScale(0.9 * altScale).setOrigin(0.5, 1);
-    this.add.image(25580 * altScale, this.scale.height - 140 * altScale, 'bloque2').setScale(0.9 * altScale).setOrigin(0.5, 1);
-    this.add.image(26500 * altScale, this.scale.height - 140 * altScale, 'bloque1').setScale(0.8 * altScale).setOrigin(0.5, 1);
-    this.add.image(25300 * altScale, this.scale.height - 140 * altScale, 'bloque6').setScale(0.5 * altScale).setOrigin(0.5, 1);
-    this.add.image(28000 * altScale, this.scale.height - 140 * altScale, 'bloque2').setScale(0.8 * altScale).setOrigin(0.5, 1);
-    this.add.image(28780 * altScale, this.scale.height - 140 * altScale, 'bloque3').setScale(0.8 * altScale).setOrigin(0.5, 1);
-    this.add.image(29600 * altScale, this.scale.height - 140 * altScale, 'imserso1').setScale(0.8 * altScale).setOrigin(0.5, 1);
-   //29600 puerta de la tienda
+    // Imágenes decorativas del nivel (tiendas, edificios, objetos de calle)
+    BARCELONA.imagenes.forEach(({ key, x, y, escala, depth, flipX }) => {
+        const img = this.add.image(x * altScale, this.scale.height - y * altScale, key)
+            .setScale(escala * altScale)
+            .setOrigin(0.5, 1);
+        if (depth !== undefined) img.setDepth(depth);
+        if (flipX) img.flipX = true;
+    });
 
-
-    //__OBJETOS
-    const senal2 = this.add.image(2750 * altScale, this.scale.height - 115 * altScale, 'senal2').setScale(0.65 * altScale).setOrigin(0.5, 1);
-    const vallas4 = this.add.image(8050 * altScale, this.scale.height - 94 * altScale, 'vallas4').setScale(0.6 * altScale).setOrigin(0.5, 1).setDepth(1.5);
-    const cono1 = this.add.image(7960 * altScale, this.scale.height - 120 * altScale, 'cono1').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    const semaforo1 = this.add.image(10250 * altScale, this.scale.height - 115 * altScale, 'semaforo1').setScale(0.6 * altScale).setOrigin(0.5, 1);
-
-    const buzon1 = this.add.image(10400 * altScale, this.scale.height - 120 * altScale, 'buzon1').setScale(0.7 * altScale).setOrigin(0.5, 1).flipX = true;
-    this.tierra1 = this.add.image(12980 * altScale, this.scale.height - 90 * altScale, 'tierra1').setScale(0.5 * altScale).setOrigin(0.5, 1).setDepth(1.5);
-    this.tierra1.flipX = true
-
-    this.crearPivote(13450,16350); //Sagrada Familia = 13450 a 16350
-    const bocaIncendios1 = this.add.image(14400 * altScale, this.scale.height - 140 * altScale, 'bocaIncendios1').setScale(0.5 * altScale).setOrigin(0.5, 1);
-    const basura1 = this.add.image(13600 * altScale, this.scale.height - 120 * altScale, 'basura2').setScale(0.5 * altScale).setOrigin(0.5, 1);
-    const basura12 = this.add.image(16200 * altScale, this.scale.height - 120 * altScale, 'basura2').setScale(0.5 * altScale).setOrigin(0.5, 1).flipX = true;
-
-    //Tramo obras agujeros 21100
-    const senal1 = this.add.image(21300 * altScale, this.scale.height - 95 * altScale, 'senal1').setScale(0.7 * altScale).setOrigin(0.5, 1).setDepth(1.5);
-    this.add.image(21450 * altScale, this.scale.height - 130 * altScale, 'carretilla1').setScale(0.5 * altScale).setOrigin(0.5, 1);
-    this.add.image(21650 * altScale, this.scale.height - 130 * altScale, 'vallas3').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    this.add.image(23600 * altScale, this.scale.height - 130 * altScale, 'vallas3').setScale(0.6 * altScale).setOrigin(0.5, 1).flipX = true;
-    this.ponerVallasObra(21750,23500);
-    this.add.image(23700 * altScale, this.scale.height - 110 * altScale, 'senal3').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    this.add.image(23755 * altScale, this.scale.height - 95 * altScale, 'tierra2').setScale(0.6 * altScale).setOrigin(0.5, 1).setDepth(1.5);
-    this.add.image(21590 * altScale, this.scale.height - 120 * altScale, 'cono3').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    this.add.image(23830 * altScale, this.scale.height - 98 * altScale, 'cono2').setScale(0.6 * altScale).setOrigin(0.5, 1).setDepth(1.5);
+    // Pivotes repetidos (Sagrada Família) y vallas de obra
+    BARCELONA.pivotes.forEach(({ inicio, fin }) => this.crearPivote(inicio, fin));
+    BARCELONA.vallasObra.forEach(({ inicio, fin }) => this.ponerVallasObra(inicio, fin));
 
    
     
@@ -293,35 +252,7 @@ class GameScene extends Phaser.Scene {
     //platforms.depth = 1;
     //platforms.create(LEVEL_WIDTH / 2, this.scale.height - 50  * altScale, 'suelo').setDisplaySize(LEVEL_WIDTH, 140  * altScale).refreshBody(); //Suelo se repite
 
- const bloquesYHuecos = [ //Array posiciones suelo, inicio ancho y huecos
-        { x: 0, ancho: 2800 }, // Bloque 1
-        { hueco: 350},         // Hueco 1
-        {  x: 3150, ancho: 5000 }, // Bloque 2
-        { hueco: 2000 },         // Hueco 2
-        //{ x: 8350, ancho: 100 }, // Bloque 3
-        //{ hueco: 250 },         // Hueco 3
-        { x: 10150, ancho: 3050 }, // Bloque 4
-        { hueco: 200 },         // Hueco 4
-        { x: 13400, ancho: 3000 }, // Bloque 5
-        { hueco: 250 },         // Hueco 5
-        { x: 16650, ancho: 5000 }, // Bloque 6
-        { hueco: 250 },         // Hueco 6
-        { x: 21900, ancho: 100 }, // Bloque 7
-        { hueco: 200 },         // Hueco 7
-        { x: 22200, ancho: 80 }, // Bloque 8
-        { hueco: 300 },         // Hueco 8
-        { x: 22580, ancho: 120 }, // Bloque 9
-        { hueco: 250 },         // Hueco 9
-        { x: 22950, ancho: 50 }, // Bloque 10
-        { hueco: 300 },         // Hueco 10
-        { x: 23300, ancho: 100 }, // Bloque 11
-        { hueco: 200 },         // Hueco 11
-        { x: 23600, ancho: 6400 }, // Bloque 12
-    ];
-
-let currentX = 0 * altScale; // Posición inicial del primer bloque
-
-bloquesYHuecos.forEach((bloque) => {
+BARCELONA.bloquesYHuecos.forEach((bloque) => {
     if (bloque.ancho !== undefined && bloque.x !== undefined) {
         // Creo bloque de suelo usando los valores de "x" y "ancho" escalados AltScale
         platforms.create(
@@ -335,32 +266,12 @@ bloquesYHuecos.forEach((bloque) => {
     }
 });
 
-// Crear grupo de plataformas, incluido el suelo_________________OTRAS PLATFORMS___________________________________________________________________________
-  
-this.plataformaDeUno(550,320);
-this.plataformaDeUno(872,500);
-this.plataformaDeUno(1120,500);
-this.plataformaDeDos(1510,700,1607,700);
-this.plataformaDeDos(1903,700,2000,700);
-this.plataformaDeDos(2210,505,2307,505);
-this.plataformaDeDos(8300,330,8397,330); //Plataformas Agujero
-this.plataformaDeDos(8700,560,8797,560);
-this.plataformaDeUno(9120,800);
-this.plataformaDeUno(9120,350);
-this.plataformaDeUno(9470,400);
-this.plataformaDeUno(9720,620);
-this.plataformaDeUno(9780,280);
-
-
-this.plataformaDeUno(10470,310);
-this.plataformaDeUno(10630,550);
-this.plataformaDeUno(10860,550);
-this.plataformaDeDos(11150,550,11247,550);
-this.plataformaDeDos(11600,500,11697,500);
-
-this.plataformaDeUno(13750,320);//Sagrada Familia
-this.plataformaGrande(14250,550);
-//this.plataformaDeDos(1100,500,1150,700);
+// Plataformas elevadas del nivel
+BARCELONA.plataformas.forEach(p => {
+    if (p.tipo === 'uno')    this.plataformaDeUno(p.x, p.y);
+    else if (p.tipo === 'dos')    this.plataformaDeDos(p.x1, p.y1, p.x2, p.y2);
+    else if (p.tipo === 'grande') this.plataformaGrande(p.x, p.y);
+});
     
 
     //platforms.body.setSize(140, 70).setOffset(50 * altScale, 50 * altScale);
@@ -369,7 +280,7 @@ this.plataformaGrande(14250,550);
 
     // __________________________________CREAR ABUELA___________________________________________
 
-    this.player = this.physics.add.sprite(130, 320, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1);
+    this.player = this.physics.add.sprite(BARCELONA.jugadorInicio.x, BARCELONA.jugadorInicio.y, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1);
     // 10500 Zona cafeteria //13500 Zona Sagrada //21000 Agbar obras
     // Ajustar el cuerpo físico del jugador
     this.player.body.setSize(130, 320).setOffset(50 * altScale, 70 * altScale); // Ajusta tamaño y desplazamiento
@@ -466,7 +377,7 @@ this.plataformaGrande(14250,550);
         repeat: -1, // Animación en buclecxxxxxx
     });
     //Creación de palomas
-    enemigosManager.crearPalomas(15);
+    enemigosManager.crearPalomas(BARCELONA.enemigos.palomas);
     // Crear colisión entre las palomas y la abuela
     this.physics.add.overlap(enemigosManager.palomas, this.player, this.colisionPaloma, null, this);
 
@@ -488,7 +399,7 @@ this.plataformaGrande(14250,550);
         frameRate: 6,
         repeat: -1 // Animación en bucle
     });
-    enemigosManager.crearPatinetes(20); //Crear patinetes
+    enemigosManager.crearPatinetes(BARCELONA.enemigos.patinetes); //Crear patinetes
     // Crear colisiones entre los patinetes y el suelo
     this.physics.add.collider(enemigosManager.patinetes, platforms);
     this.physics.add.overlap(enemigosManager.patinetes, this.player, this.colisionPatinete, null, this); //overlap lanza un evento
@@ -501,7 +412,7 @@ this.plataformaGrande(14250,550);
 
     // __________________________________CACAS__________________________________________
 
-    enemigosManager.crearCacas(5); // Crear cacas
+    enemigosManager.crearCacas(BARCELONA.enemigos.cacas); // Crear cacas
 
     // Colisiones de cacas con el jugador usando CollisionManager
     this.physics.add.overlap(enemigosManager.cacas,this.player,collisionManager.colisionCaca.bind(collisionManager),null,this); // Manejado por CollisionManager
@@ -523,7 +434,7 @@ this.plataformaGrande(14250,550);
     frascosGalletas = this.physics.add.group();
 
     // Generar frascos de galletas en el nivel
-    this.generarFrascosGalletas(3);
+    this.generarFrascosGalletas(BARCELONA.recogibles.frascosGalletas);
     
 
     // Colisión entre la abuela y los FRASCOS GALLETAS
@@ -617,7 +528,7 @@ this.plataformaGrande(14250,550);
     
 
     // Posicionar una lunaWukong en una coordenada específica
-    this.crearLunaWukong(10550); 
+    BARCELONA.recogibles.lunasWukong.forEach(x => this.crearLunaWukong(x));
 
     // Recoger objeto
     this.physics.add.overlap(this.player, this.lunasWukong, this.recogerLunaWukong, null, this);
@@ -657,7 +568,7 @@ this.plataformaGrande(14250,550);
     // Crear grupo de pastillas___________________________________________
     pastillas = this.physics.add.group();
 
-    this.generarPastillas(3); // Genera 3 pastillas en posiciones aleatorias
+    this.generarPastillas(BARCELONA.recogibles.pastillas); // Genera pastillas en posiciones aleatorias
    
     // Colisiones entre las pastillas y las plataformas
     this.physics.add.collider(pastillas, platforms);
@@ -758,7 +669,7 @@ this.plataformaGrande(14250,550);
         }
 
 
-        if (this.player.x >= 29600 * altScale && !this.nivelCompletado) {
+        if (this.player.x >= BARCELONA.finNivel * altScale && !this.nivelCompletado) {
             this.nivelCompletado = true; // Asegurarte de que esto ocurra solo una vez
             this.nivel1Completado(); // Llama a la función que maneja el fin del nivel
         }
