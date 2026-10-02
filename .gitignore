@@ -1,1 +1,13 @@
 **/.DS_Store
+node_modules/
+dist/
+release/
+.env*
+*.keystore
+*.jks
+*.p12
+*.p8
+*.mobileprovision
+CLAUDE.local.md
+.claude/settings.local.json
+assets/default.jpg
