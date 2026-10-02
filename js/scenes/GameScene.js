@@ -5,6 +5,7 @@ import CollisionManager from '../collisionManager.js';
 import entrada from '../entrada.js';
 import { BARCELONA } from '../niveles/barcelona.js';
 import { aplicarHover } from '../ui/botonTexto.js';
+import HUD from '../ui/hud.js';
 
 const altScale = 1; // Siempre 1: altura de diseño fija a 1080px (Phaser.Scale.FIT)
 const sueloAltura = 50;
@@ -257,16 +258,6 @@ BARCELONA.plataformas.forEach(p => {
     //this.physics.add.overlap(this.enemigosManager.cacas, this.player, colisionCaca, null, this);  //detecta colisiones cacas
 
     // __________________________________GALLETAS__________________________________________
-    // Crear un contenedor para mostrar la imagen de la galleta y el número de galletas
-    this.galletaIcono = this.add.image(45 * altScale, 150 * altScale, 'galleta').setScale(0.2 * altScale).setScrollFactor(0).setDepth(2);
-    this.galletasTexto = this.add.text(85 * altScale, 140 * altScale, `${ this.galletasDisponibles}`, {
-        fontFamily: 'Bangers',
-        fontSize: '30px',
-        fill: '#ffffff',
-        padding: { left: 5, right: 5, top: 5, bottom: 5}
-        //fontFamily: 'Arial',xx
-    }).setScrollFactor(0).setScale(0.8 * altScale).setDepth(2);
-
     // Crear grupo de frascos de galletas
     this.frascosGalletas = this.physics.add.group();
 
@@ -281,7 +272,7 @@ BARCELONA.plataformas.forEach(p => {
             this.cogerGalletasSound.play();
         }
         this.galletasDisponibles += 10; // Incrementar galletas
-        this.galletasTexto.setText(`${this.galletasDisponibles}`); // Actualizar texto
+        this.hud.actualizarGalletas(this.galletasDisponibles); // Actualizar texto
         frasco.destroy(); // Eliminar frasco recolectado
     });
     this.physics.add.collider(this.frascosGalletas, this.platforms);
@@ -315,7 +306,7 @@ BARCELONA.plataformas.forEach(p => {
 
         paloma.destroy(); // Elimina la paloma
         this.puntos += 10; // Añadir puntos por destruir la paloma
-        this.puntosTexto.setText(`Puntos: ${this.puntos}`);
+        this.hud.actualizarPuntos(this.puntos);
     });
 
     this.physics.add.overlap(this.galletas, this.enemigosManager.patinetes, (galleta, patinete) => {
@@ -342,7 +333,7 @@ BARCELONA.plataformas.forEach(p => {
     
             // Reducir la cantidad de galletas disponibles
             this.galletasDisponibles--;
-            this.galletasTexto.setText(`${this.galletasDisponibles}`); // Actualizar el texto en pantalla
+            this.hud.actualizarGalletas(this.galletasDisponibles); // Actualizar el texto en pantalla
     
             // Destruir la galleta después de un tiempo
             this.time.delayedCall(3000, () => {
@@ -375,24 +366,13 @@ BARCELONA.plataformas.forEach(p => {
     
 
 
-    // __________________________________PUNTOS, SALUD, PASTILLAS y TRANSFORMACIÓN__________________________________________
-    // Mostrar los puntos en la esquina superior izquierda
-    this.puntosTexto = this.add.text(25  * altScale, 12  * altScale, `Puntos: ${this.puntos}`, {fontSize: '30px',fill: '#ffffff',fontFamily: 'Bangers', padding: { left: 5, right: 5, top: 5, bottom: 5},}).setScrollFactor(0).setScale(0.8 * altScale).setDepth(2); // Para que no se mueva con la cámara
-    
-    this.indicadorVida = this.add.image(15 * altScale, 40 * altScale, 'indicadorVida').setOrigin(0,0).setScale(0.5 * altScale).setScrollFactor(0).setDepth(2); //Para el montje de la imagen
-    
-    // Crear un objeto de gráficos para la barra de salud
-    this.barraSalud = this.add.graphics().setScrollFactor(0).setScale(1 * altScale).setDepth(2);
-
-    this.indicadorVida2 = this.add.image(15 * altScale, 40 * altScale, 'indicadorVida2').setOrigin(0,0).setScale(0.5 * altScale).setScrollFactor(0).setDepth(2);
-    
-    // Dibujar la barra de salud inicial
-    this.actualizarBarraSalud(this.salud);
-
-    // Crear contenedor para las imágenes de las vidas
-    this.vidasImagen = this.add.image(15 * altScale, 190 * altScale, 'vidaIcono').setOrigin(0,0).setScale(0.6 * altScale).setScrollFactor(0).setDepth(2);
-    // Añadir texto de "Vidas"
-    this.textoVidas = this.add.text(90 * altScale, 210 * altScale, `${this.vidas}`, {fontSize: '30px', fill: '#ffffff', fontFamily: 'Bangers', padding: { left: 5, right: 5, top: 5, bottom: 5}}).setScrollFactor(0).setScale(0.8 * altScale).setDepth(2);
+    // __________________________________HUD__________________________________________
+    this.hud = new HUD(this, {
+        puntos: this.puntos,
+        salud: this.salud,
+        vidas: this.vidas,
+        galletasDisponibles: this.galletasDisponibles,
+    });
 
 
     this.anims.create({
@@ -421,21 +401,6 @@ BARCELONA.plataformas.forEach(p => {
     valla = this.add.image(5744 * altScale, this.scale.height - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
     valla = this.add.image(5852 * altScale, this.scale.height - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
 
-    //BARRA TRANSFORMACIÓN------------------------------------
-    /*
-    // Crear la barra de transformación debajo de la barra de vida
-    this.barraTransformacion = this.add.graphics().setScrollFactor(0).setScale(1 * altScale).setDepth(2);
-
-    // Dibujar el fondo de la barra
-    this.barraTransformacion.fillStyle(0x000000); // Fondo negro
-    this.barraTransformacion.fillRect(80, 95, 140, 25); // Justo debajo de la barra de salud
-
-    // Dibujar la barra azul inicial
-    this.barraTransformacion.fillStyle(0x0000ff); // Azul
-    this.barraTransformacion.fillRect(80, 95, 140, 25);
-*/
-
- 
      //__________________________SONIDOS___________________ 
     //Crear al final para tener todas las variables asociadas definidas
     // Recuperar el estado del sonido por defecto "data".
@@ -486,7 +451,6 @@ BARCELONA.plataformas.forEach(p => {
     this.gritoTransformacion = this.sound.add('gritoTransformacion', {volume: 0.5});
 
 
-    this.actualizarBarraSalud = this.actualizarBarraSalud.bind(this);//Hace que la barra de salud este disponible en cualquier lugar de la escena
     this.nivelCompletado = false;
     }
 
@@ -521,17 +485,14 @@ BARCELONA.plataformas.forEach(p => {
             // Calcular el ancho actual de la barra basado en el tiempo restante
             //const anchoBarra = (140 * transformacionRestante) / tiempoTransformacion;
 
-            if (this.isTransformed && this.barraTransformacion) {
+            if (this.isTransformed && this.hud.barraTransformacion) {
                 this.transformacionRestante -= this.game.loop.delta; // Reducir tiempo segun frames
                 if (this.transformacionRestante <= 0) {
                     this.transformacionRestante = 0;
                     this.revertirTransformacion(); // Revertir cuando el tiempo se acabe
                 }
-        
-                // Verificar si la barra existe antes de intentar dibujarla
-                if (this.barraTransformacion) {
-                    this.dibujarBarraTransformacion();
-                }
+
+                this.hud.dibujarBarraTransformacion(this.transformacionRestante, tiempoTransformacion);
             }
     }
         
@@ -593,7 +554,7 @@ colisionPaloma(player, paloma) {
 
     // Sumar puntos y actualizar el texto
     this.puntos += 10; // Añadir 10 puntos
-    this.puntosTexto.setText(`Puntos: ${this.puntos}`);
+    this.hud.actualizarPuntos(this.puntos);
 
     this.verificaMuerte(); //Si llega a 0 verifica y activa animacion muerte
 
@@ -616,7 +577,7 @@ colisionPatinete(player, patinete) {
     // Reducir puntos
     this.puntos -= 20;
     if (this.puntos < 0) this.puntos = 0;
-    this.puntosTexto.setText(`Puntos: ${this.puntos}`);
+    this.hud.actualizarPuntos(this.puntos);
     
     // Hacer a la abuela invulnerable
     this.isInvulnerable = true;
@@ -639,21 +600,7 @@ colisionPatinete(player, patinete) {
 }
 
 actualizarBarraSalud(valor) {
-     
-    if (valor < 0) valor = 0;
-    if (valor > 100) valor = 100; // Máximo permitido
-
-   this.barraSalud.clear(); // Limpia el gráfico anterior
-   // Dibujar el fondo de la barra
-   this.barraSalud.fillStyle(0x000000); // Color negro
-   this.barraSalud.fillRect(80, 63, 140, 25); // Posición (20, 20), ancho 200px, alto 20px
-
-   // Dibujar la barra de salud actual
-   this.barraSalud.fillStyle(0xff0000); // Color rojo
-   
-   this.barraSalud.fillRect(80, 63, (140 * valor) / 100, 25); // Escalar ancho según la salud
-   console.log(`Barra de salud actualizada: ${valor}`);
-   
+    this.hud.actualizarSalud(valor);
 }
 
 recogerPastilla(player, pastilla) {
@@ -964,9 +911,7 @@ verificaMuerte() {
         //Restarua el cuerpo físico si viene de Wukong
         this.player.body.setSize(150, 320).setOffset(50 * altScale, 50 * altScale);
 
-        if (this.textoVidas) {
-            this.textoVidas.setText(`${this.vidas}`);
-        }
+        this.hud.actualizarVidas(this.vidas);
         // Desactivar controles mientras se reproduce la animación
         this.physics.pause(); // Pausa físicas para evitar movimiento durante la animación
         this.player.setVelocity(0); // Detener al jugador
@@ -983,7 +928,7 @@ verificaMuerte() {
         this.time.delayedCall(2000, () => { // Ajusta el tiempo al de la duración de la animación
             console.log(`Vidas restantes: ${this.vidas}`);
             if(this.vidas <= 0) {
-                this.textoVidas.setText(`${this.vidas}`);
+                this.hud.actualizarVidas(this.vidas);
                 this.gameOver();
             }else{
                 this.physics.world.colliders.destroy(); // Reinicia las colisiones
@@ -1100,10 +1045,8 @@ recogerLunaWukong(player, luna) {
         this.transformacionRestante = tiempoTransformacion; // Reiniciar el tiempo de transformación
 
          // Crear la barra de transformación al recoger la luna
-        this.barraTransformacion = this.add.graphics().setScrollFactor(0).setDepth(2);
-
-
-        this.dibujarBarraTransformacion();
+        this.hud.crearBarraTransformacion();
+        this.hud.dibujarBarraTransformacion(this.transformacionRestante, tiempoTransformacion);
 
         this.physics.pause(); // Pausar la física de toda la escena
         this.input.enabled = false; // Deshabilitar las entradas mientras ocurre la transformación
@@ -1140,27 +1083,9 @@ revertirTransformacion() {
     this.player.body.setSize(130, 320).setOffset(50 * altScale, 50 * altScale);
 
     // Eliminar la barra de transformación
-    this.barraTransformacion.clear();
-    this.barraTransformacion = null; // Eliminar referencia de la memoria
+    this.hud.eliminarBarraTransformacion();
 
     this.transformacionRestante = tiempoTransformacion; // Reiniciar el tiempo
-}
-
-dibujarBarraTransformacion() {
-    //const x = this.vidasImagen.x + this.vidasImagen.displayWidth / 2 + 10; // Centrada bajo la imagen de vidas
-    const x = 15 * altScale;
-    const y = 265 * altScale;
-
-    const anchoBarra = (180 * this.transformacionRestante) / tiempoTransformacion;
-
-    this.barraTransformacion.clear();
-    // Fondo negro
-    this.barraTransformacion.fillStyle(0x000000);
-    this.barraTransformacion.fillRect(x, y, 180, 25);
-
-    // Barra azul
-    this.barraTransformacion.fillStyle(0x0000ff);
-    this.barraTransformacion.fillRect(x, y, anchoBarra, 25);
 }
 
 crearBotonesTactiles() {
