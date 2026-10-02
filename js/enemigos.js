@@ -9,32 +9,53 @@ export default class Enemigos {
         this.configurarAnimaciones();
     }
 
-    crearPalomas(cantidad) {
-        // Crear grupo de palomas
-        this.palomas = this.scene.physics.add.group();
-        for (let i = 0; i < cantidad; i++) {
-            const x = Phaser.Math.Between(this.scene.scale.width, this.scene.physics.world.bounds.width);
-            const y = Phaser.Math.Between(100, this.scene.scale.height * 0.8 * this.altScale); // Altura entre 50px y la mitad de la pantalla
-
-            const paloma = this.palomas.create(x, y, 'paloma').setScale(0.3 * this.altScale);
-            paloma.setDepth(1.5);
-            paloma.play('volar'); // Animación de vuelo
-            paloma.body.setAllowGravity(false); // Las palomas no son afectadas por la gravedad
-            paloma.setVelocityX(Phaser.Math.Between(-150 * this.altScale, -500 * this.altScale)); // Velocidad inicial
-            // Ajustar el cuerpo físico de las palomas
-            paloma.body.setSize(paloma.width * 0.7, paloma.height * 0.3).setOffset(paloma.width * 0.07, paloma.height * 0.35); // Ajusta el tamaño/pos para colisiones
+    crearPalomas(config) {
+        // config puede ser un número (compatibilidad) o un objeto { inicial, intervalo, max }
+        if (typeof config === 'number') {
+            config = { inicial: config, intervalo: 8000, max: config };
         }
+
+        this.palomas = this.scene.physics.add.group();
+        this.palomasMax = config.max;
+
+        // Generar palomas iniciales
+        for (let i = 0; i < config.inicial; i++) {
+            this.generarPaloma();
+        }
+
+        // Spawning continuo
+        this.scene.time.addEvent({
+            delay: config.intervalo,
+            loop: true,
+            callback: () => {
+                if (this.palomas.countActive(true) < this.palomasMax) {
+                    this.generarPaloma();
+                }
+            },
+        });
+
         this.enemigos.push({ tipo: 'palomas', grupo: this.palomas });
-        
+    }
+
+    generarPaloma() {
+        const scrollX = this.scene.cameras.main.scrollX;
+        const x = scrollX + this.scene.scale.width + Phaser.Math.Between(50, 300);
+        const y = Phaser.Math.Between(100, this.scene.scale.height * 0.7);
+
+        const paloma = this.palomas.create(x, y, 'paloma').setScale(0.3 * this.altScale);
+        paloma.setDepth(1.5);
+        paloma.play('volar');
+        paloma.body.setAllowGravity(false);
+        paloma.setVelocityX(Phaser.Math.Between(-150 * this.altScale, -500 * this.altScale));
+        paloma.body.setSize(paloma.width * 0.7, paloma.height * 0.3)
+            .setOffset(paloma.width * 0.07, paloma.height * 0.35);
     }
 
     actualizarPalomas(scrollX) {
-        // Reposicionar palomas si salen de la pantalla
         this.palomas.getChildren().forEach(paloma => {
-            if (paloma.x < scrollX - 500 || paloma.y < 0) { // Si sale por la izquierda o por arriba
-                paloma.x = scrollX + this.scene.scale.width + 50; // Reposicionar fuera del lado derecho
-                paloma.y = Phaser.Math.Between(50, this.scene.scale.height * 0.7); // Nueva altura aleatoria
-                paloma.setVelocityX(Phaser.Math.Between(-150 * this.altScale, -400 * this.altScale)); // Nueva velocidad
+            // Destruir palomas que salen por la izquierda (el spawner crea nuevas)
+            if (paloma.x < scrollX - 500 || paloma.y < 0) {
+                paloma.destroy();
             }
         });
     }

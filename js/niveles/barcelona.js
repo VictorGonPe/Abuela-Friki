@@ -112,7 +112,7 @@ export const BARCELONA = {
     vallasObra: [{ inicio: 21750, fin: 23500 }], // Vallas zona obras
 
     enemigos: {
-        palomas:   15,
+        palomas:   { inicial: 8, intervalo: 8000, max: 15 },
         patinetes: 20,
         cacas:     5,
     },
