@@ -42,6 +42,20 @@ Una entrada por decisión técnica o de diseño relevante: qué se decidió, por
 
 **Por qué:** antes chocar con una paloma daba los mismos puntos que destruirla, y destruir un patinete, el enemigo más peligroso, no daba nada. Ahora se premia la habilidad y el riesgo, y el daño se castiga solo con salud. Son valores de partida, para ajustar jugando.
 
+## 2026-10-02 · Palomas: spawning continuo y variante rápida
+
+**Decisión:** las palomas no son instancias fijas. Se generan en oleadas o de forma continua para que nunca desaparezcan todas del nivel. Se añade una variante con tono rojo y mayor velocidad (enemigo más difícil, igual que el patinete respecto a la caca).
+
+**Por qué:** si el jugador destruye todas las palomas al principio, el nivel queda sin ese obstáculo el resto de la partida. La variante roja añade variedad sin necesitar un enemigo nuevo completo.
+
+**Pendiente:** definir la frecuencia de spawn y la velocidad de la variante roja. Se implementa en la Fase 4 (o antes si afecta al equilibrio).
+
+## 2026-10-02 · Bug: traspasa suelo según tamaño de pantalla
+
+**Causa:** `setOrigin` se multiplica por `altScale` en `GameScene.js:358`, lo que descuadra el cuerpo físico respecto al sprite. Al transformarse, el sprite de Wukong es más alto (470 px vs 378 px) y el origen no se recalcula, dejando a la abuela ligeramente hundida en el suelo.
+
+**Solución:** Fase 2 (resolución fija, `altScale` siempre 1). Hasta entonces no tocar los valores de origen y tamaño de cuerpo físico sin comprobar en varias resoluciones.
+
 ## 2026-10-02 · Se borra el código muerto
 
 **Decisión:** se eliminan las colisiones duplicadas de `CollisionManager`, las plataformas móviles que nunca se crean, las zonas táctiles sin usar y el código comentado.
