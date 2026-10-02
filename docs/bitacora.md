@@ -31,8 +31,6 @@ Registro de estado por fase y pendientes concretos. Se actualiza al terminar cad
 
 | Decisión | Dónde se implementa |
 |---|---|
-| Palomas: spawning continuo (no instancias fijas) | Fase 4 |
-| Paloma roja: vuela rápido, baja en picado hacia la abuela y vuelve a subir | Fase 4 |
 | Nueva tabla de puntuación (paloma +10, patinete +25, fin nivel +500…) | Fase 6 |
 
 ---
@@ -45,8 +43,11 @@ Registro de estado por fase y pendientes concretos. Se actualiza al terminar cad
 - **Paso 3** — helper `aplicarHover` en `js/ui/botonTexto.js`; 5 bloques duplicados eliminados en MenuScene y GameScene (commit dca8876)
 - **Paso 4** — estado de módulo a propiedades de la escena (`this`); ~40 variables migradas, variables muertas eliminadas (commit a2f0c5c)
 
+- **Paso 5** — HUD extraído a `js/ui/hud.js`; GameScene conserva `actualizarBarraSalud` como wrapper (commit 0e3786b)
+- **Paso 5b** — Palomas: spawning continuo como patinetes; `barcelona.js` usa config `{ inicial, intervalo, max }` (commit 04ac0ef)
+- **Paso 5c** — Paloma roja: variante con tint, más rápida, picado hacia la Y del jugador (commit 455c411)
+
 ### Pasos pendientes (uno por conversación)
-5. Extraer el HUD (puntos, salud, vidas, galletas, barra de transformación) a una clase
 6. Extraer la abuela (movimiento, salto, transformación, daño) a una clase
 7. Código muerto: preguntar a Víctor antes de borrar `colisionPatinete`, `colisionPaloma` y las plataformas móviles
 

@@ -63,11 +63,11 @@ Borra cada punto de esta lista cuando quede resuelto.
 
 - ~~`createTouchControls` se llama en `GameScene.js:485` pero no está definida en ningún sitio~~ — resuelto en Fase 3.
 - ~~Inicio, HistoriaInicial y Controles solo avanzan con teclado~~ — resuelto en Fase 3.
-- El estado de la partida (`puntos`, `salud`, `galletasDisponibles`, `isTransformed`…) vive en variables de módulo al principio de `GameScene.js`. `scene.restart()` no las reinicia, y eso hoy se aprovecha para conservar puntos y galletas al perder una vida. Tenlo en cuenta antes de mover nada.
+- ~~El estado de la partida vive en variables de módulo al principio de `GameScene.js`~~ — resuelto en Fase 4 paso 4: todo migrado a `this.xxx` en `init()`.
 - Todo se calcula una sola vez con `window.innerHeight` al cargar. Cambiar el tamaño de la ventana o girar el dispositivo descuadra el juego. En pantallas pequeñas la abuela traspasa el suelo al andar.
 - Al transformarse en Wukong el sprite cambia de 378 px a 470 px de alto y el origen no se recalcula: la abuela queda ligeramente hundida en el suelo. Se corrige en Fase 2 junto con el resto del sistema de escala.
 - `AjustesScene.js:108` usa una variable `game` que no existe en ese módulo: lanza un error en cada cambio de tamaño después de visitar Ajustes.
-- Las palomas son instancias fijas: si se destruyen todas al principio no aparecen más. Pendiente: spawning continuo y variante rápida con tono rojo (ver `docs/decisiones.md`).
+- ~~Las palomas son instancias fijas~~ — resuelto en Fase 4: spawning continuo + variante roja con picado.
 - Al menos seis spritesheets en uso superan los 4096 px de ancho, el límite de textura de muchos móviles.
 
 ## Forma de trabajar
