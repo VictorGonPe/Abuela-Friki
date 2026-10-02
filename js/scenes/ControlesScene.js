@@ -16,7 +16,7 @@ class ControlesScene extends Phaser.Scene {
         overlay.fillRect(0, 0, this.scale.width, this.scale.height);
 
         // Texto de instrucciones
-        const tamanoFuente = 40 * window.innerHeight / 1080;
+        const tamanoFuente = 40 * 1;
 
         this.add.text(
             this.scale.width / 2,
@@ -27,7 +27,7 @@ class ControlesScene extends Phaser.Scene {
                 fontFamily: 'Bangers',
                 color: '#ffffff',
                 align: 'center',
-                lineSpacing: 10 * window.innerHeight / 1080,
+                lineSpacing: 10 * 1,
                 padding: { left: 5, right: 5, top: 5, bottom: 5 },
             }
         ).setOrigin(0.5);

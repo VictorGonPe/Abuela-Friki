@@ -15,7 +15,7 @@ class HistoriaInicialScene extends Phaser.Scene {
     create() {
         // Crear un fondo negro para asegurarte de que las transiciones se vean bien
         this.cameras.main.setBackgroundColor('#000000');
-        const tamanoFuente = 30 * window.innerHeight / 1080;
+        const tamanoFuente = 30 * 1;
     
         // Reproducir el audio de historia
         const historiaAudio = this.sound.add('historiaAudio', { loop: false });
@@ -23,12 +23,12 @@ class HistoriaInicialScene extends Phaser.Scene {
     
         // Mostrar el texto "Saltar intro: Pulsar Espacio"
         const textoSaltar = this.add.text(
-            this.scale.width - 200 * window.innerHeight / 1080,
-            50 * window.innerHeight / 1080, // Posición en la parte superior
+            this.scale.width - 200 * 1,
+            50 * 1, // Posición en la parte superior
             'Saltar intro: Pulsar Espacio',
             {
                 fontFamily: 'Bangers',
-                fontSize: `${30 * window.innerHeight / 1080}px`,
+                fontSize: `${30 * 1}px`,
                 color: '#ffffff',
                 align: 'center',
                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -37,9 +37,9 @@ class HistoriaInicialScene extends Phaser.Scene {
         ).setOrigin(0.5).setDepth(10);
     
         // Crear imágenes
-        const imagen1 = this.add.image(this.scale.width / 2, this.scale.height / 2, 'imagen1').setScale(1.08 * window.innerHeight / 1080).setAlpha(0);
-        const imagen2 = this.add.image(this.scale.width / 2, this.scale.height / 2, 'imagen2').setScale(1.08 * window.innerHeight / 1080).setAlpha(0);
-        const imagen3 = this.add.image(this.scale.width / 2, this.scale.height / 2, 'imagen3').setScale(1.08 * window.innerHeight / 1080).setAlpha(0);
+        const imagen1 = this.add.image(this.scale.width / 2, this.scale.height / 2, 'imagen1').setScale(1.08 * 1).setAlpha(0);
+        const imagen2 = this.add.image(this.scale.width / 2, this.scale.height / 2, 'imagen2').setScale(1.08 * 1).setAlpha(0);
+        const imagen3 = this.add.image(this.scale.width / 2, this.scale.height / 2, 'imagen3').setScale(1.08 * 1).setAlpha(0);
     
         // Fondo negro para texto (estrecho y centrado)
         const textoAncho = this.scale.width * 0.6; // Ajusta el ancho del texto
@@ -47,15 +47,15 @@ class HistoriaInicialScene extends Phaser.Scene {
         textoFondo.fillStyle(0x000000, 0.7);
         textoFondo.fillRect(
             (this.scale.width - textoAncho) / 2, // Centrar el fondo
-            this.scale.height - 200 * window.innerHeight / 1080,
+            this.scale.height - 200 * 1,
             textoAncho,
-            150 * window.innerHeight / 1080
+            150 * 1
         );
     
         // Crear texto centrado
         const texto = this.add.text(
             this.scale.width / 2, // Centrar horizontalmente
-            this.scale.height - 125 * window.innerHeight / 1080, // Ajustar posición vertical
+            this.scale.height - 125 * 1, // Ajustar posición vertical
             '',
             {
                 fontFamily: 'Bangers',

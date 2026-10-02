@@ -13,15 +13,15 @@ class MenuScene extends Phaser.Scene {
     create() {
        
         // Fondo del menú
-        this.add.image(this.scale.width / 2, this.scale.height / 2, 'menuBackground').setScale(1.08 *  window.innerHeight / 1080);
-        const tamanio = 40 * window.innerHeight / 1080;
+        this.add.image(this.scale.width / 2, this.scale.height / 2, 'menuBackground').setScale(1.08 *  1);
+        const tamanio = 40 * 1;
 
         // Crear un fondo blanco detrás de los botones
         const background = this.add.rectangle(
             this.cameras.main.width / 2,  // Posición X centrada
             this.cameras.main.height / 2 - 60, // Posición Y centrada
             500 * tamanio,                          // Ancho
-            window.innerHeight + 300,                          // Alto
+            this.scale.height + 300,                          // Alto
             0x000000                      // Color blanco
         );
         background.setAlpha(0.5);       // 70% de opacidad

@@ -17,20 +17,26 @@ import ControlesScene from './scenes/ControlesScene.js';
 
 
 
+// Altura de diseño fija. El ancho se calcula según la proporción real, limitado entre 4:3 y 21:9.
+const ALTURA_JUEGO = 1080;
+const ratio = Math.min(Math.max(window.innerWidth / window.innerHeight, 4 / 3), 21 / 9);
+const ANCHO_JUEGO = Math.round(ALTURA_JUEGO * ratio);
+
 // Configuración básica del juego - mediante un JSON
 var config = {
     type: Phaser.AUTO, // Usará webGL y si no admite navegador Canvas
-    width: window.innerWidth,
-    height: window.innerHeight,
+    parent: 'gameContainer',
     scale: {
-        mode: Phaser.Scale.RESIZE, // Escala para ajustar a diferentes pantallas
-        autoCenter: Phaser.Scale.CENTER_BOTH
+        mode: Phaser.Scale.FIT,        // Phaser escala el lienzo; el código siempre ve 1080px de alto
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: ANCHO_JUEGO,
+        height: ALTURA_JUEGO,
     },
     physics: { //Añade las físicas
         default: 'arcade',
         arcade: {
-            gravity: { y: 980 * window.innerHeight / 1080}, // gravedad de la tierra * por la escala de la pantalla
-            debug: false   // Activar el modo de depuración para ver colisiones y límites
+            gravity: { y: 980 }, // Gravedad fija; altScale siempre vale 1 con altura fija
+            debug: false
         }
     },
     /*

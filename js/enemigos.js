@@ -31,7 +31,7 @@ export default class Enemigos {
     actualizarPalomas(scrollX) {
         // Reposicionar palomas si salen de la pantalla
         this.palomas.getChildren().forEach(paloma => {
-            if (paloma.x < scrollX - 500|| paloma.y < scrollY ) { // Si sale por el lado izquierdo de la cámara
+            if (paloma.x < scrollX - 500 || paloma.y < 0) { // Si sale por la izquierda o por arriba
                 paloma.x = scrollX + this.scene.scale.width + 50; // Reposicionar fuera del lado derecho
                 paloma.y = Phaser.Math.Between(50, this.scene.scale.height * 0.7); // Nueva altura aleatoria
                 paloma.setVelocityX(Phaser.Math.Between(-150 * this.altScale, -400 * this.altScale)); // Nueva velocidad

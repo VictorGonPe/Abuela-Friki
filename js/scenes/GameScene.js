@@ -3,7 +3,7 @@ import Monumento from '../monumento.js';
 import Enemigos from '../enemigos.js';
 import CollisionManager from '../collisionManager.js';
 
-const altScale = window.innerHeight / 1080;
+const altScale = 1; // Siempre 1: altura de diseño fija a 1080px (Phaser.Scale.FIT)
 var player;
 var platforms;
 let movingPlatformC, movingPlatformL, movingPlatformR; // Variables para plataformas móviles
@@ -46,17 +46,33 @@ let tiempoTransformacion = 60000;
 let transformacionRestante = tiempoTransformacion; // Tiempo restante en milisegundos
 
 let alturaSuelo;
-let sueloAltura = 50 * altScale;
+const sueloAltura = 50;
 
-const LEVEL_WIDTH = 30000 * altScale; // Ancho total del nivel
+const LEVEL_WIDTH = 30000; // Ancho total del nivel
 
 
 class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameScene' });
-        this.salud = 100; // Salud inicial
     }
-    
+
+    // init() se llama antes de create() en cada restart. Gestiona el estado persistente.
+    init(data) {
+        // Puntos y galletas sobreviven a perder una vida; se pasan explícitamente en scene.restart()
+        puntos = data?.puntos ?? 0;
+        galletasDisponibles = data?.galletasDisponibles ?? 10;
+        this.vidas = data?.vidas ?? 3;
+        // El resto siempre se reinicia
+        salud = 100;
+        isInvulnerable = false;
+        isTransformed = false;
+        dobleSalto = false;
+        saltosRestantes = 2;
+        saltando = false;
+        transformacionRestante = tiempoTransformacion;
+        haMuerto = false;
+        gritoPajaros = [];
+    }
 
     preload() {
     this.load.image('backgroundMountain', 'assets/backgroundMountain.png'); // Fondo montañoso
@@ -180,12 +196,10 @@ class GameScene extends Phaser.Scene {
 
         //____________________________CREATE__________________________________________________________________________________________
     // Definir el tamaño del mundo del juego y de la camara
-    this.physics.world.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
-    this.cameras.main.setBounds(0, 0, LEVEL_WIDTH, window.innerHeight);
+    this.physics.world.setBounds(0, 0, LEVEL_WIDTH, this.scale.height);
+    this.cameras.main.setBounds(0, 0, LEVEL_WIDTH, this.scale.height);
 
-    this.salud = salud; 
-    // Si hay vidas guardadas, úsalas; de lo contrario, inicia con 3
-    this.vidas = this.data.get('vidas') !== undefined ? this.data.get('vidas') : 3;
+    this.salud = salud; // = 100, puesto por init()
     this.haMuerto = false;
 
     this.add.rectangle(0, 0, LEVEL_WIDTH, this.scale.height, 0xFFCC00)
@@ -195,20 +209,20 @@ class GameScene extends Phaser.Scene {
 
 
     // Fondo azul cielo que ocupa todo el nivel ________________________FONDOS___________________________________
-    this.add.rectangle(0, 0, LEVEL_WIDTH, window.innerHeight, 0x42aaff).setOrigin(0, 0);
+    this.add.rectangle(0, 0, LEVEL_WIDTH, this.scale.height, 0x42aaff).setOrigin(0, 0);
     // Fondo montañoso que se moverá lentamente
-    backgroundMountain = this.add.tileSprite(0, window.innerHeight - (40 * altScale), LEVEL_WIDTH / altScale, 1080, 'backgroundMountain').setOrigin(0, 1).setScrollFactor(0).setScale(1 * altScale);
+    backgroundMountain = this.add.tileSprite(0, this.scale.height - 40, LEVEL_WIDTH, 1080, 'backgroundMountain').setOrigin(0, 1).setScrollFactor(0).setScale(1);
     // Fondo de ciudad que se moverá más rápido
-    backgroundCiudad = this.add.tileSprite(0, window.innerHeight - (40 * altScale), LEVEL_WIDTH / altScale, 1080, 'backgroundCiudad').setOrigin(0, 1).setScrollFactor(0).setScale(1 * altScale);
+    backgroundCiudad = this.add.tileSprite(0, this.scale.height - 40, LEVEL_WIDTH, 1080, 'backgroundCiudad').setOrigin(0, 1).setScrollFactor(0).setScale(1);
     backgroundCesped = this.add.tileSprite(
-    0, 
-    window.innerHeight - (40 * altScale), // Altura total del lienzo
-    LEVEL_WIDTH / altScale, // Ancho del sprite
-    1080,  // Ajustar la altura al fondo disponible
-    'cesped' 
+    0,
+    this.scale.height - 40,
+    LEVEL_WIDTH,
+    1080,
+    'cesped'
     )
-    .setOrigin(0, 1) // Anclar en la parte inferior
-    .setScale(1 * altScale);
+    .setOrigin(0, 1)
+    .setScale(1);
 
     
     //Instancia y creacion de monumentos
@@ -218,59 +232,59 @@ class GameScene extends Phaser.Scene {
 
     //__________________CREAR ESCENARIO____________________
     //__TIENDAS
-    const cartelBarcelona = this.add.image(400 * altScale, window.innerHeight - 120 * altScale, 'cartelBarcelona').setScale(0.5 * altScale).setOrigin(0.5, 1);
-    const quiosco1 = this.add.image(1000 * altScale, window.innerHeight - 140 * altScale, 'quiosco1').setScale(0.7 * altScale).setOrigin(0.5, 1);
-    const pescaderia1 = this.add.image(2250 * altScale, window.innerHeight - 170 * altScale, 'pescaderia1').setScale(0.57 * altScale).setOrigin(0.5, 1);
-    const tiendaComic1 = this.add.image(1750 * altScale, window.innerHeight - 140 * altScale, 'tiendaComic1').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    const carniceria1 = this.add.image(3430 * altScale, window.innerHeight - 170 * altScale, 'carniceria1').setScale(0.55 * altScale).setOrigin(0.5, 1);
-    const panaderia1 = this.add.image(2870 * altScale, window.innerHeight - 140 * altScale, 'panaderia1').setScale(0.7 * altScale).setOrigin(0.5, 1);
-    const carpinteria1 = this.add.image(4470 * altScale, window.innerHeight - 170 * altScale, 'carpinteria1').setScale(0.55 * altScale).setOrigin(0.5, 1);
-    const badulaque1 = this.add.image(3940 * altScale, window.innerHeight - 140 * altScale, 'badulaque1').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    const colegio1 = this.add.image(5600 * altScale, window.innerHeight - 180 * altScale, 'colegio1').setScale(0.7 * altScale).setOrigin(0.5, 1);
-    const informatica1 = this.add.image(5000 * altScale, window.innerHeight - 140 * altScale, 'informatica1').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    const heladeria1 = this.add.image(6100 * altScale, window.innerHeight - 120 * altScale, 'heladeria1').setScale(0.7 * altScale).setOrigin(0.5, 1);
-    const colmado1 = this.add.image(7600 * altScale, window.innerHeight - 170 * altScale, 'colmado1').setScale(0.5 * altScale).setOrigin(0.5, 1);
-    const floristeria1 = this.add.image(7100 * altScale, window.innerHeight - 120 * altScale, 'floristeria1').setScale(0.7 * altScale).setOrigin(0.5, 1);
-    const carniceria2 = this.add.image(11200 * altScale, window.innerHeight - 170 * altScale, 'carniceria2').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    const cafeteria1 = this.add.image(10750 * altScale, window.innerHeight - 140 * altScale, 'cafeteria1').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    const drogueria1 = this.add.image(12110 * altScale, window.innerHeight - 170 * altScale, 'drogueria1').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    const pasteleria1 = this.add.image(12600 * altScale, window.innerHeight - 140 * altScale, 'pasteleria1').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    const bar1 = this.add.image(11650 * altScale, window.innerHeight - 140 * altScale, 'bar1').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    this.add.image(24100 * altScale, window.innerHeight - 140 * altScale, 'bloque4').setScale(0.9 * altScale).setOrigin(0.5, 1);
-    this.add.image(25580 * altScale, window.innerHeight - 140 * altScale, 'bloque2').setScale(0.9 * altScale).setOrigin(0.5, 1);
-    this.add.image(26500 * altScale, window.innerHeight - 140 * altScale, 'bloque1').setScale(0.8 * altScale).setOrigin(0.5, 1);
-    this.add.image(25300 * altScale, window.innerHeight - 140 * altScale, 'bloque6').setScale(0.5 * altScale).setOrigin(0.5, 1);
-    this.add.image(28000 * altScale, window.innerHeight - 140 * altScale, 'bloque2').setScale(0.8 * altScale).setOrigin(0.5, 1);
-    this.add.image(28780 * altScale, window.innerHeight - 140 * altScale, 'bloque3').setScale(0.8 * altScale).setOrigin(0.5, 1);
-    this.add.image(29600 * altScale, window.innerHeight - 140 * altScale, 'imserso1').setScale(0.8 * altScale).setOrigin(0.5, 1);
+    const cartelBarcelona = this.add.image(400 * altScale, this.scale.height - 120 * altScale, 'cartelBarcelona').setScale(0.5 * altScale).setOrigin(0.5, 1);
+    const quiosco1 = this.add.image(1000 * altScale, this.scale.height - 140 * altScale, 'quiosco1').setScale(0.7 * altScale).setOrigin(0.5, 1);
+    const pescaderia1 = this.add.image(2250 * altScale, this.scale.height - 170 * altScale, 'pescaderia1').setScale(0.57 * altScale).setOrigin(0.5, 1);
+    const tiendaComic1 = this.add.image(1750 * altScale, this.scale.height - 140 * altScale, 'tiendaComic1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const carniceria1 = this.add.image(3430 * altScale, this.scale.height - 170 * altScale, 'carniceria1').setScale(0.55 * altScale).setOrigin(0.5, 1);
+    const panaderia1 = this.add.image(2870 * altScale, this.scale.height - 140 * altScale, 'panaderia1').setScale(0.7 * altScale).setOrigin(0.5, 1);
+    const carpinteria1 = this.add.image(4470 * altScale, this.scale.height - 170 * altScale, 'carpinteria1').setScale(0.55 * altScale).setOrigin(0.5, 1);
+    const badulaque1 = this.add.image(3940 * altScale, this.scale.height - 140 * altScale, 'badulaque1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const colegio1 = this.add.image(5600 * altScale, this.scale.height - 180 * altScale, 'colegio1').setScale(0.7 * altScale).setOrigin(0.5, 1);
+    const informatica1 = this.add.image(5000 * altScale, this.scale.height - 140 * altScale, 'informatica1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const heladeria1 = this.add.image(6100 * altScale, this.scale.height - 120 * altScale, 'heladeria1').setScale(0.7 * altScale).setOrigin(0.5, 1);
+    const colmado1 = this.add.image(7600 * altScale, this.scale.height - 170 * altScale, 'colmado1').setScale(0.5 * altScale).setOrigin(0.5, 1);
+    const floristeria1 = this.add.image(7100 * altScale, this.scale.height - 120 * altScale, 'floristeria1').setScale(0.7 * altScale).setOrigin(0.5, 1);
+    const carniceria2 = this.add.image(11200 * altScale, this.scale.height - 170 * altScale, 'carniceria2').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const cafeteria1 = this.add.image(10750 * altScale, this.scale.height - 140 * altScale, 'cafeteria1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const drogueria1 = this.add.image(12110 * altScale, this.scale.height - 170 * altScale, 'drogueria1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const pasteleria1 = this.add.image(12600 * altScale, this.scale.height - 140 * altScale, 'pasteleria1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const bar1 = this.add.image(11650 * altScale, this.scale.height - 140 * altScale, 'bar1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    this.add.image(24100 * altScale, this.scale.height - 140 * altScale, 'bloque4').setScale(0.9 * altScale).setOrigin(0.5, 1);
+    this.add.image(25580 * altScale, this.scale.height - 140 * altScale, 'bloque2').setScale(0.9 * altScale).setOrigin(0.5, 1);
+    this.add.image(26500 * altScale, this.scale.height - 140 * altScale, 'bloque1').setScale(0.8 * altScale).setOrigin(0.5, 1);
+    this.add.image(25300 * altScale, this.scale.height - 140 * altScale, 'bloque6').setScale(0.5 * altScale).setOrigin(0.5, 1);
+    this.add.image(28000 * altScale, this.scale.height - 140 * altScale, 'bloque2').setScale(0.8 * altScale).setOrigin(0.5, 1);
+    this.add.image(28780 * altScale, this.scale.height - 140 * altScale, 'bloque3').setScale(0.8 * altScale).setOrigin(0.5, 1);
+    this.add.image(29600 * altScale, this.scale.height - 140 * altScale, 'imserso1').setScale(0.8 * altScale).setOrigin(0.5, 1);
    //29600 puerta de la tienda
 
 
     //__OBJETOS
-    const senal2 = this.add.image(2750 * altScale, window.innerHeight - 115 * altScale, 'senal2').setScale(0.65 * altScale).setOrigin(0.5, 1);
-    const vallas4 = this.add.image(8050 * altScale, window.innerHeight - 94 * altScale, 'vallas4').setScale(0.6 * altScale).setOrigin(0.5, 1).setDepth(1.5);
-    const cono1 = this.add.image(7960 * altScale, window.innerHeight - 120 * altScale, 'cono1').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    const semaforo1 = this.add.image(10250 * altScale, window.innerHeight - 115 * altScale, 'semaforo1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const senal2 = this.add.image(2750 * altScale, this.scale.height - 115 * altScale, 'senal2').setScale(0.65 * altScale).setOrigin(0.5, 1);
+    const vallas4 = this.add.image(8050 * altScale, this.scale.height - 94 * altScale, 'vallas4').setScale(0.6 * altScale).setOrigin(0.5, 1).setDepth(1.5);
+    const cono1 = this.add.image(7960 * altScale, this.scale.height - 120 * altScale, 'cono1').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    const semaforo1 = this.add.image(10250 * altScale, this.scale.height - 115 * altScale, 'semaforo1').setScale(0.6 * altScale).setOrigin(0.5, 1);
 
-    const buzon1 = this.add.image(10400 * altScale, window.innerHeight - 120 * altScale, 'buzon1').setScale(0.7 * altScale).setOrigin(0.5, 1).flipX = true;
-    this.tierra1 = this.add.image(12980 * altScale, window.innerHeight - 90 * altScale, 'tierra1').setScale(0.5 * altScale).setOrigin(0.5, 1).setDepth(1.5);
+    const buzon1 = this.add.image(10400 * altScale, this.scale.height - 120 * altScale, 'buzon1').setScale(0.7 * altScale).setOrigin(0.5, 1).flipX = true;
+    this.tierra1 = this.add.image(12980 * altScale, this.scale.height - 90 * altScale, 'tierra1').setScale(0.5 * altScale).setOrigin(0.5, 1).setDepth(1.5);
     this.tierra1.flipX = true
 
     this.crearPivote(13450,16350); //Sagrada Familia = 13450 a 16350
-    const bocaIncendios1 = this.add.image(14400 * altScale, window.innerHeight - 140 * altScale, 'bocaIncendios1').setScale(0.5 * altScale).setOrigin(0.5, 1);
-    const basura1 = this.add.image(13600 * altScale, window.innerHeight - 120 * altScale, 'basura2').setScale(0.5 * altScale).setOrigin(0.5, 1);
-    const basura12 = this.add.image(16200 * altScale, window.innerHeight - 120 * altScale, 'basura2').setScale(0.5 * altScale).setOrigin(0.5, 1).flipX = true;
+    const bocaIncendios1 = this.add.image(14400 * altScale, this.scale.height - 140 * altScale, 'bocaIncendios1').setScale(0.5 * altScale).setOrigin(0.5, 1);
+    const basura1 = this.add.image(13600 * altScale, this.scale.height - 120 * altScale, 'basura2').setScale(0.5 * altScale).setOrigin(0.5, 1);
+    const basura12 = this.add.image(16200 * altScale, this.scale.height - 120 * altScale, 'basura2').setScale(0.5 * altScale).setOrigin(0.5, 1).flipX = true;
 
     //Tramo obras agujeros 21100
-    const senal1 = this.add.image(21300 * altScale, window.innerHeight - 95 * altScale, 'senal1').setScale(0.7 * altScale).setOrigin(0.5, 1).setDepth(1.5);
-    this.add.image(21450 * altScale, window.innerHeight - 130 * altScale, 'carretilla1').setScale(0.5 * altScale).setOrigin(0.5, 1);
-    this.add.image(21650 * altScale, window.innerHeight - 130 * altScale, 'vallas3').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    this.add.image(23600 * altScale, window.innerHeight - 130 * altScale, 'vallas3').setScale(0.6 * altScale).setOrigin(0.5, 1).flipX = true;
+    const senal1 = this.add.image(21300 * altScale, this.scale.height - 95 * altScale, 'senal1').setScale(0.7 * altScale).setOrigin(0.5, 1).setDepth(1.5);
+    this.add.image(21450 * altScale, this.scale.height - 130 * altScale, 'carretilla1').setScale(0.5 * altScale).setOrigin(0.5, 1);
+    this.add.image(21650 * altScale, this.scale.height - 130 * altScale, 'vallas3').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    this.add.image(23600 * altScale, this.scale.height - 130 * altScale, 'vallas3').setScale(0.6 * altScale).setOrigin(0.5, 1).flipX = true;
     this.ponerVallasObra(21750,23500);
-    this.add.image(23700 * altScale, window.innerHeight - 110 * altScale, 'senal3').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    this.add.image(23755 * altScale, window.innerHeight - 95 * altScale, 'tierra2').setScale(0.6 * altScale).setOrigin(0.5, 1).setDepth(1.5);
-    this.add.image(21590 * altScale, window.innerHeight - 120 * altScale, 'cono3').setScale(0.6 * altScale).setOrigin(0.5, 1);
-    this.add.image(23830 * altScale, window.innerHeight - 98 * altScale, 'cono2').setScale(0.6 * altScale).setOrigin(0.5, 1).setDepth(1.5);
+    this.add.image(23700 * altScale, this.scale.height - 110 * altScale, 'senal3').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    this.add.image(23755 * altScale, this.scale.height - 95 * altScale, 'tierra2').setScale(0.6 * altScale).setOrigin(0.5, 1).setDepth(1.5);
+    this.add.image(21590 * altScale, this.scale.height - 120 * altScale, 'cono3').setScale(0.6 * altScale).setOrigin(0.5, 1);
+    this.add.image(23830 * altScale, this.scale.height - 98 * altScale, 'cono2').setScale(0.6 * altScale).setOrigin(0.5, 1).setDepth(1.5);
 
    
     
@@ -278,7 +292,7 @@ class GameScene extends Phaser.Scene {
     // Crear grupo de plataformas, incluido el suelo__________________SUELOS_______________________________
     platforms = this.physics.add.staticGroup();
     //platforms.depth = 1;
-    //platforms.create(LEVEL_WIDTH / 2, window.innerHeight - 50  * altScale, 'suelo').setDisplaySize(LEVEL_WIDTH, 140  * altScale).refreshBody(); //Suelo se repite
+    //platforms.create(LEVEL_WIDTH / 2, this.scale.height - 50  * altScale, 'suelo').setDisplaySize(LEVEL_WIDTH, 140  * altScale).refreshBody(); //Suelo se repite
 
  const bloquesYHuecos = [ //Array posiciones suelo, inicio ancho y huecos
         { x: 0, ancho: 2800 }, // Bloque 1
@@ -313,7 +327,7 @@ bloquesYHuecos.forEach((bloque) => {
         // Creo bloque de suelo usando los valores de "x" y "ancho" escalados AltScale
         platforms.create(
             bloque.x * altScale + (bloque.ancho * altScale) / 2, // Centrar el bloque en su posición escalada
-            alturaSuelo = window.innerHeight - 50 * altScale, // Altura ajustada
+            alturaSuelo = this.scale.height - 50 * altScale, // Altura ajustada
             'suelo'
         )
         
@@ -356,7 +370,7 @@ this.plataformaGrande(14250,550);
 
     // __________________________________CREAR ABUELA___________________________________________
 
-    this.player = this.physics.add.sprite(130, 320, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5 * altScale,1 * altScale).setDepth(1);
+    this.player = this.physics.add.sprite(130, 320, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1);
     // 10500 Zona cafeteria //13500 Zona Sagrada //21000 Agbar obras
     // Ajustar el cuerpo físico del jugador
     this.player.body.setSize(130, 320).setOffset(50 * altScale, 70 * altScale); // Ajusta tamaño y desplazamiento
@@ -571,7 +585,6 @@ this.plataformaGrande(14250,550);
     this.lanzarGalleta = () => {
         if (galletasDisponibles > 0) {
 
-            if (window.innerHeight < 1000) this.player.setOrigin(0.5, 1);
 
             const galleta = this.galletas.create(this.player.x, this.player.y - this.player.displayHeight / 2, 'galleta').setScale(0.15 * altScale);
             galleta.setVelocityX(this.player.flipX ? -800 * altScale : 800 * altScale); // Dirección según la orientación del jugador
@@ -654,13 +667,13 @@ this.plataformaGrande(14250,550);
     
 
        
-    let valla = this.add.image(5504 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5); //Colegio
-    valla = this.add.image(5312 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
-    valla = this.add.image(5420 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
-    valla = this.add.image(5528 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
-    valla = this.add.image(5636 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
-    valla = this.add.image(5744 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
-    valla = this.add.image(5852 * altScale, window.innerHeight - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
+    let valla = this.add.image(5504 * altScale, this.scale.height - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5); //Colegio
+    valla = this.add.image(5312 * altScale, this.scale.height - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
+    valla = this.add.image(5420 * altScale, this.scale.height - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
+    valla = this.add.image(5528 * altScale, this.scale.height - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
+    valla = this.add.image(5636 * altScale, this.scale.height - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
+    valla = this.add.image(5744 * altScale, this.scale.height - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
+    valla = this.add.image(5852 * altScale, this.scale.height - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
 
     //BARRA TRANSFORMACIÓN------------------------------------
     /*
@@ -695,7 +708,7 @@ this.plataformaGrande(14250,550);
 
 
     // Crear botón de sonido en la esquina superior derecha
-     soundButton = this.add.image(window.innerWidth - 50 * altScale, 80 * altScale, this.isSoundOn ? 'soundOn' : 'soundOff') // Ajusta imagen segun estado
+     soundButton = this.add.image(this.scale.width - 50 * altScale, 80 * altScale, this.isSoundOn ? 'soundOn' : 'soundOff') // Ajusta imagen segun estado
      .setOrigin(0.5)
      .setScrollFactor(0) // Fijo en la pantalla
      .setInteractive()
@@ -910,7 +923,7 @@ recogerPastilla(player, pastilla) {
 generarPastillas(cantidad) {
     for (let i = 0; i < cantidad; i++) {
         const x = Phaser.Math.Between(100, LEVEL_WIDTH - 100);
-        const y = Phaser.Math.Between(100, window.innerHeight - 200);
+        const y = Phaser.Math.Between(100, this.scale.height - 200);
         const pastilla = pastillas.create(x, y, 'paracetamol').setScale(0.1 * altScale).setBounce(0.5).setDepth(1);
         //pastilla.body.setAllowGravity(false);
         pastilla.play('brillarParacetamol'); // Reproducir la animación
@@ -920,7 +933,7 @@ generarPastillas(cantidad) {
 generarFrascosGalletas(cantidad) {
     for (let i = 0; i < cantidad; i++) {
         const x = Phaser.Math.Between(200, LEVEL_WIDTH - 200);
-        const y = Phaser.Math.Between(100, window.innerHeight - 200);
+        const y = Phaser.Math.Between(100, this.scale.height - 200);
         const frasco = frascosGalletas.create(x, y, 'frascoGalletas').setScale(0.3 * altScale).setBounce(0.5).setSize(210,200);
         frasco.body.setAllowGravity(true); // Sin gravedad para los frascos
     }
@@ -1029,7 +1042,7 @@ movimientosAbuela() {
 
 updateParallax() {
     // Fondos parallax
-    const maxScrollX = LEVEL_WIDTH - window.innerWidth; //Calcula el desplazamiento dependiendo del ancho de la ventana
+    const maxScrollX = LEVEL_WIDTH - this.scale.width; //Calcula el desplazamiento dependiendo del ancho de la ventana
 
     if (this.cameras.main.scrollX < maxScrollX) {
         backgroundMountain.tilePositionX = this.cameras.main.scrollX * 0.2; // Movimiento lento
@@ -1116,15 +1129,9 @@ gameOver() {
     });
     
 
-    // Al hacer clic en el botón, reiniciar el juego
+    // Al hacer clic en el botón, reiniciar el juego (init() resetea todo a defaults)
     restartButton.on('pointerdown', () => {
-        this.vidas = 3; // Reiniciar las vidas
-        this.data.set('vidas', this.vidas); // Guardar las vidas
-        puntos = 0; // Reiniciar los puntos
-        salud = 100; // Restaurar la salud
-        galletasDisponibles = 10; // Reiniciar las galletas
-        isInvulnerable = false; // Reiniciar invulnerabilidad
-        this.scene.restart(); // Reiniciar la escena
+        this.scene.restart();
     });
 
     // Detener música y sonidos si están activos
@@ -1158,20 +1165,14 @@ gameOver() {
     });
 
     menuButton.on('pointerdown', () => {
-        this.vidas = 3; // Reiniciar las vidas
-        this.data.set('vidas', this.vidas); // Guardar las vidas
-        puntos = 0; // Reiniciar los puntos
-        salud = 100; // Restaurar la salud
-        galletasDisponibles = 10; // Reiniciar las galletas
-        isInvulnerable = false; // Reiniciar invulnerabilidad
-        this.scene.start('MenuScene'); // Cambia a la escena del menú principal
+        this.scene.start('MenuScene');
     });
 }
 
 plataformaDeUno(x, y) {
     // Añadir plataformas fijas
-    //platforms.create(700 * altScale, window.innerHeight - 300 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody().setSize(70 * altScale, 15 * altScale);
-    const plataforma = platforms.create(x * altScale, window.innerHeight - y * altScale, 'plataformasL')
+    //platforms.create(700 * altScale, this.scale.height - 300 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody().setSize(70 * altScale, 15 * altScale);
+    const plataforma = platforms.create(x * altScale, this.scale.height - y * altScale, 'plataformasL')
     .setScale(0.6 * altScale)
     .refreshBody()
     .setSize(90 * altScale, 15 * altScale) //Tamaño cuerpo físico
@@ -1184,12 +1185,12 @@ plataformaDeUno(x, y) {
 plataformaDeDos(x1, y1, x2, y2) { //97 px entre una x y la otra
 
    // Añadir plataformas fijas
-   const plataforma1 = platforms.create(x1 * altScale, window.innerHeight - y1 * altScale, 'plataformasL').setScale(0.6 * altScale).refreshBody()
+   const plataforma1 = platforms.create(x1 * altScale, this.scale.height - y1 * altScale, 'plataformasL').setScale(0.6 * altScale).refreshBody()
    .setSize(90 * altScale, 15 * altScale)
    .setSize(90 * altScale, 15 * altScale) //Tamaño cuerpo físico
    .setOffset(7 * altScale, 25 * altScale); //Colocación
 
-   const plataforma2 = platforms.create(x2 * altScale, window.innerHeight - y2 * altScale, 'plataformasR').setScale(0.6 * altScale).refreshBody()
+   const plataforma2 = platforms.create(x2 * altScale, this.scale.height - y2 * altScale, 'plataformasR').setScale(0.6 * altScale).refreshBody()
    .setSize(90 * altScale, 15 * altScale)
    .setSize(90 * altScale, 15 * altScale) //Tamaño cuerpo físico
    .setOffset(0 * altScale, 25 * altScale); //Colocación
@@ -1201,7 +1202,7 @@ plataformaDeDos(x1, y1, x2, y2) { //97 px entre una x y la otra
 
 plataformaGrande(x, y) {
 
-    const plataforma = platforms.create(x * altScale, window.innerHeight - y * altScale, 'plataformasC')
+    const plataforma = platforms.create(x * altScale, this.scale.height - y * altScale, 'plataformasC')
     .setScale(0.6 * altScale)
     .refreshBody()
     .setSize(500 * altScale, 15 * altScale) //Tamaño cuerpo físico
@@ -1211,9 +1212,9 @@ plataformaGrande(x, y) {
     
     /*
      // Crear plataformas móviles
-     movingPlatformL = this.physics.add.image(1455 * altScale, window.innerHeight - 800 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody().setSize(130 * altScale, 15 * altScale);
-     movingPlatformC = this.physics.add.image(1515 * altScale, window.innerHeight - 630 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody().setSize(750 * altScale, 15 * altScale);
-     movingPlatformR = this.physics.add.image(1575 * altScale, window.innerHeight - 800 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody().setSize(130 * altScale, 15 * altScale);
+     movingPlatformL = this.physics.add.image(1455 * altScale, this.scale.height - 800 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody().setSize(130 * altScale, 15 * altScale);
+     movingPlatformC = this.physics.add.image(1515 * altScale, this.scale.height - 630 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody().setSize(750 * altScale, 15 * altScale);
+     movingPlatformR = this.physics.add.image(1575 * altScale, this.scale.height - 800 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody().setSize(130 * altScale, 15 * altScale);
  
      // Desactivar la gravedad para la plataforma móvil
      [movingPlatformL, movingPlatformC, movingPlatformR].forEach(platform => {
@@ -1233,13 +1234,13 @@ colisionPlataformas() {
 
 crearPivote(x,y) { //Sagrada Familia = 13450 a 16350
     for (x; x <= y; x += 100){
-        this.add.image(x * altScale, window.innerHeight - 105 * altScale, 'pivote2').setScale(0.5 * altScale).setOrigin(0.5, 1).setDepth(1.1);
+        this.add.image(x * altScale, this.scale.height - 105 * altScale, 'pivote2').setScale(0.5 * altScale).setOrigin(0.5, 1).setDepth(1.1);
     }   
 }
 
 ponerVallasObra(x,y) { //Vallas zona agujeros
     for (x; x<= y; x+=102.5){
-        this.add.image(x * altScale, window.innerHeight - 130 * altScale, 'vallas2').setScale(0.6 * altScale).setOrigin(0.5, 1);
+        this.add.image(x * altScale, this.scale.height - 130 * altScale, 'vallas2').setScale(0.6 * altScale).setOrigin(0.5, 1);
     }
 }
 
@@ -1249,7 +1250,7 @@ verificaMuerte() {
         this.haMuerto = true;
         this.vidas--;
         isTransformed = false; // Volver a estado normal
-        this.data.set('vidas', this.vidas); // Guardar vidas en `data` 
+        // vidas viaja a través de init() data en scene.restart()
         //Restarua el cuerpo físico si viene de Wukong
         this.player.body.setSize(150, 320).setOffset(50 * altScale, 50 * altScale);
 
@@ -1261,7 +1262,7 @@ verificaMuerte() {
         this.player.setVelocity(0); // Detener al jugador
         this.player.anims.play('muerte', true); // Reproducir animación de muerte
 
-        this.data.set('isSoundOn', this.isSoundOn); // Guardar el estado del sonido en `data` antes de reiniciar
+        this.data.set('isSoundOn', this.isSoundOn); // El estado de sonido sigue en data
         
             // Detener la música si está sonando
         if (this.backgroundSound && this.backgroundSound.isPlaying) {
@@ -1275,12 +1276,9 @@ verificaMuerte() {
                 this.textoVidas.setText(`${this.vidas}`);
                 this.gameOver();
             }else{
-                salud = 100;
-                //puntos = 0;
-                //galletasDisponibles = 10;
-                isInvulnerable = false; // Asegurar que no quede invulnerable
-                this.physics.world.colliders.destroy();// Reinica las colisiones - no colision cacas
-                this.scene.restart(); // Reinicia la escena
+                this.physics.world.colliders.destroy(); // Reinicia las colisiones
+                // Pasar puntos y galletas para que sobrevivan a la muerte; init() resetea el resto
+                this.scene.restart({ puntos, galletasDisponibles, vidas: this.vidas });
             }
         });
     }
@@ -1369,7 +1367,7 @@ mostrarPantallaVictoria() {
 
 crearLunaWukong(x) {
     // Crear la luna en la posición `x` y una posición temporal en `y`
-    const luna = this.lunasWukong.create(x * altScale, window.innerHeight - 200 * altScale, 'lunaWukong')
+    const luna = this.lunasWukong.create(x * altScale, this.scale.height - 200 * altScale, 'lunaWukong')
         .setScale(0.15  * altScale)
         .setBounce(0.5);
 

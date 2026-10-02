@@ -11,7 +11,7 @@ class AjustesScene extends Phaser.Scene {
     }
 
     create() {
-        const escalaPantalla = window.innerHeight / 1080;
+        const escalaPantalla = 1;
         const tamanoFuente = 24 * escalaPantalla;
 
         // Asocia la imagen del menú ajustes
@@ -105,14 +105,11 @@ class AjustesScene extends Phaser.Scene {
             this.scene.start('MenuScene');
         });
 
-        this.game.scale.on('resize', (gameSize) => {
-            const newAlturaEscala = gameSize.height / 1080;
-            game.config.globalData.alturaEscala = newAlturaEscala;
-            console.log(`Nueva escala global: ${newAlturaEscala}`);
-        });
-        
-        // Escuchar eventos de redimensionamiento
+        // Escuchar eventos de redimensionamiento y limpiar al salir
         this.scale.on('resize', () => this.redimensionarElementos());
+        this.events.once('shutdown', () => {
+            this.scale.off('resize', this.redimensionarElementos, this);
+        });
     }
 
     
@@ -121,7 +118,7 @@ class AjustesScene extends Phaser.Scene {
     redimensionarElementos() {
         const newWidth = this.scale.width;
         const newHeight = this.scale.height;
-        const escalaPantalla = newHeight / 1080;
+        const escalaPantalla = 1;
 
         // Redimensionar la imagen del menú ajustes
         if (this.menuAjustes) {
