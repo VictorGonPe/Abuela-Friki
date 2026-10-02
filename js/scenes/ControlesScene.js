@@ -18,10 +18,15 @@ class ControlesScene extends Phaser.Scene {
         // Texto de instrucciones
         const tamanoFuente = 40 * 1;
 
+        const esTactil = this.sys.game.device.input.touch;
+        const instrucciones = esTactil
+            ? 'Botones izquierda / derecha: abajo a la izquierda\nBotones saltar / lanzar: abajo a la derecha\n\nToca la pantalla para continuar'
+            : '← : Mover a la izquierda\n→ : Mover a la derecha\n↑ : Saltar\nX : Lanzar galletas\n\nPulsa ESPACIO para continuar';
+
         this.add.text(
             this.scale.width / 2,
             this.scale.height / 2 - 100,
-            '← : Mover a la izquierda\n→ : Mover a la derecha\n↑ : Saltar\nX : Lanzar galletas\n\nPulsa ESPACIO para continuar',
+            instrucciones,
             {
                 fontSize: `${tamanoFuente}px`,
                 fontFamily: 'Bangers',
@@ -32,11 +37,10 @@ class ControlesScene extends Phaser.Scene {
             }
         ).setOrigin(0.5);
 
-        // Detectar la tecla Z para continuar
-        const zKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-        zKey.on('down', () => {
-            this.scene.start('GameScene'); // Cambia a la escena principal del juego
-        });
+        const continuar = () => this.scene.start('GameScene');
+        const spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        spaceKey.on('down', continuar);
+        this.input.on('pointerdown', continuar);
     }
 }
 

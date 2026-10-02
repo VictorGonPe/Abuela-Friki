@@ -48,7 +48,7 @@ Una entrada por decisión técnica o de diseño relevante: qué se decidió, por
 
 **Por qué:** si el jugador destruye todas las palomas al principio, el nivel queda sin ese obstáculo el resto de la partida. La variante roja añade variedad sin necesitar un enemigo nuevo completo.
 
-**Pendiente:** definir la frecuencia de spawn y la velocidad de la variante roja. Se implementa en la Fase 4 (o antes si afecta al equilibrio).
+**Comportamiento de la variante roja:** vuela rápido en horizontal y, de vez en cuando, baja en picado hacia la posición Y de la abuela; al llegar cerca vuelve a su altura de vuelo. **Pendiente:** definir frecuencia de spawn, velocidad y trigger del picado. Se implementa en la Fase 4 (o antes si afecta al equilibrio).
 
 ## 2026-10-02 · Bug: traspasa suelo según tamaño de pantalla
 

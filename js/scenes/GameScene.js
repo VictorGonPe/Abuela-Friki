@@ -2,14 +2,13 @@ import Phaser from 'phaser';
 import Monumento from '../monumento.js';
 import Enemigos from '../enemigos.js';
 import CollisionManager from '../collisionManager.js';
+import entrada from '../entrada.js';
 
 const altScale = 1; // Siempre 1: altura de diseño fija a 1080px (Phaser.Scale.FIT)
 var player;
 var platforms;
-let movingPlatformC, movingPlatformL, movingPlatformR; // Variables para plataformas móviles
 var cursors;
-var leftZone, rightZone, upZone; // Control de zonas táctiles
-var currentControl = 'keyboard'; // Variable para cambiar de controles táctiles a teclado
+let botonesMoviles = []; // Botones táctiles HUD
 var backgroundMountain, backgroundCiudad, backgroundCesped, indicadorVida, indicadorVida2; // Variables para los fondos parallax
 let monumentoManager;
 let enemigosManager;
@@ -496,9 +495,8 @@ this.plataformaGrande(14250,550);
 
     // Habilitar controles
     cursors = this.input.keyboard.createCursorKeys();
-    if (this.sys.game.device.input.touch) {
-        createTouchControls(this);
-    }
+    this.input.addPointer(3); // permite hasta 4 toques simultáneos
+    this.crearBotonesTactiles();
     this.gritoPatineteSound = this.sound.add('gritoPatinete', { volume: 0.5 });
 
     // __________________________________CACAS__________________________________________
@@ -941,99 +939,100 @@ generarFrascosGalletas(cantidad) {
 
 movimientosAbuela() {
     //******* MOVIMIENTOS ********/
-    if (currentControl === 'keyboard') {
 
-        // Bloquear movimientos si el jugador ha muerto o está transformándose
-        if (this.haMuerto || this.isTransforming) {
-            this.player.setVelocityX(0); // Detener el movimiento horizontal
-            return;
+    // Bloquear movimientos si el jugador ha muerto o está transformándose
+    if (this.haMuerto || this.isTransforming) {
+        this.player.setVelocityX(0); // Detener el movimiento horizontal
+        return;
+    }
+
+    // Controlar si el jugador está en el suelo
+    let isOnGround = this.player.body.touching.down;
+
+    // Si toca el suelo, restablecer los saltos restantes (Doble Salto)
+    if (isOnGround) {
+        saltosRestantes = 2;
+        saltando = false; // Reiniciar estado de salto
+        dobleSalto = false; // Restablecer estado de doble salto
+    }
+
+    // ABUELA -- Movimiento horizontal
+    if (cursors.left.isDown || entrada.izquierda) {
+        this.player.setVelocityX(-300 * altScale);
+        if (isOnGround) this.player.anims.play(isTransformed ? 'walkWukong' : 'left', true); // Alterna entre las anim..
+        this.player.flipX = true;
+        if(!isTransformed) {
+            this.player.body.setOffset(180, 50); //Compensa el desplazamiento del cuerpo físico abuela Normal ,al no ser centro img
+        }
+    } else if (cursors.right.isDown || entrada.derecha) {
+        this.player.setVelocityX(300 * altScale);
+        if (isOnGround) this.player.anims.play(isTransformed ? 'walkWukong' : 'right', true);
+        this.player.flipX = false;
+        if(!isTransformed) {
+            this.player.body.setOffset(50 ,50);
         }
 
-        // Controlar si el jugador está en el suelo
-        let isOnGround = this.player.body.touching.down;
-
-        // Si toca el suelo, restablecer los saltos restantes (Doble Salto)
+    } else {
+        this.player.setVelocityX(0);
+        // Animación idle según el estado de transformación
         if (isOnGround) {
-            saltosRestantes = 2;
-            saltando = false; // Reiniciar estado de salto
-            dobleSalto = false; // Restablecer estado de doble salto
-        }
-
-        // ABUELA -- Movimiento horizontal
-        if (cursors.left.isDown) {
-            this.player.setVelocityX(-300 * altScale);
-            if (isOnGround) this.player.anims.play(isTransformed ? 'walkWukong' : 'left', true); // Alterna entre las anim..
-            this.player.flipX = true;
-            if(!isTransformed) {
-                this.player.body.setOffset(180, 50); //Compensa el desplazamiento del cuerpo físico abuela Normal ,al no ser centro img
-            }
-        } else if (cursors.right.isDown) {
-            this.player.setVelocityX(300 * altScale);
-            if (isOnGround) this.player.anims.play(isTransformed ? 'walkWukong' : 'right', true);
-            this.player.flipX = false;
-            if(!isTransformed) {
-                this.player.body.setOffset(50 ,50);
-            }
-   
-        } else {
-            this.player.setVelocityX(0);
-            // Animación idle según el estado de transformación
-            if (isOnGround) {
-                this.player.setOrigin(0.5,1);
-                this.player.anims.play(isTransformed ? 'idleWukong' : 'abuelaIdle', true);
-
-            }
+            this.player.setOrigin(0.5,1);
+            this.player.anims.play(isTransformed ? 'idleWukong' : 'abuelaIdle', true);
 
         }
 
-        // Lógica de salto
-        if (Phaser.Input.Keyboard.JustDown(cursors.up) || (!saltando && cursors.up.isDown)) {
-            if (isOnGround) {
-                // Salto normal
-                this.jumpSound.play();
-                this.player.setVelocityY(-700 * altScale);
-                this.player.anims.play(isTransformed ? 'jumpWukong' : 'jump', true);
-                saltosRestantes--; // Reducir los saltos restantes
-                saltando = true; // Marcar que el personaje está saltando
-            } else if (isTransformed && saltosRestantes > 0) {
-                // Doble salto solo en estado transformado
-                this.jumpSound.play();
-                this.player.setVelocityY(-900 * altScale);
-                this.player.anims.play('jumpWukong', true);
+    }
 
-                // Efectos visuales o sonoros
-                const emisorParticulas = this.add.particles('particulas').createEmitter({
-                    x: this.player.x,
-                    y: this.player.y,
-                    speed: { min: -100, max: 100 },
-                    lifespan: 500,
-                    quantity: 1,
-                    scale: { start: 1, end: 0 }, // Las partículas se hacen más pequeñas
-                    
-                }).setScale(0.3 * altScale);
+    // Lógica de salto
+    const quereSaltar = Phaser.Input.Keyboard.JustDown(cursors.up) || (!saltando && cursors.up.isDown) || entrada.saltar;
+    entrada.saltar = false;
+    if (quereSaltar) {
+        if (isOnGround) {
+            // Salto normal
+            this.jumpSound.play();
+            this.player.setVelocityY(-700 * altScale);
+            this.player.anims.play(isTransformed ? 'jumpWukong' : 'jump', true);
+            saltosRestantes--; // Reducir los saltos restantes
+            saltando = true; // Marcar que el personaje está saltando
+        } else if (isTransformed && saltosRestantes > 0) {
+            // Doble salto solo en estado transformado
+            this.jumpSound.play();
+            this.player.setVelocityY(-900 * altScale);
+            this.player.anims.play('jumpWukong', true);
 
-                // Hacer que las partículas sigan al jugador
-                emisorParticulas.startFollow(this.player);
+            // Efectos visuales o sonoros
+            const emisorParticulas = this.add.particles('particulas').createEmitter({
+                x: this.player.x,
+                y: this.player.y,
+                speed: { min: -100, max: 100 },
+                lifespan: 500,
+                quantity: 1,
+                scale: { start: 1, end: 0 }, // Las partículas se hacen más pequeñas
 
-                // Configurar para que el emisor dure solo un instante
-                this.time.delayedCall(1000, () => {
-                    emisorParticulas.stop(); // Detener emisión de partículas
-                    emisorParticulas.manager.destroy(); // Eliminar el sistema de partículas para liberar memoria
-                });
+            }).setScale(0.3 * altScale);
 
-                saltosRestantes--; // Reducir saltos restantes
-            }
+            // Hacer que las partículas sigan al jugador
+            emisorParticulas.startFollow(this.player);
+
+            // Configurar para que el emisor dure solo un instante
+            this.time.delayedCall(1000, () => {
+                emisorParticulas.stop(); // Detener emisión de partículas
+                emisorParticulas.manager.destroy(); // Eliminar el sistema de partículas para liberar memoria
+            });
+
+            saltosRestantes--; // Reducir saltos restantes
         }
+    }
 
-        // Detectar cuando se suelta la tecla de salto para reiniciar el estado de salto
-        if (Phaser.Input.Keyboard.JustUp(cursors.up)) {
-            saltando = false;
-        }
+    // Detectar cuando se suelta la tecla de salto para reiniciar el estado de salto
+    if (Phaser.Input.Keyboard.JustUp(cursors.up)) {
+        saltando = false;
+    }
 
-        // ABUELA -- Lanzar galleta
-        if (Phaser.Input.Keyboard.JustDown(this.keys.lanzarGalleta)) {
-            this.lanzarGalleta(); // Lógica para lanzar galleta
-        }
+    // ABUELA -- Lanzar galleta
+    if (Phaser.Input.Keyboard.JustDown(this.keys.lanzarGalleta) || entrada.lanzar) {
+        entrada.lanzar = false;
+        this.lanzarGalleta(); // Lógica para lanzar galleta
     }
 }
 
@@ -1056,18 +1055,6 @@ updateParallax() {
     enemigosManager.actualizar(scrollX); //maneja a todos los enemigos   
 }
 
-updateMovingPlatforms() {
-    // Cambiar dirección de plataformas móviles
-    if (movingPlatformL.x >= 700 * altScale) {
-        movingPlatformL.setVelocityX(-100 * altScale);
-        movingPlatformC.setVelocityX(-100 * altScale);
-        movingPlatformR.setVelocityX(-100 * altScale);
-    } else if (movingPlatformL.x <= 300 * altScale) {
-        movingPlatformL.setVelocityX(100 * altScale);
-        movingPlatformC.setVelocityX(100 * altScale);
-        movingPlatformR.setVelocityX(100 * altScale);
-    }
-}
 
 gameOver() {
     // Detener toda la física y lógica del juego
@@ -1227,9 +1214,6 @@ plataformaGrande(x, y) {
 colisionPlataformas() {
      // Añadir colisiones abuela con plataformas
      this.physics.add.collider(this.player, platforms);
-     this.physics.add.collider(this.player, movingPlatformL);
-     this.physics.add.collider(this.player, movingPlatformC);
-     this.physics.add.collider(this.player, movingPlatformR);
 }
 
 crearPivote(x,y) { //Sagrada Familia = 13450 a 16350
@@ -1463,7 +1447,48 @@ dibujarBarraTransformacion() {
     barraTransformacion.fillRect(x, y, anchoBarra, 25);
 }
 
+crearBotonesTactiles() {
+    const h = this.scale.height;
+    const w = this.scale.width;
+    const margen = 30;
+    const estilo = {
+        fontFamily: 'Bangers',
+        fontSize: '52px',
+        color: '#ffffff',
+        backgroundColor: 'rgba(0,0,0,0.45)',
+        padding: { left: 22, right: 22, top: 14, bottom: 14 },
+    };
 
+    const btnIzq   = this.add.text(margen + 45,       h - margen - 40, '←', estilo).setOrigin(0.5).setScrollFactor(0).setDepth(2).setAlpha(0.85).setInteractive();
+    const btnDer   = this.add.text(margen + 160,      h - margen - 40, '→', estilo).setOrigin(0.5).setScrollFactor(0).setDepth(2).setAlpha(0.85).setInteractive();
+    const btnSaltar = this.add.text(w - margen - 160, h - margen - 40, '↑', estilo).setOrigin(0.5).setScrollFactor(0).setDepth(2).setAlpha(0.85).setInteractive();
+    const btnLanzar = this.add.text(w - margen - 45,  h - margen - 40, 'X', estilo).setOrigin(0.5).setScrollFactor(0).setDepth(2).setAlpha(0.85).setInteractive();
+
+    botonesMoviles = [btnIzq, btnDer, btnSaltar, btnLanzar];
+    botonesMoviles.forEach(b => b.setVisible(false));
+
+    // Botones hold (izquierda / derecha)
+    btnIzq.on('pointerdown',  () => { entrada.izquierda = true; });
+    btnIzq.on('pointerup',    () => { entrada.izquierda = false; });
+    btnIzq.on('pointerout',   () => { entrada.izquierda = false; });
+    btnDer.on('pointerdown',  () => { entrada.derecha = true; });
+    btnDer.on('pointerup',    () => { entrada.derecha = false; });
+    btnDer.on('pointerout',   () => { entrada.derecha = false; });
+
+    // Botones pulso (saltar / lanzar)
+    btnSaltar.on('pointerdown', () => { entrada.saltar = true; });
+    btnLanzar.on('pointerdown', () => { entrada.lanzar = true; });
+
+    // Mostrar al tocar, ocultar al usar teclado
+    this.input.on('pointerdown', () => {
+        botonesMoviles.forEach(b => b.setVisible(true));
+    });
+    this.input.keyboard.on('keydown', () => {
+        botonesMoviles.forEach(b => b.setVisible(false));
+        entrada.izquierda = false;
+        entrada.derecha   = false;
+    });
+}
 
 }
 

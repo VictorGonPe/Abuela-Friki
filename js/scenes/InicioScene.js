@@ -19,7 +19,7 @@ class InicioScene extends Phaser.Scene {
 
         this.add.image(this.scale.width / 2, this.scale.height / 2 - 100 * 1 , 'titulo').setScale(0.7 * 1);
 
-        const texto = this.add.text(this.scale.width / 2,this.scale.height / 2 + 300 * 1 ,'Presiona cualquier tecla para continuar',{ fontSize: tamanoFuente, color: '#ffffff',fontFamily: 'Bangers',
+        const texto = this.add.text(this.scale.width / 2,this.scale.height / 2 + 300 * 1 ,'Toca la pantalla o pulsa cualquier tecla',{ fontSize: tamanoFuente, color: '#ffffff',fontFamily: 'Bangers',
             padding: { left: 5, right: 5, top: 5, bottom: 5},}).setOrigin(0.5);
         //const backGroundAudio = this.sound.add('backgroundSound', { loop: false });
 
@@ -29,21 +29,18 @@ class InicioScene extends Phaser.Scene {
             loop: false ,
         });
 
-        this.input.keyboard.on('keydown', () => {
-
+        const avanzar = () => {
             if (this.soundIsOn) return; //salir si suena
-
             this.soundIsOn = true; //Hace que no se duplique el sonido al picar mas veces
-            // Reproducir audio de fondo
-            //backGroundAudio.Volume = 1;
             backGroundAudio.play();
-            
-            
             this.time.delayedCall(1400, () => {
-                backGroundAudio.stop(); 
+                backGroundAudio.stop();
                 this.scene.start('HistoriaInicialScene');
             });
-        }); //Cambia a la scene Juego
+        };
+
+        this.input.keyboard.on('keydown', avanzar);
+        this.input.on('pointerdown', avanzar);
     }
 }
 

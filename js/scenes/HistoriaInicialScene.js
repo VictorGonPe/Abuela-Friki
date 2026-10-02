@@ -111,16 +111,19 @@ class HistoriaInicialScene extends Phaser.Scene {
             });
         });
     
-        // Pulsar SPACE para saltar
-        const spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-        spaceKey.on('down', () => {
+        const saltarIntro = () => {
             historiaAudio.stop();
             this.scene.start('MenuScene');
-        });
-    
+        };
+
+        // Pulsar SPACE o tocar pantalla para saltar
+        const spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        spaceKey.on('down', saltarIntro);
+        this.input.on('pointerdown', saltarIntro);
+
         // Al finalizar el audio, ir al menú
         historiaAudio.on('complete', () => {
-            this.scene.start('GameScene');
+            this.scene.start('MenuScene');
         });
     }
     

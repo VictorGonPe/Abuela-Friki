@@ -61,8 +61,8 @@ Flujo de escenas: Inicio → HistoriaInicial → Menu → Controles → Game. Aj
 
 Borra cada punto de esta lista cuando quede resuelto.
 
-- `createTouchControls` se llama en `GameScene.js:485` pero no está definida en ningún sitio: en cualquier dispositivo con pantalla táctil la escena falla al crearse.
-- Inicio, HistoriaInicial y Controles solo avanzan con teclado.
+- ~~`createTouchControls` se llama en `GameScene.js:485` pero no está definida en ningún sitio~~ — resuelto en Fase 3.
+- ~~Inicio, HistoriaInicial y Controles solo avanzan con teclado~~ — resuelto en Fase 3.
 - El estado de la partida (`puntos`, `salud`, `galletasDisponibles`, `isTransformed`…) vive en variables de módulo al principio de `GameScene.js`. `scene.restart()` no las reinicia, y eso hoy se aprovecha para conservar puntos y galletas al perder una vida. Tenlo en cuenta antes de mover nada.
 - Todo se calcula una sola vez con `window.innerHeight` al cargar. Cambiar el tamaño de la ventana o girar el dispositivo descuadra el juego. En pantallas pequeñas la abuela traspasa el suelo al andar.
 - Al transformarse en Wukong el sprite cambia de 378 px a 470 px de alto y el origen no se recalcula: la abuela queda ligeramente hundida en el suelo. Se corrige en Fase 2 junto con el resto del sistema de escala.
