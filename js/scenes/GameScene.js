@@ -4,6 +4,7 @@ import Enemigos from '../enemigos.js';
 import CollisionManager from '../collisionManager.js';
 import entrada from '../entrada.js';
 import { BARCELONA } from '../niveles/barcelona.js';
+import { aplicarHover } from '../ui/botonTexto.js';
 
 const altScale = 1; // Siempre 1: altura de diseño fija a 1080px (Phaser.Scale.FIT)
 var player;
@@ -896,17 +897,7 @@ gameOver() {
         }
     ).setOrigin(0.5).setInteractive().setDepth(3);
 
-    // Efecto al pasar el mouse sobre el botón
-    restartButton.on('pointerover', () => {
-        restartButton.setStyle({ color: '#FF0000' }); 
-        restartButton.setScale(1.2); // Aumenta el tamaño del texto
-    });
-    
-    // Efecto al salir del botón
-    restartButton.on('pointerout', () => {
-        restartButton.setStyle({ color: '#ffffff' }); // Vuelve al color original
-        restartButton.setScale(1); // Restaura el tamaño original
-    });
+    aplicarHover(restartButton);
     
 
     // Al hacer clic en el botón, reiniciar el juego (init() resetea todo a defaults)
@@ -932,17 +923,7 @@ gameOver() {
         }
     ).setOrigin(0.5).setInteractive().setDepth(3);
     
-    // Efecto al pasar el mouse sobre el botón
-    menuButton.on('pointerover', () => {
-        menuButton.setStyle({ color: '#FF0000' }); 
-        menuButton.setScale(1.2); // Aumenta el tamaño del texto
-    });
-    
-    // Efecto al salir del botón
-    menuButton.on('pointerout', () => {
-        menuButton.setStyle({ color: '#ffffff' }); // Vuelve al color original
-        menuButton.setScale(1); // Restaura el tamaño original
-    });
+    aplicarHover(menuButton);
 
     menuButton.on('pointerdown', () => {
         this.scene.start('MenuScene');
@@ -1124,17 +1105,7 @@ mostrarPantallaVictoria() {
         }
     ).setOrigin(0.5).setInteractive().setDepth(10);
 
-     // Efecto al pasar el mouse sobre el botón
-     menuButton.on('pointerover', () => {
-        menuButton.setStyle({ color: '#FF0000' }); 
-        menuButton.setScale(1.2); // Aumenta el tamaño del texto
-    });
-    
-    // Efecto al salir del botón
-    menuButton.on('pointerout', () => {
-        menuButton.setStyle({ color: '#ffffff' }); // Vuelve al color original
-        menuButton.setScale(1); // Restaura el tamaño original
-    });
+    aplicarHover(menuButton);
 
     menuButton.on('pointerdown', () => {
         this.scene.start('MenuScene'); // Cambiar a la escena del menú principal

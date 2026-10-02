@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { aplicarHover } from '../ui/botonTexto.js';
 
 class MenuScene extends Phaser.Scene {
     constructor() {
@@ -35,17 +36,7 @@ class MenuScene extends Phaser.Scene {
             padding: { left: 5, right: 5, top: 5, bottom: 5},
         }).setOrigin(0.5).setInteractive();
 
-         // Efecto al pasar el mouse sobre el botón
-        startButton.on('pointerover', () => {
-            startButton.setStyle({ color: '#FF0000' }); 
-            startButton.setScale(1.2); // Aumenta el tamaño del texto
-        });
-
-        // Efecto al salir del botón
-        startButton.on('pointerout', () => {
-            startButton.setStyle({ color: '#ffffff' }); // Vuelve al color original
-            startButton.setScale(1); // Restaura el tamaño original
-        });
+        aplicarHover(startButton);
 
   
 
@@ -57,17 +48,7 @@ class MenuScene extends Phaser.Scene {
             padding: { left: 5, right: 5, top: 5, bottom: 5},
         }).setOrigin(0.5).setInteractive();
 
-          // Efecto al pasar el mouse sobre el botón
-          settingsButton.on('pointerover', () => {
-            settingsButton.setStyle({ color: '#FF0000' }); 
-            settingsButton.setScale(1.2); // Aumenta el tamaño del texto
-        });
-
-        // Efecto al salir del botón
-        settingsButton.on('pointerout', () => {
-            settingsButton.setStyle({ color: '#ffffff' }); // Vuelve al color original
-            settingsButton.setScale(1); // Restaura el tamaño original
-        });
+        aplicarHover(settingsButton);
 
 
         // Acciones de los botones
