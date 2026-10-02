@@ -37,6 +37,21 @@ Registro de estado por fase y pendientes concretos. Se actualiza al terminar cad
 
 ---
 
+## Fase 4 · Niveles como datos — EN PROGRESO
+
+### Pasos completados
+- **Paso 1** — datos de Barcelona a `js/niveles/barcelona.js` (commit 3bf3316)
+- **Paso 2** — manifiesto de assets + CargaScene con barra de progreso (commit incluido en rama)
+- **Paso 3** — helper `aplicarHover` en `js/ui/botonTexto.js`; 5 bloques duplicados eliminados en MenuScene y GameScene (commit dca8876)
+
+### Pasos pendientes (uno por conversación)
+4. Pasar el estado de módulo a propiedades de la escena inicializadas en `init()` — conservar el comportamiento: puntos y galletas se mantienen al perder una vida, se reinician en game over
+5. Extraer el HUD (puntos, salud, vidas, galletas, barra de transformación) a una clase
+6. Extraer la abuela (movimiento, salto, transformación, daño) a una clase
+7. Código muerto: preguntar a Víctor antes de borrar `colisionPatinete`, `colisionPaloma` y las plataformas móviles
+
+---
+
 ## Fases completadas
 
 | Fase | Commit | Notas |
@@ -44,7 +59,7 @@ Registro de estado por fase y pendientes concretos. Se actualiza al terminar cad
 | 0 · Preparar el terreno | ce72e23 | Rama desarrollo, gitignore, CLAUDE.md, docs |
 | 1 · Vite y dependencias locales | 588e24b | Vite, Phaser local, ESLint, fuente Bangers local |
 | 2 · Resolución fija y estado | 640d7d1 | 1080px fijos, FIT, estado en init(), altScale = 1 |
-| 3 · Entrada unificada | pendiente commit | entrada.js, botones táctiles, texto ControlesScene por dispositivo |
+| 3 · Entrada unificada | 3bf3316 | entrada.js, botones táctiles, texto ControlesScene por dispositivo |
 
 ---
 
