@@ -37,7 +37,7 @@ class ControlesScene extends Phaser.Scene {
             }
         ).setOrigin(0.5);
 
-        const continuar = () => this.scene.start('GameScene');
+        const continuar = () => this.scene.start('CargaScene');
         const spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
         spaceKey.on('down', continuar);
         this.input.on('pointerdown', continuar);

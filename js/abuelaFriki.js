@@ -14,6 +14,7 @@ import HistoriaInicialScene from './scenes/HistoriaInicialScene.js';
 import MenuScene from './scenes/MenuScene.js';
 import AjustesScene from './scenes/AjustesScene.js';
 import ControlesScene from './scenes/ControlesScene.js';
+import CargaScene from './scenes/CargaScene.js';
 
 
 
@@ -45,7 +46,7 @@ var config = {
     }
     */
    //Especie de máquina de estados
-    scene: [InicioScene, HistoriaInicialScene, MenuScene, ControlesScene, GameScene, AjustesScene],
+    scene: [InicioScene, HistoriaInicialScene, MenuScene, ControlesScene, CargaScene, GameScene, AjustesScene],
 };
 
 
