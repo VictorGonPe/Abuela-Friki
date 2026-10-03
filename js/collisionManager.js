@@ -16,17 +16,16 @@ export default class CollisionManager {
             this.scene.colisionCacaSound.play();
         }
         // Reducir la salud del jugador
-        this.scene.salud -= 15;
-        if (this.scene.salud <= 0) {
-            this.scene.salud = 0;
-            this.scene.verificaMuerte(); // Verificar si la salud llegó a cero y activar la lógica de muerte
+        this.scene.abuela.salud -= 15;
+        if (this.scene.abuela.salud <= 0) {
+            this.scene.abuela.salud = 0;
+            this.scene.verificaMuerte();
         } else {
             this.scene.time.delayedCall(2000, () => {
-                this.tocandoCaca = false; // Permitir nuevas colisiones
+                this.tocandoCaca = false;
             });
         }
-        // Actualizar la barra de salud en pantalla
-        this.scene.actualizarBarraSalud(this.scene.salud);
+        this.scene.hud.actualizarSalud(this.scene.abuela.salud);
         // Destruir la caca
         if (caca && caca.body) {
             caca.body.enable = false;

@@ -6,10 +6,10 @@ import entrada from '../entrada.js';
 import { BARCELONA } from '../niveles/barcelona.js';
 import { aplicarHover } from '../ui/botonTexto.js';
 import HUD from '../ui/hud.js';
+import Abuela from '../abuela.js';
 
 const altScale = 1; // Siempre 1: altura de diseño fija a 1080px (Phaser.Scale.FIT)
 const sueloAltura = 50;
-const tiempoTransformacion = 60000;
 const LEVEL_WIDTH = BARCELONA.anchoNivel; // Ancho total del nivel (definido en barcelona.js)
 
 
@@ -24,15 +24,8 @@ class GameScene extends Phaser.Scene {
         this.puntos = data?.puntos ?? 0;
         this.galletasDisponibles = data?.galletasDisponibles ?? 10;
         this.vidas = data?.vidas ?? 3;
-        // El resto siempre se reinicia
-        this.salud = 100;
-        this.isInvulnerable = false;
-        this.isTransformed = false;
-        this.dobleSalto = false;
-        this.saltosRestantes = 2;
-        this.saltando = false;
-        this.transformacionRestante = tiempoTransformacion;
-        this.haMuerto = false;
+        // El estado de la abuela (salud, invulnerabilidad, transformación, etc.)
+        // se reinicia al crear la instancia de Abuela en create()
     }
 
     create() {
@@ -118,87 +111,8 @@ BARCELONA.plataformas.forEach(p => {
 
     // __________________________________CREAR ABUELA___________________________________________
 
-    this.player = this.physics.add.sprite(BARCELONA.jugadorInicio.x, BARCELONA.jugadorInicio.y, 'abuelaMovimiento1').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1);
-    // 10500 Zona cafeteria //13500 Zona Sagrada //21000 Agbar obras
-    // Ajustar el cuerpo físico del jugador
-    this.player.body.setSize(130, 320).setOffset(50 * altScale, 70 * altScale); // Ajusta tamaño y desplazamiento
-    // Configurar físicas del jugador
-    this.player.setBounce(0.2);
-    this.player.setCollideWorldBounds(true); //Evita que se salgo de los limites del escenario
-    //const playerScale = this.scale.height / 800;// Escala el personaje segun el tamaño de la pantalla
-    //player.setScale(playerScale);
-
-    // Hacer que la cámara siga al jugador
-    this.cameras.main.startFollow(this.player);
-
-
-    // Anims: propiedad de phaser para animar. Animaciones de la abuela
-    this.anims.create({
-        key: 'left',
-        frames: this.anims.generateFrameNumbers('abuelaMovimiento1', { start: 0, end: 20 }),
-        frameRate: 30,
-        repeat: -1
-    });
-
-    this.anims.create({
-        key: 'abuelaIdle',
-        frames: this.anims.generateFrameNumbers('abuelaQuieta', { start: 0, end: 12 }),
-        frameRate: 4,
-        repeat: -1
-    });
-
-    this.anims.create({
-        key: 'right',
-        frames: this.anims.generateFrameNumbers('abuelaMovimiento1', { start: 0, end: 20 }),
-        frameRate: 30,
-        repeat: -1
-    });
-
-    this.anims.create({
-        key: 'jump',
-        frames: this.anims.generateFrameNumbers('abuelaMovimiento2', { start: 4, end: 10 }), // Rango para salto
-        frameRate: 14,
-        repeat: 0 // Sin bucle, se ejecuta una vez por salto
-    });
-    
-    this.anims.create({
-        key: 'muerte',
-        frames: this.anims.generateFrameNumbers('abuelaMuerte', { start: 0, end: 5 }), // Cambia los valores según tu spritesheet
-        frameRate: 10,
-        repeat: -1 // Sin bucle, se ejecuta una vez
-    });
-
-    // Animaciones de la transformación
-    this.anims.create({
-        key: 'transformWukong',
-        frames: this.anims.generateFrameNumbers('abuelaTWukong', { start: 0, end: 8 }),
-        frameRate: 8,
-        repeat: 0
-    });
-
-    // Crear la animación de idle (quieta) en la forma transformada
-    this.anims.create({
-        key: 'idleWukong',
-        frames: this.anims.generateFrameNumbers('abuelaQuietaWukong', { start: 0, end: 12 }),
-        frameRate: 4,
-        repeat: -1
-    });
-
-    // Crear la animación de andar en la forma transformada
-    this.anims.create({
-        key: 'walkWukong',
-        frames: this.anims.generateFrameNumbers('abuelaMov1Wukong', { start: 0, end: 20 }),
-        frameRate: 30,
-        repeat: -1
-    });
-
-    // Crear la animación de andar en la forma transformada
-    this.anims.create({
-        key: 'jumpWukong',
-        frames: this.anims.generateFrameNumbers('abuelaMov2Wukong', { start: 0, end: 6 }),
-        frameRate: 14,
-        repeat: 0
-    });
+    this.abuela = new Abuela(this, BARCELONA.jugadorInicio.x, BARCELONA.jugadorInicio.y);
+    this.player = this.abuela.sprite; // Alias para colisiones y compatibilidad
 
    
     // Instancias a la clase
@@ -369,7 +283,7 @@ BARCELONA.plataformas.forEach(p => {
     // __________________________________HUD__________________________________________
     this.hud = new HUD(this, {
         puntos: this.puntos,
-        salud: this.salud,
+        salud: this.abuela.salud,
         vidas: this.vidas,
         galletasDisponibles: this.galletasDisponibles,
     });
@@ -456,44 +370,21 @@ BARCELONA.plataformas.forEach(p => {
 
     //________________________________UPDATE__________________________________
     update() {
-    
-       
-        this.movimientosAbuela();  
-        this.updateParallax(); //Controla desplazamientos, fondos, monumentos, enemigos, etc.
-        //this.updateMovingPlatforms();
-
-        
-        // Restablecer el doble salto cuando toque el suelo
-        if (this.player.body.touching.down) {
-            this.dobleSalto = false;
-        }
-
+        this.abuela.actualizar();
+        this.updateParallax();
 
         if (this.player.x >= BARCELONA.finNivel * altScale && !this.nivelCompletado) {
-            this.nivelCompletado = true; // Asegurarte de que esto ocurra solo una vez
-            this.nivel1Completado(); // Llama a la función que maneja el fin del nivel
+            this.nivelCompletado = true;
+            this.nivel1Completado();
         }
-        
 
-        const limiteInferior = this.scale.height - 10; // Ajusta este valor según el diseño del nivel
+        const limiteInferior = this.scale.height - 10;
         if (this.player.y > limiteInferior) {
-            this.salud = 0; 
+            this.abuela.salud = 0;
         }
 
         this.verificaMuerte();
-
-            // Calcular el ancho actual de la barra basado en el tiempo restante
-            //const anchoBarra = (140 * transformacionRestante) / tiempoTransformacion;
-
-            if (this.isTransformed && this.hud.barraTransformacion) {
-                this.transformacionRestante -= this.game.loop.delta; // Reducir tiempo segun frames
-                if (this.transformacionRestante <= 0) {
-                    this.transformacionRestante = 0;
-                    this.revertirTransformacion(); // Revertir cuando el tiempo se acabe
-                }
-
-                this.hud.dibujarBarraTransformacion(this.transformacionRestante, tiempoTransformacion);
-            }
+        this.abuela.actualizarTransformacion(this.game.loop.delta);
     }
         
     
@@ -503,23 +394,17 @@ BARCELONA.plataformas.forEach(p => {
 //___________________________________METODOS GAME_________________________________
 
 colisionPaloma(player, paloma) {
+    if (!this.abuela.recibirDano(10)) return;
 
-    if (this.isInvulnerable) {
-        return; // No aplicar daño si la abuela es invulnerable
-    }
-
-    if (this.isSoundOn && this.abuelaGolpeSound) { // Reproducir el sonido de golpe
+    if (this.isSoundOn && this.abuelaGolpeSound) {
         this.abuelaGolpeSound.play();
     }
 
-    this.salud -= 10; // Reducir la salud
-    if (this.salud < 0) this.salud = 0; // Asegurar que no sea negativa
-    this.actualizarBarraSalud(this.salud); // Actualizar la barra de salud
+    this.hud.actualizarSalud(this.abuela.salud);
 
     // Crear la animación de explosión en la posición de la paloma
     const explosion = this.add.sprite(paloma.x, paloma.y, 'explosion')
         .setScale(0.5 * altScale)
-        //.setDepth(10); // Asegurar que esté visible sobre otros elementos
 
     explosion.play('efectoExplosion', true);
 
@@ -530,86 +415,46 @@ colisionPaloma(player, paloma) {
         this.gritoPajaros[sonidoAleatorio].play();
     }
 
-    // Verificar eventos de animación
-    explosion.on('animationstart', () => console.log('Animación iniciada'));
-    explosion.on('animationcomplete', () => {   
-    explosion.destroy(); // Destruir el sprite tras la animación
+    explosion.on('animationcomplete', () => {
+        explosion.destroy();
     });
 
-    // Hacer a la abuela invulnerable
-    this.isInvulnerable = true;
+    paloma.destroy();
 
-    for (let i = 0; i < 5; i++) {
-        this.time.delayedCall(200 * i, () => {
-            player.visible = !player.visible; // Alternar visibilidad
-        });
-    }
-    // Asegurarse de que quede visible al final del parpadeo
-    this.time.delayedCall(1000, () => {
-        player.visible = true;
-        this.isInvulnerable = false; // Termina invulnerabilidad
-    });
-
-    paloma.destroy(); // Destruir la paloma
-
-    // Sumar puntos y actualizar el texto
-    this.puntos += 10; // Añadir 10 puntos
+    this.puntos += 10;
     this.hud.actualizarPuntos(this.puntos);
 
-    this.verificaMuerte(); //Si llega a 0 verifica y activa animacion muerte
-
-
+    this.verificaMuerte();
 }
 
 colisionPatinete(player, patinete) {
-    if (this.isInvulnerable) {
-        return; // No aplicar daño si la abuela es invulnerable
-    }
+    if (!this.abuela.recibirDano(30)) return;
 
     if (this.isSoundOn && this.choquePatineteSound) {
         this.choquePatineteSound.play();
     }
 
-    this.salud -= 30; // Reducir la salud
-    if (this.salud < 0) this.salud = 0; // Asegurar que no sea negativa
-    this.actualizarBarraSalud(this.salud); // Actualizar la barra de salud
-    
+    this.hud.actualizarSalud(this.abuela.salud);
+
     // Reducir puntos
     this.puntos -= 20;
     if (this.puntos < 0) this.puntos = 0;
     this.hud.actualizarPuntos(this.puntos);
-    
-    // Hacer a la abuela invulnerable
-    this.isInvulnerable = true;
-    player.setTint(0xff0000); // Cambiar color como indicativo de daño
 
-    // Hacer que parpadee durante el período de invulnerabilidad
-    for (let i = 0; i < 5; i++) {
-        this.time.delayedCall(200 * i, () => {
-            player.visible = !player.visible; // Alternar visibilidad
-        });
-    }
-
-    // Restaurar visibilidad y eliminar invulnerabilidad después del tiempo
+    // Tinte rojo como indicativo de daño (el parpadeo lo gestiona recibirDano)
+    this.player.setTint(0xff0000);
     this.time.delayedCall(1000, () => {
-        player.visible = true; // Asegurarse de que sea visible
-        this.isInvulnerable = false; // Termina invulnerabilidad
-        player.clearTint(); // Quitar el color
+        this.player.clearTint();
     });
-    this.verificaMuerte();
-}
 
-actualizarBarraSalud(valor) {
-    this.hud.actualizarSalud(valor);
+    this.verificaMuerte();
 }
 
 recogerPastilla(player, pastilla) {
     console.log('¡Has recogido una pastilla!');
-    // Subir salud, pero no más de 100
-    this.salud = Math.min(this.salud + 20, 100);
-    this.actualizarBarraSalud(this.salud);
+    this.abuela.salud = Math.min(this.abuela.salud + 20, 100);
+    this.hud.actualizarSalud(this.abuela.salud);
     pastilla.destroy();
-
 }
 
 generarPastillas(cantidad) {
@@ -630,107 +475,6 @@ generarFrascosGalletas(cantidad) {
         frasco.body.setAllowGravity(true); // Sin gravedad para los frascos
     }
 }
-
-movimientosAbuela() {
-    //******* MOVIMIENTOS ********/
-
-    // Bloquear movimientos si el jugador ha muerto o está transformándose
-    if (this.haMuerto || this.isTransforming) {
-        this.player.setVelocityX(0); // Detener el movimiento horizontal
-        return;
-    }
-
-    // Controlar si el jugador está en el suelo
-    let isOnGround = this.player.body.touching.down;
-
-    // Si toca el suelo, restablecer los saltos restantes (Doble Salto)
-    if (isOnGround) {
-        this.saltosRestantes = 2;
-        this.saltando = false; // Reiniciar estado de salto
-        this.dobleSalto = false; // Restablecer estado de doble salto
-    }
-
-    // ABUELA -- Movimiento horizontal
-    if (this.cursors.left.isDown || entrada.izquierda) {
-        this.player.setVelocityX(-300 * altScale);
-        if (isOnGround) this.player.anims.play(this.isTransformed ? 'walkWukong' : 'left', true); // Alterna entre las anim..
-        this.player.flipX = true;
-        if(!this.isTransformed) {
-            this.player.body.setOffset(180, 50); //Compensa el desplazamiento del cuerpo físico abuela Normal ,al no ser centro img
-        }
-    } else if (this.cursors.right.isDown || entrada.derecha) {
-        this.player.setVelocityX(300 * altScale);
-        if (isOnGround) this.player.anims.play(this.isTransformed ? 'walkWukong' : 'right', true);
-        this.player.flipX = false;
-        if(!this.isTransformed) {
-            this.player.body.setOffset(50 ,50);
-        }
-
-    } else {
-        this.player.setVelocityX(0);
-        // Animación idle según el estado de transformación
-        if (isOnGround) {
-            this.player.setOrigin(0.5,1);
-            this.player.anims.play(this.isTransformed ? 'idleWukong' : 'abuelaIdle', true);
-
-        }
-
-    }
-
-    // Lógica de salto
-    const quereSaltar = Phaser.Input.Keyboard.JustDown(this.cursors.up) || (!this.saltando && this.cursors.up.isDown) || entrada.saltar;
-    entrada.saltar = false;
-    if (quereSaltar) {
-        if (isOnGround) {
-            // Salto normal
-            this.jumpSound.play();
-            this.player.setVelocityY(-700 * altScale);
-            this.player.anims.play(this.isTransformed ? 'jumpWukong' : 'jump', true);
-            this.saltosRestantes--; // Reducir los saltos restantes
-            this.saltando = true; // Marcar que el personaje está saltando
-        } else if (this.isTransformed && this.saltosRestantes > 0) {
-            // Doble salto solo en estado transformado
-            this.jumpSound.play();
-            this.player.setVelocityY(-900 * altScale);
-            this.player.anims.play('jumpWukong', true);
-
-            // Efectos visuales o sonoros
-            const emisorParticulas = this.add.particles('particulas').createEmitter({
-                x: this.player.x,
-                y: this.player.y,
-                speed: { min: -100, max: 100 },
-                lifespan: 500,
-                quantity: 1,
-                scale: { start: 1, end: 0 }, // Las partículas se hacen más pequeñas
-
-            }).setScale(0.3 * altScale);
-
-            // Hacer que las partículas sigan al jugador
-            emisorParticulas.startFollow(this.player);
-
-            // Configurar para que el emisor dure solo un instante
-            this.time.delayedCall(1000, () => {
-                emisorParticulas.stop(); // Detener emisión de partículas
-                emisorParticulas.manager.destroy(); // Eliminar el sistema de partículas para liberar memoria
-            });
-
-            this.saltosRestantes--; // Reducir saltos restantes
-        }
-    }
-
-    // Detectar cuando se suelta la tecla de salto para reiniciar el estado de salto
-    if (Phaser.Input.Keyboard.JustUp(this.cursors.up)) {
-        this.saltando = false;
-    }
-
-    // ABUELA -- Lanzar galleta
-    if (Phaser.Input.Keyboard.JustDown(this.keys.lanzarGalleta) || entrada.lanzar) {
-        entrada.lanzar = false;
-        this.lanzarGalleta(); // Lógica para lanzar galleta
-    }
-}
-
-
 
 
 updateParallax() {
@@ -902,37 +646,31 @@ ponerVallasObra(x,y) { //Vallas zona agujeros
 }
 
 verificaMuerte() {
-    //Cuando muere
-    if (this.salud <= 0 && !this.haMuerto)  {
-        this.haMuerto = true;
+    if (this.abuela.salud <= 0 && !this.abuela.haMuerto) {
+        this.abuela.haMuerto = true;
         this.vidas--;
-        this.isTransformed = false; // Volver a estado normal
-        // vidas viaja a través de init() data en scene.restart()
-        //Restarua el cuerpo físico si viene de Wukong
+        this.abuela.isTransformed = false;
+        // Restaura el cuerpo físico si viene de Wukong
         this.player.body.setSize(150, 320).setOffset(50 * altScale, 50 * altScale);
 
         this.hud.actualizarVidas(this.vidas);
-        // Desactivar controles mientras se reproduce la animación
-        this.physics.pause(); // Pausa físicas para evitar movimiento durante la animación
-        this.player.setVelocity(0); // Detener al jugador
-        this.player.anims.play('muerte', true); // Reproducir animación de muerte
+        this.physics.pause();
+        this.player.setVelocity(0);
+        this.player.anims.play('muerte', true);
 
-        this.data.set('isSoundOn', this.isSoundOn); // El estado de sonido sigue en data
-        
-            // Detener la música si está sonando
+        this.data.set('isSoundOn', this.isSoundOn);
+
         if (this.backgroundSound && this.backgroundSound.isPlaying) {
             this.backgroundSound.stop();
         }
 
-        // Reiniciar la escena después de que termine la animación
-        this.time.delayedCall(2000, () => { // Ajusta el tiempo al de la duración de la animación
+        this.time.delayedCall(2000, () => {
             console.log(`Vidas restantes: ${this.vidas}`);
-            if(this.vidas <= 0) {
+            if (this.vidas <= 0) {
                 this.hud.actualizarVidas(this.vidas);
                 this.gameOver();
-            }else{
-                this.physics.world.colliders.destroy(); // Reinicia las colisiones
-                // Pasar puntos y galletas para que sobrevivan a la muerte; init() resetea el resto
+            } else {
+                this.physics.world.colliders.destroy();
                 this.scene.restart({ puntos: this.puntos, galletasDisponibles: this.galletasDisponibles, vidas: this.vidas });
             }
         });
@@ -1035,57 +773,8 @@ crearLunaWukong(x) {
 
 
 recogerLunaWukong(player, luna) {
-    luna.destroy(); // Eliminar la luna
-    this.player.body.setSize(130 * altScale, 150 * altScale).setOffset(100 * altScale, 100 * altScale);
-    this.gritoTransformacion.play();
-
-    if (!this.isTransformed) {
-        this.isTransformed = true; // Controlar el estado de transformación
-        this.isTransforming = true; // Indicar que la transformación está en curso
-        this.transformacionRestante = tiempoTransformacion; // Reiniciar el tiempo de transformación
-
-         // Crear la barra de transformación al recoger la luna
-        this.hud.crearBarraTransformacion();
-        this.hud.dibujarBarraTransformacion(this.transformacionRestante, tiempoTransformacion);
-
-        this.physics.pause(); // Pausar la física de toda la escena
-        this.input.enabled = false; // Deshabilitar las entradas mientras ocurre la transformación
-
-        this.player.play('transformWukong'); // Llama a la animación
-        //this.player.setOrigin(0.5, 1);
-        
-
-        this.player.once('animationcomplete', (anim) => {
-            if (anim.key === 'transformWukong') {
-                this.player.play('idleWukong', true); // Cambiar a idleWukong manualmente
-                if (this.isTransforming == true) {
-                    //this.player.body.setOffset(140 * altScale ,80 * altScale);
-                    this.player.body.setSize(130, 320).setOffset(150 * altScale, 150 * altScale);
-                }
-                
-                //this.player.body.setSize(150 * altScale, 250 * altScale).setOffset(100 * altScale, 110 * altScale);
-                this.isTransforming = false; // Finalizar transformación
-                this.physics.resume(); // Reanudar la física
-                this.input.enabled = true; // Reanudar las entradas
-            }
-        });
-    }
-}
-
-revertirTransformacion() {
-    this.isTransformed = false; // Cambiar el estado a la abuela normal
-
-    // Cambiar el sprite y animación de vuelta a la abuela normal
-    this.player.setTexture('abuelaMovimiento1');
-    this.player.play('abuelaIdle');
-    
-    // Restablecer el cuerpo físico
-    this.player.body.setSize(130, 320).setOffset(50 * altScale, 50 * altScale);
-
-    // Eliminar la barra de transformación
-    this.hud.eliminarBarraTransformacion();
-
-    this.transformacionRestante = tiempoTransformacion; // Reiniciar el tiempo
+    luna.destroy();
+    this.abuela.transformar();
 }
 
 crearBotonesTactiles() {
