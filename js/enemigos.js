@@ -18,12 +18,14 @@ export default class Enemigos {
         this.palomas = this.scene.physics.add.group();
         this.palomasMax = config.max;
 
-        // Generar palomas iniciales
+        // Repartir palomas iniciales por todo el nivel
+        const anchoNivel = this.scene.physics.world.bounds.width;
         for (let i = 0; i < config.inicial; i++) {
-            this.generarPaloma();
+            const x = Phaser.Math.Between(this.scene.scale.width, anchoNivel);
+            this.generarPaloma(x);
         }
 
-        // Spawning continuo
+        // Spawning continuo: nuevas palomas delante de la cámara
         this.scene.time.addEvent({
             delay: config.intervalo,
             loop: true,
@@ -37,12 +39,13 @@ export default class Enemigos {
         this.enemigos.push({ tipo: 'palomas', grupo: this.palomas });
     }
 
-    generarPaloma() {
-        // 1 de cada 4 palomas es roja
-        const esRoja = Phaser.Math.Between(1, 4) === 1;
+    generarPaloma(xFijo) {
+        // 1 de cada 2 palomas es roja
+        const esRoja = Phaser.Math.Between(1, 2) === 1;
 
         const scrollX = this.scene.cameras.main.scrollX;
-        const x = scrollX + this.scene.scale.width + Phaser.Math.Between(50, 300);
+        // Si se pasa una x fija (iniciales), usarla; si no, delante de la cámara
+        const x = xFijo ?? scrollX + this.scene.scale.width + Phaser.Math.Between(50, 300);
         const y = Phaser.Math.Between(100, this.scene.scale.height * 0.5);
 
         const paloma = this.palomas.create(x, y, 'paloma').setScale(0.3 * this.altScale);
@@ -58,22 +61,19 @@ export default class Enemigos {
             paloma.esRoja = true;
             paloma.alturaVuelo = y;
             paloma.enPicado = false;
-            this.programarPicado(paloma);
+            paloma.haPicado = false;
         } else {
             paloma.setVelocityX(Phaser.Math.Between(-150 * this.altScale, -500 * this.altScale));
         }
     }
 
-    programarPicado(paloma) {
-        this.scene.time.delayedCall(Phaser.Math.Between(1500, 3500), () => {
-            if (!paloma.active) return;
-            // Iniciar picado hacia la Y del jugador
-            const jugador = this.scene.player;
-            if (!jugador || !jugador.active) return;
+    iniciarPicado(paloma) {
+        const jugador = this.scene.player;
+        if (!jugador || !jugador.active) return;
 
-            paloma.enPicado = true;
-            paloma.setVelocityY((jugador.y - paloma.y) * 1.5);
-        });
+        paloma.enPicado = true;
+        paloma.haPicado = true;
+        paloma.setVelocityY((jugador.y - paloma.y) * 2.5);
     }
 
     actualizarPalomas(scrollX) {
@@ -84,18 +84,25 @@ export default class Enemigos {
                 return;
             }
 
-            // Paloma roja: volver a altura de vuelo tras el picado
-            if (paloma.esRoja && paloma.enPicado) {
-                if (paloma.y >= paloma.alturaVuelo + 100) {
-                    // Ha bajado lo suficiente, volver arriba
-                    paloma.setVelocityY(-300 * this.altScale);
+            // Paloma roja: iniciar picado cuando entra en el primer 25% visible de la pantalla
+            if (paloma.esRoja && !paloma.haPicado && !paloma.enPicado) {
+                const limiteDerechoVisible = scrollX + this.scene.scale.width;
+                const limitePicado = scrollX + this.scene.scale.width * 0.70;
+                if (paloma.x < limiteDerechoVisible && paloma.x >= limitePicado) {
+                    this.iniciarPicado(paloma);
                 }
-                if (paloma.body.velocity.y < 0 && paloma.y <= paloma.alturaVuelo) {
-                    // Ha vuelto a su altura, estabilizar y programar nuevo picado
-                    paloma.y = paloma.alturaVuelo;
+            }
+
+            // Paloma roja: tras el picado se estabiliza; nunca bajar del suelo
+            if (paloma.esRoja && paloma.enPicado) {
+                const sueloY = this.scene.scale.height - 210 * this.altScale;
+                const jugador = this.scene.player;
+                const alturaObjetivo = jugador ? Math.min(jugador.y, sueloY) : sueloY;
+                if (paloma.y >= alturaObjetivo) {
+                    paloma.y = alturaObjetivo;
                     paloma.setVelocityY(0);
+                    paloma.alturaVuelo = paloma.y;
                     paloma.enPicado = false;
-                    this.programarPicado(paloma);
                 }
             }
         });

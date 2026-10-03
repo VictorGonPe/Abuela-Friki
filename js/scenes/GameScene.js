@@ -544,9 +544,9 @@ gameOver() {
     aplicarHover(restartButton);
     
 
-    // Al hacer clic en el botón, reiniciar el juego (init() resetea todo a defaults)
+    // Al hacer clic en el botón, reiniciar el juego con valores iniciales
     restartButton.on('pointerdown', () => {
-        this.scene.restart();
+        this.scene.restart({ puntos: 0, galletasDisponibles: 10, vidas: 3 });
     });
 
     // Detener música y sonidos si están activos
