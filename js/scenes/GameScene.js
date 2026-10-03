@@ -465,7 +465,7 @@ generarPastillas(cantidad) {
     for (let i = 0; i < cantidad; i++) {
         const x = Phaser.Math.Between(100, LEVEL_WIDTH - 100);
         const y = Phaser.Math.Between(100, this.scale.height - 200);
-        const pastilla = this.pastillas.create(x, y, 'paracetamol').setScale(0.1 * altScale).setBounce(0.5).setDepth(1);
+        const pastilla = this.pastillas.create(x, y, 'paracetamol').setScale(0.2 * altScale).setBounce(0.5).setDepth(1);
         //pastilla.body.setAllowGravity(false);
         pastilla.play('brillarParacetamol'); // Reproducir la animación
     }
@@ -744,7 +744,7 @@ mostrarPantallaVictoria() {
 crearLunaWukong(x) {
     // Crear la luna en la posición `x` y una posición temporal en `y`
     const luna = this.lunasWukong.create(x * altScale, this.scale.height - 200 * altScale, 'lunaWukong')
-        .setScale(0.15  * altScale)
+        .setScale(0.3 * altScale)
         .setBounce(0.5);
 
     // Ajustar la posición `y` para que esté sobre una plataforma o el suelo
