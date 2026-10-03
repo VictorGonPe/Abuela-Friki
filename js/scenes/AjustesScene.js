@@ -1,4 +1,8 @@
 import Phaser from 'phaser';
+import { cargar, guardar } from '../almacenamiento.js';
+import { aplicarHover } from '../ui/botonTexto.js';
+
+const DIFICULTADES = ['Fácil', 'Medio', 'Difícil'];
 
 class AjustesScene extends Phaser.Scene {
     constructor() {
@@ -7,131 +11,97 @@ class AjustesScene extends Phaser.Scene {
 
     preload() {
         this.load.image('menuAjustes', 'assets/historia/menuAjustes.png');
-        this.load.image('backgroundMountain', 'assets/backgroundMountain.png'); // Fondo montañoso
     }
 
     create() {
-        const escalaPantalla = 1;
-        const tamanoFuente = 24 * escalaPantalla;
+        const datos = cargar();
+        const tamano = 28;
+        const centroX = this.scale.width / 2;
 
-        // Asocia la imagen del menú ajustes
-        this.menuAjustes = this.add.image(this.scale.width / 2, this.scale.height / 2, 'menuAjustes')
+        // Fondo
+        this.add.image(centroX, this.scale.height / 2, 'menuAjustes')
             .setOrigin(0.5)
-            .setDisplaySize(this.scale.width, this.scale.height); // Tamaño inicial ajustado al canvas
+            .setDisplaySize(this.scale.width, this.scale.height);
 
-        // Fondo negro para el texto
-        const textoFondo = this.add.graphics();
-        textoFondo.fillStyle(0x000000, 0.7);
-        textoFondo.fillRect(50 * escalaPantalla, 120 * escalaPantalla, this.scale.width / 4 - 5 * escalaPantalla, 500 * escalaPantalla);
+        // Panel semitransparente
+        const panel = this.add.graphics();
+        panel.fillStyle(0x000000, 0.75);
+        panel.fillRoundedRect(centroX - 220, 140, 440, 520, 16);
 
         // Título
-        this.add.text(this.scale.width / 2, 1030 * escalaPantalla, 'Ajustes', {
-            fontSize: `${32 * escalaPantalla}px`,
-            fontStyle: 'bold',
-            color: '#000000',
+        this.add.text(centroX, 180, 'Ajustes', {
+            fontFamily: 'Bangers', fontSize: '42px', color: '#ffd700',
         }).setOrigin(0.5);
 
         // Música
-        let musicOn = true;
-        const musicButton = this.add.text(100 * escalaPantalla, 150 * escalaPantalla, `Música: On`, {
-            fontSize: `${tamanoFuente}px`,
-            fontStyle: 'bold',
-            color: '#ffffff',
-        }).setInteractive();
+        let musicaOn = datos.musicaOn;
+        const btnMusica = this.add.text(centroX, 280, `Música: ${musicaOn ? 'On' : 'Off'}`, {
+            fontFamily: 'Bangers', fontSize: `${tamano}px`, color: '#ffffff',
+            padding: { left: 10, right: 10, top: 8, bottom: 8 },
+        }).setOrigin(0.5).setInteractive();
+        aplicarHover(btnMusica);
 
-        musicButton.on('pointerdown', () => {
-            musicOn = !musicOn;
-            musicButton.setText(`Música: ${musicOn ? 'On' : 'Off'}`);
+        btnMusica.on('pointerdown', () => {
+            musicaOn = !musicaOn;
+            btnMusica.setText(`Música: ${musicaOn ? 'On' : 'Off'}`);
+            guardar({ musicaOn });
         });
 
         // Efectos de sonido
-        let sfxOn = true;
-        const sfxButton = this.add.text(100 * escalaPantalla, 250 * escalaPantalla, `Efectos de Sonido: On`, {
-            fontSize: `${tamanoFuente}px`,
-            fontStyle: 'bold',
-            color: '#ffffff',
-        }).setInteractive();
+        let efectosOn = datos.efectosOn;
+        const btnEfectos = this.add.text(centroX, 360, `Efectos: ${efectosOn ? 'On' : 'Off'}`, {
+            fontFamily: 'Bangers', fontSize: `${tamano}px`, color: '#ffffff',
+            padding: { left: 10, right: 10, top: 8, bottom: 8 },
+        }).setOrigin(0.5).setInteractive();
+        aplicarHover(btnEfectos);
 
-        sfxButton.on('pointerdown', () => {
-            sfxOn = !sfxOn;
-            sfxButton.setText(`Efectos de Sonido: ${sfxOn ? 'On' : 'Off'}`);
-        });
-
-        // Pantalla Completa
-        let isFullscreen = false;
-        const fullscreenButton = this.add.text(100 * escalaPantalla, 350 * escalaPantalla, 'Pantalla Completa: Off', {
-            fontSize: `${tamanoFuente}px`,
-            fontStyle: 'bold',
-            color: '#ffffff',
-        }).setInteractive();
-
-        fullscreenButton.on('pointerdown', () => {
-            if (!isFullscreen) {
-                this.scale.startFullscreen();
-                fullscreenButton.setText('Pantalla Completa: On');
-            } else {
-                this.scale.stopFullscreen();
-                fullscreenButton.setText('Pantalla Completa: Off');
-            }
-            isFullscreen = !isFullscreen;
-
-            // Redimensiona elementos inmediatamente
-            this.redimensionarElementos();
+        btnEfectos.on('pointerdown', () => {
+            efectosOn = !efectosOn;
+            btnEfectos.setText(`Efectos: ${efectosOn ? 'On' : 'Off'}`);
+            guardar({ efectosOn });
         });
 
         // Dificultad
-        const difficulties = ['Fácil', 'Medio', 'Difícil'];
-        let currentDifficulty = 1;
+        let dificultad = datos.dificultad;
+        const btnDif = this.add.text(centroX, 440, `Dificultad: ${DIFICULTADES[dificultad]}`, {
+            fontFamily: 'Bangers', fontSize: `${tamano}px`, color: '#ffffff',
+            padding: { left: 10, right: 10, top: 8, bottom: 8 },
+        }).setOrigin(0.5).setInteractive();
+        aplicarHover(btnDif);
 
-        const difficultyText = this.add.text(100 * escalaPantalla, 450 * escalaPantalla, `Dificultad: ${difficulties[currentDifficulty]}`, {
-            fontSize: `${tamanoFuente}px`,
-            fontStyle: 'bold',
-            color: '#ffffff',
-        }).setInteractive();
-
-        difficultyText.on('pointerdown', () => {
-            currentDifficulty = (currentDifficulty + 1) % difficulties.length;
-            difficultyText.setText(`Dificultad: ${difficulties[currentDifficulty]}`);
+        btnDif.on('pointerdown', () => {
+            dificultad = (dificultad + 1) % DIFICULTADES.length;
+            btnDif.setText(`Dificultad: ${DIFICULTADES[dificultad]}`);
+            guardar({ dificultad });
         });
 
-        // Volver al menú principal
-        const backButton = this.add.text(100 * escalaPantalla, 550 * escalaPantalla, 'Volver', {
-            fontSize: `${tamanoFuente}px`,
-            fontStyle: 'bold',
-            color: '#ffffff',
-        }).setInteractive();
+        // Pantalla completa
+        let enPantallaCompleta = this.scale.isFullscreen;
+        const btnFull = this.add.text(centroX, 520, `Pantalla Completa: ${enPantallaCompleta ? 'On' : 'Off'}`, {
+            fontFamily: 'Bangers', fontSize: `${tamano}px`, color: '#ffffff',
+            padding: { left: 10, right: 10, top: 8, bottom: 8 },
+        }).setOrigin(0.5).setInteractive();
+        aplicarHover(btnFull);
 
-        backButton.on('pointerdown', () => {
+        btnFull.on('pointerdown', () => {
+            if (!enPantallaCompleta) {
+                this.scale.startFullscreen();
+            } else {
+                this.scale.stopFullscreen();
+            }
+            enPantallaCompleta = !enPantallaCompleta;
+            btnFull.setText(`Pantalla Completa: ${enPantallaCompleta ? 'On' : 'Off'}`);
+        });
+
+        // Volver
+        const btnVolver = this.add.text(centroX, 610, 'Volver', {
+            fontFamily: 'Bangers', fontSize: `${tamano}px`, color: '#ffffff',
+            padding: { left: 10, right: 10, top: 8, bottom: 8 },
+        }).setOrigin(0.5).setInteractive();
+        aplicarHover(btnVolver);
+
+        btnVolver.on('pointerdown', () => {
             this.scene.start('MenuScene');
-        });
-
-        // Escuchar eventos de redimensionamiento y limpiar al salir
-        this.scale.on('resize', () => this.redimensionarElementos());
-        this.events.once('shutdown', () => {
-            this.scale.off('resize', this.redimensionarElementos, this);
-        });
-    }
-
-    
-    // Método para redimensionar elementos al cambiar tamaño de pantalla
-     
-    redimensionarElementos() {
-        const newWidth = this.scale.width;
-        const newHeight = this.scale.height;
-        const escalaPantalla = 1;
-
-        // Redimensionar la imagen del menú ajustes
-        if (this.menuAjustes) {
-            this.menuAjustes.setDisplaySize(newWidth, newHeight);
-        }
-
-        // Redimensionar botones y texto
-        const tamanoFuente = 24 * escalaPantalla;
-        const botones = this.children.list.filter(child => child.text);
-
-        botones.forEach((boton, index) => {
-            boton.setFontSize(`${tamanoFuente}px`);
-            boton.setPosition(100 * escalaPantalla, (150 + index * 100) * escalaPantalla);
         });
     }
 }

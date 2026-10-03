@@ -7,6 +7,7 @@ import { BARCELONA } from '../niveles/barcelona.js';
 import { aplicarHover } from '../ui/botonTexto.js';
 import HUD from '../ui/hud.js';
 import Abuela from '../abuela.js';
+import { cargar, guardar } from '../almacenamiento.js';
 
 const altScale = 1; // Siempre 1: altura de diseño fija a 1080px (Phaser.Scale.FIT)
 const sueloAltura = 50;
@@ -317,11 +318,13 @@ BARCELONA.plataformas.forEach(p => {
     valla = this.add.image(5744 * altScale, this.scale.height - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
     valla = this.add.image(5852 * altScale, this.scale.height - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
 
-     //__________________________SONIDOS___________________ 
-    //Crear al final para tener todas las variables asociadas definidas
-    // Recuperar el estado del sonido por defecto "data".
-    this.isSoundOn = this.data.get('isSoundOn') !== undefined ? this.data.get('isSoundOn') : true;
-    //this.isSoundOn = false;
+     //__________________________SONIDOS___________________
+    // Leer ajustes persistentes
+    const ajustes = cargar();
+    this.isSoundOn = ajustes.musicaOn && ajustes.efectosOn;
+    this.musicaOn = ajustes.musicaOn;
+    this.efectosOn = ajustes.efectosOn;
+    this.dificultad = ajustes.dificultad; // 0=fácil, 1=medio, 2=difícil
 
      this.backgroundSound = this.sound.add('backgroundSound', {
         loop: true,
@@ -329,7 +332,7 @@ BARCELONA.plataformas.forEach(p => {
     });
      
     // Iniciar la música si estaba encendida
-    if (this.isSoundOn) {
+    if (this.musicaOn) {
         this.backgroundSound.play();
     }
 
@@ -343,15 +346,17 @@ BARCELONA.plataformas.forEach(p => {
 
       // Activar desactivar sonido
       this.soundButton.on('pointerdown', () => {
-        this.isSoundOn = !this.isSoundOn; // Cambiar el estado global
-        this.data.set('isSoundOn', this.isSoundOn); // Guardar el estado en 'data'
+        this.isSoundOn = !this.isSoundOn;
+        this.musicaOn = this.isSoundOn;
+        this.efectosOn = this.isSoundOn;
+        guardar({ musicaOn: this.isSoundOn, efectosOn: this.isSoundOn });
 
         if (this.isSoundOn) {
-            this.soundButton.setTexture('soundOn'); // Cambiar el ícono
-            this.backgroundSound.play(); // Iniciar música
+            this.soundButton.setTexture('soundOn');
+            this.backgroundSound.play();
         } else {
-            this.soundButton.setTexture('soundOff'); // Cambiar el ícono
-            this.backgroundSound.stop(); // Detener música
+            this.soundButton.setTexture('soundOff');
+            this.backgroundSound.stop();
         }
     });
 
@@ -650,8 +655,6 @@ verificaMuerte() {
         this.physics.pause();
         this.player.setVelocity(0);
         this.player.anims.play('muerte', true);
-
-        this.data.set('isSoundOn', this.isSoundOn);
 
         if (this.backgroundSound && this.backgroundSound.isPlaying) {
             this.backgroundSound.stop();
