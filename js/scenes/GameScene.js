@@ -373,10 +373,25 @@ BARCELONA.plataformas.forEach(p => {
 
 
     this.nivelCompletado = false;
+    this.estaPausado = false;
+    this.elementosPausa = [];
+
+    // Tecla P para pausar
+    this.input.keyboard.addKey('P').on('down', () => this.togglePausa());
+
+    // Botón de pausa táctil (arriba a la izquierda)
+    this.btnPausa = this.add.text(60, 80, '⏸', {
+        fontFamily: 'Bangers', fontSize: '42px', color: '#ffffff',
+        backgroundColor: 'rgba(0,0,0,0.45)',
+        padding: { left: 12, right: 12, top: 6, bottom: 6 },
+    }).setScrollFactor(0).setDepth(2).setInteractive();
+    this.btnPausa.on('pointerdown', () => this.togglePausa());
     }
 
     //________________________________UPDATE__________________________________
     update() {
+        if (this.estaPausado) return;
+
         this.abuela.actualizar();
         this.updateParallax();
 
@@ -397,6 +412,64 @@ BARCELONA.plataformas.forEach(p => {
     
     
 
+
+togglePausa() {
+    if (this.nivelCompletado || this.abuela.haMuerto) return;
+
+    this.estaPausado = !this.estaPausado;
+
+    if (this.estaPausado) {
+        this.physics.pause();
+        if (this.backgroundSound && this.backgroundSound.isPlaying) {
+            this.backgroundSound.pause();
+        }
+
+        const cx = this.cameras.main.worldView.x + this.cameras.main.width / 2;
+        const cy = this.cameras.main.worldView.y + this.cameras.main.height / 2;
+
+        const overlay = this.add.graphics();
+        overlay.fillStyle(0x000000, 0.7);
+        overlay.fillRect(
+            this.cameras.main.worldView.x,
+            this.cameras.main.worldView.y,
+            this.cameras.main.width,
+            this.cameras.main.height
+        );
+        overlay.setDepth(3);
+        this.elementosPausa.push(overlay);
+
+        const titulo = this.add.text(cx, cy - 80, 'PAUSA', {
+            fontFamily: 'Bangers', fontSize: '52px', color: '#ffd700',
+        }).setOrigin(0.5).setDepth(3);
+        this.elementosPausa.push(titulo);
+
+        const btnReanudar = this.add.text(cx, cy + 10, 'Reanudar', {
+            fontFamily: 'Bangers', fontSize: '32px', color: '#ffffff',
+            padding: { left: 10, right: 10, top: 8, bottom: 8 },
+        }).setOrigin(0.5).setInteractive().setDepth(3);
+        aplicarHover(btnReanudar);
+        btnReanudar.on('pointerdown', () => this.togglePausa());
+        this.elementosPausa.push(btnReanudar);
+
+        const btnMenu = this.add.text(cx, cy + 80, 'Menú Principal', {
+            fontFamily: 'Bangers', fontSize: '32px', color: '#ffffff',
+            padding: { left: 10, right: 10, top: 8, bottom: 8 },
+        }).setOrigin(0.5).setInteractive().setDepth(3);
+        aplicarHover(btnMenu);
+        btnMenu.on('pointerdown', () => {
+            this.sound.stopAll();
+            this.scene.start('MenuScene');
+        });
+        this.elementosPausa.push(btnMenu);
+    } else {
+        this.physics.resume();
+        if (this.musicaOn && this.backgroundSound) {
+            this.backgroundSound.resume();
+        }
+        this.elementosPausa.forEach(e => e.destroy());
+        this.elementosPausa = [];
+    }
+}
 
 //___________________________________METODOS GAME_________________________________
 
