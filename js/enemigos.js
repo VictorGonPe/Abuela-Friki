@@ -1,9 +1,10 @@
 import Phaser from 'phaser';
 
 export default class Enemigos {
-    constructor(scene, altScale) {
+    constructor(scene, altScale, multDificultad = 1) {
         this.scene = scene; // Referencia a la escena de Phaser
         this.altScale = altScale; // Escala para ajustar tamaños
+        this.multDificultad = multDificultad; // Multiplicador de dificultad (0.7, 1, 1.3)
         this.enemigos = []; // Array para todos los enemigos
         // Configura las animaciones al crear la clase
         this.configurarAnimaciones();
@@ -55,15 +56,16 @@ export default class Enemigos {
         paloma.body.setSize(paloma.width * 0.7, paloma.height * 0.3)
             .setOffset(paloma.width * 0.07, paloma.height * 0.35);
 
+        const md = this.multDificultad;
         if (esRoja) {
             paloma.setTint(0xff4444);
-            paloma.setVelocityX(Phaser.Math.Between(-400 * this.altScale, -700 * this.altScale));
+            paloma.setVelocityX(Phaser.Math.Between(-400 * this.altScale * md, -700 * this.altScale * md));
             paloma.esRoja = true;
             paloma.alturaVuelo = y;
             paloma.enPicado = false;
             paloma.haPicado = false;
         } else {
-            paloma.setVelocityX(Phaser.Math.Between(-150 * this.altScale, -500 * this.altScale));
+            paloma.setVelocityX(Phaser.Math.Between(-150 * this.altScale * md, -500 * this.altScale * md));
         }
     }
 
@@ -136,7 +138,7 @@ export default class Enemigos {
         const patinete = this.patinetes.create(x, y, 'patinete').setScale(0.45 * this.altScale).setDepth(1);
         patinete.play('moverPatinete');
         patinete.body.setAllowGravity(true); // Activar gravedad
-        patinete.setVelocityX(Phaser.Math.Between(-100 * this.altScale, -500 * this.altScale)); // Velocidad inicial
+        patinete.setVelocityX(Phaser.Math.Between(-100 * this.altScale * this.multDificultad, -500 * this.altScale * this.multDificultad)); // Velocidad inicial
         patinete.body.setSize(patinete.width * 0.8, patinete.height * 0.7).setOffset(patinete.width * 0.1, patinete.height * 0.25); // Ajustar colisión
     }
     
@@ -146,7 +148,7 @@ export default class Enemigos {
             // Si el patinete sale del borde izquierdo, reposicionarlo
             if (patinete.x < scrollX - 50) {
                 patinete.x = scrollX + this.scene.scale.width + 550; // Reposicionar a la derecha
-                patinete.setVelocityX(Phaser.Math.Between(-100 * this.altScale, -500 * this.altScale)); // Nueva velocidad
+                patinete.setVelocityX(Phaser.Math.Between(-100 * this.altScale * this.multDificultad, -500 * this.altScale * this.multDificultad)); // Nueva velocidad
             }
         });
     }

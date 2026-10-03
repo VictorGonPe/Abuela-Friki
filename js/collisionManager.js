@@ -16,7 +16,8 @@ export default class CollisionManager {
             this.scene.colisionCacaSound.play();
         }
         // Reducir la salud del jugador
-        this.scene.abuela.salud -= 15;
+        const multDif = this.scene.multDificultad || 1;
+        this.scene.abuela.salud -= Math.round(15 * multDif);
         if (this.scene.abuela.salud <= 0) {
             this.scene.abuela.salud = 0;
             this.scene.verificaMuerte();

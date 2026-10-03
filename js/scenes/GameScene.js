@@ -118,8 +118,12 @@ BARCELONA.plataformas.forEach(p => {
     this.player = this.abuela.sprite; // Alias para colisiones y compatibilidad
 
    
-    // Instancias a la clase
-    this.enemigosManager = new Enemigos(this, altScale);
+    // Leer dificultad del almacenamiento antes de usarla
+    const ajustesDif = cargar();
+    this.dificultad = ajustesDif.dificultad; // 0=fácil, 1=medio, 2=difícil
+    // Multiplicador de dificultad: 0=fácil(0.7x), 1=medio(1x), 2=difícil(1.3x)
+    this.multDificultad = [0.7, 1, 1.3][this.dificultad];
+    this.enemigosManager = new Enemigos(this, altScale, this.multDificultad);
     this.collisionManager = new CollisionManager(this, this.player, altScale);
     this.colisionPlataformas(); //Colisiones abuela-plataforma
   
@@ -324,7 +328,7 @@ BARCELONA.plataformas.forEach(p => {
     this.isSoundOn = ajustes.musicaOn && ajustes.efectosOn;
     this.musicaOn = ajustes.musicaOn;
     this.efectosOn = ajustes.efectosOn;
-    this.dificultad = ajustes.dificultad; // 0=fácil, 1=medio, 2=difícil
+    // this.dificultad ya se leyó arriba, antes de crear enemigos
 
      this.backgroundSound = this.sound.add('backgroundSound', {
         loop: true,
@@ -379,12 +383,26 @@ BARCELONA.plataformas.forEach(p => {
     // Tecla P para pausar
     this.input.keyboard.addKey('P').on('down', () => this.togglePausa());
 
-    // Botón de pausa táctil (arriba a la izquierda)
-    this.btnPausa = this.add.text(60, 80, '⏸', {
-        fontFamily: 'Bangers', fontSize: '42px', color: '#ffffff',
-        backgroundColor: 'rgba(0,0,0,0.45)',
-        padding: { left: 12, right: 12, top: 6, bottom: 6 },
-    }).setScrollFactor(0).setDepth(2).setInteractive();
+    // Botón de pausa táctil (a la izquierda del botón de sonido)
+    const pausaX = this.soundButton.x - 70 * altScale;
+    const pausaY = this.soundButton.y;
+    const pausaR = 28 * altScale;
+
+    const circuloPausa = this.add.graphics();
+    circuloPausa.fillStyle(0x222222, 0.7);
+    circuloPausa.fillCircle(0, 0, pausaR);
+    circuloPausa.lineStyle(3, 0xffd700, 1);
+    circuloPausa.strokeCircle(0, 0, pausaR);
+    circuloPausa.setScrollFactor(0).setDepth(2);
+    circuloPausa.setPosition(pausaX, pausaY);
+
+    const iconoPausa = this.add.text(pausaX, pausaY, '⏸', {
+        fontFamily: 'Bangers', fontSize: `${Math.round(28 * altScale)}px`, color: '#ffffff',
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(2);
+
+    // Zona interactiva circular
+    this.btnPausa = this.add.zone(pausaX, pausaY, pausaR * 2, pausaR * 2)
+        .setScrollFactor(0).setDepth(2).setInteractive();
     this.btnPausa.on('pointerdown', () => this.togglePausa());
     }
 
@@ -474,7 +492,7 @@ togglePausa() {
 //___________________________________METODOS GAME_________________________________
 
 colisionPaloma(player, paloma) {
-    if (!this.abuela.recibirDano(10)) return;
+    if (!this.abuela.recibirDano(Math.round(10 * this.multDificultad))) return;
 
     if (this.isSoundOn && this.abuelaGolpeSound) {
         this.abuelaGolpeSound.play();
@@ -504,7 +522,7 @@ colisionPaloma(player, paloma) {
 }
 
 colisionPatinete(player, patinete) {
-    if (!this.abuela.recibirDano(30)) return;
+    if (!this.abuela.recibirDano(Math.round(30 * this.multDificultad))) return;
 
     if (this.isSoundOn && this.choquePatineteSound) {
         this.choquePatineteSound.play();
