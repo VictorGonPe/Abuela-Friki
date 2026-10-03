@@ -208,8 +208,8 @@ export const BARCELONA = {
             { key: 'lunaWukong',         ruta: 'assets/lunaWukong.png',              fw: 420,   fh: 390 },
             { key: 'paloma',             ruta: 'assets/paloma1.png',                 fw: 370,   fh: 450 },
             { key: 'explosion',          ruta: 'assets/explosion.png',               fw: 298,   fh: 300 },
-            { key: 'patinete',           ruta: 'assets/patinete.png',               fw: 313.3, fh: 360 },
-            { key: 'caca',               ruta: 'assets/caca.png',                   fw: 345.5, fh: 300 },
+            { key: 'patinete',           ruta: 'assets/patinete.png',               fw: 313,   fh: 360 },
+            { key: 'caca',               ruta: 'assets/caca.png',                   fw: 345,   fh: 300 },
         ],
         audios: [
             { key: 'backgroundSound',    ruta: 'assets/sonidos/pruebaBackground.mp3' },
