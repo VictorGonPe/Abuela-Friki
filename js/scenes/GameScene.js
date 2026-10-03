@@ -688,51 +688,72 @@ nivel1Completado() {
 }
 
 mostrarPantallaVictoria() {
-
+    const cx = this.cameras.main.worldView.x + this.cameras.main.width / 2;
+    const cy = this.cameras.main.worldView.y + this.cameras.main.height / 2;
+    const estiloTexto = { fontFamily: 'Bangers', fontSize: '28px', color: '#ffffff', align: 'center' };
 
     // Fondo negro semitransparente
     const overlay = this.add.graphics();
-    overlay.fillStyle(0x000000, 0.7); // Negro con 70% de opacidad
+    overlay.fillStyle(0x000000, 0.8);
     overlay.fillRect(
         this.cameras.main.worldView.x,
         this.cameras.main.worldView.y,
         this.cameras.main.width,
         this.cameras.main.height
     );
+    overlay.setDepth(10);
 
-    // Mensaje de nivel completado
-    const message = this.add.text(
-        this.cameras.main.worldView.x + this.cameras.main.width / 2,
-        this.cameras.main.worldView.y + this.cameras.main.height / 2 - 50,
-        '¡Has pasado el nivel!\nViajando al siguiente destino.\n\n - En construcción -',
-        {
-            fontSize: '32px',
-            fill: '#ffffff',
-            fontFamily: 'Bangers',
-            padding: { left: 5, right: 5, top: 5, bottom: 5},
-            align: 'center',
-        }
-    ).setOrigin(0.5).setDepth(10);
+    // Título
+    this.add.text(cx, cy - 220, '¡Nivel completado!', {
+        fontFamily: 'Bangers', fontSize: '48px', color: '#ffd700', align: 'center',
+    }).setOrigin(0.5).setDepth(10);
 
-    // Botón para ir al menú principal
-    const menuButton = this.add.text(
-        this.cameras.main.worldView.x + this.cameras.main.width / 2,
-        this.cameras.main.worldView.y + this.cameras.main.height / 2 + 100,
-        'Ir al Menú',
-        {
-            fontSize: '36px',
-            fontFamily: 'Bangers',
-            backgroundColor: '#000000',
-            padding: { left: 10, right: 15, top: 10, bottom: 15},
-        }
-    ).setOrigin(0.5).setInteractive().setDepth(10);
+    // Estrellas según puntuación total
+    let estrellas = 1;
+    if (this.puntos >= 800) estrellas = 2;
+    if (this.puntos >= 1500) estrellas = 3;
+    const estrellasTexto = '★'.repeat(estrellas) + '☆'.repeat(3 - estrellas);
+    this.add.text(cx, cy - 155, estrellasTexto, {
+        fontFamily: 'Bangers', fontSize: '64px', color: '#ffd700',
+    }).setOrigin(0.5).setDepth(10);
 
+    // Desglose de puntos
+    const desglose = [
+        `Puntos en partida:  ${this.puntosBase}`,
+        `Bonus nivel:  +${this.bonusNivel}`,
+        `Bonus vidas (${this.vidas} x 100):  +${this.bonusVidas}`,
+        `──────────────────`,
+        `Total:  ${this.puntos}`,
+    ].join('\n');
+    this.add.text(cx, cy - 30, desglose, {
+        ...estiloTexto, lineSpacing: 8,
+    }).setOrigin(0.5).setDepth(10);
+
+    // Récord
+    const datosGuardados = cargar();
+    const esNuevoRecord = this.puntos > datosGuardados.record;
+    if (esNuevoRecord) {
+        guardar({ record: this.puntos });
+        this.add.text(cx, cy + 100, '¡Nuevo récord!', {
+            fontFamily: 'Bangers', fontSize: '36px', color: '#ff4444',
+        }).setOrigin(0.5).setDepth(10);
+    } else {
+        this.add.text(cx, cy + 100, `Récord: ${datosGuardados.record}`, {
+            ...estiloTexto, color: '#aaaaaa',
+        }).setOrigin(0.5).setDepth(10);
+    }
+
+    // Botón menú
+    const menuButton = this.add.text(cx, cy + 180, 'Ir al Menú', {
+        fontFamily: 'Bangers', fontSize: '36px', color: '#ffffff',
+        backgroundColor: '#333333',
+        padding: { left: 15, right: 15, top: 10, bottom: 10 },
+    }).setOrigin(0.5).setInteractive().setDepth(10);
     aplicarHover(menuButton);
 
     menuButton.on('pointerdown', () => {
-        this.scene.start('MenuScene'); // Cambiar a la escena del menú principal
+        this.scene.start('MenuScene');
     });
-
 } 
 
 crearLunaWukong(x) {

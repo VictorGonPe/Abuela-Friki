@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { aplicarHover } from '../ui/botonTexto.js';
+import { cargar } from '../almacenamiento.js';
 
 class MenuScene extends Phaser.Scene {
     constructor() {
@@ -7,53 +8,53 @@ class MenuScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('menuBackground', 'assets/historia/menuBackground.png'); // Fondo del menú
-        
+        this.load.image('menuBackground', 'assets/historia/menuBackground.png');
     }
 
     create() {
-       
-        // Fondo del menú
-        this.add.image(this.scale.width / 2, this.scale.height / 2, 'menuBackground').setScale(1.08 *  1);
-        const tamanio = 40 * 1;
+        const centroX = this.scale.width / 2;
+        const centroY = this.scale.height / 2;
+        const tamanio = 40;
 
-        // Crear un fondo blanco detrás de los botones
-        const background = this.add.rectangle(
-            this.cameras.main.width / 2,  // Posición X centrada
-            this.cameras.main.height / 2 - 60, // Posición Y centrada
-            500 * tamanio,                          // Ancho
-            this.scale.height + 300,                          // Alto
-            0x000000                      // Color blanco
-        );
-        background.setAlpha(0.5);       // 70% de opacidad
+        // Fondo del menú
+        this.add.image(centroX, centroY, 'menuBackground').setScale(1.08);
+
+        // Panel semitransparente
+        const background = this.add.rectangle(centroX, centroY - 60, 500 * tamanio, this.scale.height + 300, 0x000000);
+        background.setAlpha(0.5);
 
         // Botones del menú
-        const startButton = this.add.text(this.scale.width / 2, this.scale.height / 2.6, 'Iniciar Juego', {
-            fontFamily: 'Bangers',
-            fontSize: tamanio,
-            fontStyle: 'bold',
-            color: '#ffffff',
-            padding: { left: 5, right: 5, top: 5, bottom: 5},
+        const startButton = this.add.text(centroX, centroY - 80, 'Iniciar Juego', {
+            fontFamily: 'Bangers', fontSize: tamanio, fontStyle: 'bold', color: '#ffffff',
+            padding: { left: 5, right: 5, top: 5, bottom: 5 },
         }).setOrigin(0.5).setInteractive();
-
         aplicarHover(startButton);
 
-  
-
-        const settingsButton = this.add.text(this.scale.width / 2, this.scale.height / 2, 'Ajustes', {
-            fontFamily: 'Bangers',
-            fontSize: tamanio,
-            fontStyle: 'bold',
-            color: '#ffffff',
-            padding: { left: 5, right: 5, top: 5, bottom: 5},
+        const settingsButton = this.add.text(centroX, centroY, 'Ajustes', {
+            fontFamily: 'Bangers', fontSize: tamanio, fontStyle: 'bold', color: '#ffffff',
+            padding: { left: 5, right: 5, top: 5, bottom: 5 },
         }).setOrigin(0.5).setInteractive();
-
         aplicarHover(settingsButton);
 
+        startButton.on('pointerdown', () => this.scene.start('ControlesScene'));
+        settingsButton.on('pointerdown', () => this.scene.start('AjustesScene'));
 
-        // Acciones de los botones
-        startButton.on('pointerdown', () => this.scene.start('ControlesScene')); // Cambia a la escena del juego
-        settingsButton.on('pointerdown', () => this.scene.start('AjustesScene')); // Cambia a ajustes
+        // Récord
+        const datos = cargar();
+        if (datos.record > 0) {
+            this.add.text(centroX, centroY + 80, `Récord: ${datos.record}`, {
+                fontFamily: 'Bangers', fontSize: '28px', color: '#ffd700',
+            }).setOrigin(0.5);
+        }
+
+        // Controles
+        const esTactil = this.sys.game.device.input.touch;
+        const textoControles = esTactil
+            ? '← → : Mover  |  ↑ : Saltar  |  X : Galleta'
+            : '← → : Mover  |  ↑ : Saltar  |  X : Galleta  |  P : Pausa';
+        this.add.text(centroX, this.scale.height - 60, textoControles, {
+            fontFamily: 'Bangers', fontSize: '22px', color: '#cccccc', align: 'center',
+        }).setOrigin(0.5);
     }
 }
 
