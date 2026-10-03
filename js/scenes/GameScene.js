@@ -43,6 +43,8 @@ class GameScene extends Phaser.Scene {
 
     // Fondo azul cielo que ocupa todo el nivel ________________________FONDOS___________________________________
     this.add.rectangle(0, 0, LEVEL_WIDTH, this.scale.height, 0x42aaff).setOrigin(0, 0);
+    // Franja negra detrás del suelo para que los huecos se vean negros en vez de azules
+    this.add.rectangle(0, this.scale.height - 180, LEVEL_WIDTH, 250, 0x000000).setOrigin(0, 0);
     // Fondo montañoso que se moverá lentamente
     this.backgroundMountain = this.add.tileSprite(0, this.scale.height - 40, LEVEL_WIDTH, 1080, 'backgroundMountain').setOrigin(0, 1).setScrollFactor(0).setScale(1);
     // Fondo de ciudad que se moverá más rápido
@@ -224,13 +226,13 @@ BARCELONA.plataformas.forEach(p => {
     });
 
     this.physics.add.overlap(this.galletas, this.enemigosManager.patinetes, (galleta, patinete) => {
-        galleta.destroy(); // Elimina la galleta
-        patinete.destroy(); // Elimina el patinete
-        // Reproducir sonido de grito al destruir un patinete
+        galleta.destroy();
+        patinete.destroy();
         if (this.isSoundOn && this.gritoPatineteSound) {
             this.gritoPatineteSound.play();
         }
-        
+        this.puntos += 10;
+        this.hud.actualizarPuntos(this.puntos);
     }); 
 
     this.lanzarGalleta = () => {
@@ -451,9 +453,11 @@ colisionPatinete(player, patinete) {
 }
 
 recogerPastilla(player, pastilla) {
-    console.log('¡Has recogido una pastilla!');
     this.abuela.salud = Math.min(this.abuela.salud + 20, 100);
     this.hud.actualizarSalud(this.abuela.salud);
+    if (this.isSoundOn && this.cogerGalletasSound) {
+        this.cogerGalletasSound.play();
+    }
     pastilla.destroy();
 }
 
@@ -614,17 +618,6 @@ plataformaGrande(x, y) {
 
     plataforma.depth = 1;
     
-    /*
-     // Crear plataformas móviles
-     movingPlatformL = this.physics.add.image(1455 * altScale, this.scale.height - 800 * altScale, 'plataformasL').setScale(0.45 * altScale).refreshBody().setSize(130 * altScale, 15 * altScale);
-     movingPlatformC = this.physics.add.image(1515 * altScale, this.scale.height - 630 * altScale, 'plataformasC').setScale(0.45 * altScale).refreshBody().setSize(750 * altScale, 15 * altScale);
-     movingPlatformR = this.physics.add.image(1575 * altScale, this.scale.height - 800 * altScale, 'plataformasR').setScale(0.45 * altScale).refreshBody().setSize(130 * altScale, 15 * altScale);
- 
-     // Desactivar la gravedad para la plataforma móvil
-     [movingPlatformL, movingPlatformC, movingPlatformR].forEach(platform => {
-         platform.body.setAllowGravity(false).setImmovable(true).setVelocityX(100 * altScale);;
-     });
- */
  
  }
 

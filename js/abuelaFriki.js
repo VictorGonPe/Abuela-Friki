@@ -27,6 +27,7 @@ const ANCHO_JUEGO = Math.round(ALTURA_JUEGO * ratio);
 var config = {
     type: Phaser.AUTO, // Usará webGL y si no admite navegador Canvas
     parent: 'gameContainer',
+    backgroundColor: '#000000',
     scale: {
         mode: Phaser.Scale.FIT,        // Phaser escala el lienzo; el código siempre ve 1080px de alto
         autoCenter: Phaser.Scale.CENTER_BOTH,
@@ -40,11 +41,6 @@ var config = {
             debug: false
         }
     },
-    /*
-    scene: { //Funciones de phaser para crear la escena implementadas en cada escena
-        preload: preload, create: create, update: update
-    }
-    */
    //Especie de máquina de estados
     scene: [InicioScene, HistoriaInicialScene, MenuScene, ControlesScene, CargaScene, GameScene, AjustesScene],
 };
