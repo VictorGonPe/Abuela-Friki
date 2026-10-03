@@ -49,8 +49,8 @@ class CargaScene extends Phaser.Scene {
         assets.imagenes.forEach(({ key, ruta }) => {
             if (!this.textures.exists(key)) this.load.image(key, ruta);
         });
-        assets.spritesheets.forEach(({ key, ruta, fw, fh, spacing }) => {
-            if (!this.textures.exists(key)) this.load.spritesheet(key, ruta, { frameWidth: fw, frameHeight: fh, spacing: spacing || 0 });
+        assets.spritesheets.forEach(({ key, ruta, fw, fh, margin, spacing }) => {
+            if (!this.textures.exists(key)) this.load.spritesheet(key, ruta, { frameWidth: fw, frameHeight: fh, margin: margin || 0, spacing: spacing || 0 });
         });
         assets.audios.forEach(({ key, ruta }) => {
             if (!this.cache.audio.exists(key)) this.load.audio(key, ruta);

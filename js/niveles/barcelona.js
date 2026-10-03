@@ -201,7 +201,7 @@ export const BARCELONA = {
             { key: 'abuelaQuieta',       ruta: 'assets/abuelaIdle.png',              fw: 363,   fh: 378 },
             { key: 'abuelaMuerte',       ruta: 'assets/abuelaMuerte.png',            fw: 363,   fh: 378 },
             { key: 'abuelaTWukong',      ruta: 'assets/abuelaTWukong.png',           fw: 452,   fh: 610 },
-            { key: 'abuelaMov1Wukong',   ruta: 'assets/abuelaAndarWukongPrueba.png', fw: 363,   fh: 470, spacing: 2 },
+            { key: 'abuelaMov1Wukong',   ruta: 'assets/abuelaAndarWukongPrueba.png', fw: 363,   fh: 470, margin: 2, spacing: 4 },
             { key: 'abuelaQuietaWukong', ruta: 'assets/abuelaIdleWukong.png',        fw: 450,   fh: 470 },
             { key: 'abuelaMov2Wukong',   ruta: 'assets/abuelaSaltoWukong.png',       fw: 450,   fh: 470 },
             { key: 'paracetamol',        ruta: 'assets/paracetamol.png',             fw: 275,   fh: 260 },
