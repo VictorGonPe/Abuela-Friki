@@ -232,7 +232,7 @@ BARCELONA.plataformas.forEach(p => {
         if (this.isSoundOn && this.gritoPatineteSound) {
             this.gritoPatineteSound.play();
         }
-        this.puntos += 10;
+        this.puntos += 25;
         this.hud.actualizarPuntos(this.puntos);
     }); 
 
@@ -427,10 +427,6 @@ colisionPaloma(player, paloma) {
     });
 
     paloma.destroy();
-
-    this.puntos += 10;
-    this.hud.actualizarPuntos(this.puntos);
-
     this.verificaMuerte();
 }
 
@@ -442,11 +438,6 @@ colisionPatinete(player, patinete) {
     }
 
     this.hud.actualizarSalud(this.abuela.salud);
-
-    // Reducir puntos
-    this.puntos -= 20;
-    if (this.puntos < 0) this.puntos = 0;
-    this.hud.actualizarPuntos(this.puntos);
 
     // Tinte rojo como indicativo de daño (el parpadeo lo gestiona recibirDano)
     this.player.setTint(0xff0000);
@@ -674,26 +665,26 @@ verificaMuerte() {
 }
 
 nivel1Completado() {
-    // Pausar el juego
     this.physics.pause();
-    // Detener cualquier animación activa de la abuela
     this.player.anims.stop();
-    // Tween para hacer que la abuela desaparezca gradualmente
+
+    // Calcular bonificaciones
+    this.bonusNivel = 500;
+    this.bonusVidas = this.vidas * 100;
+    this.puntosBase = this.puntos;
+    this.puntos += this.bonusNivel + this.bonusVidas;
+
     this.tweens.add({
-        targets: this.player, // realizarlo a player
-        alpha: 0, // Cambiar la opacidad a 0
-        duration: 1500, // Duración del efecto en milisegundos (1.5 segundos)
+        targets: this.player,
+        alpha: 0,
+        duration: 1500,
         onComplete: () => {
-            this.player.setVisible(false); // Esconder el sprite después del tween
+            this.player.setVisible(false);
             this.sound.stopAll();
             this.cacaSaltoSound.stop();
-        
             this.mostrarPantallaVictoria();
         }
     });
-
-
-
 }
 
 mostrarPantallaVictoria() {
