@@ -457,22 +457,28 @@ recogerPastilla(player, pastilla) {
     pastilla.destroy();
 }
 
+// Devuelve una X aleatoria dentro de un bloque de suelo sólido
+xSobreSuelo() {
+    const bloques = BARCELONA.bloquesYHuecos.filter(b => b.ancho !== undefined);
+    const bloque = bloques[Phaser.Math.Between(0, bloques.length - 1)];
+    return Phaser.Math.Between(bloque.x + 50, bloque.x + bloque.ancho - 50);
+}
+
 generarPastillas(cantidad) {
     for (let i = 0; i < cantidad; i++) {
-        const x = Phaser.Math.Between(100, LEVEL_WIDTH - 100);
-        const y = Phaser.Math.Between(100, this.scale.height - 200);
+        const x = this.xSobreSuelo();
+        const y = this.scale.height - 200;
         const pastilla = this.pastillas.create(x, y, 'paracetamol').setScale(0.2 * altScale).setBounce(0.5).setDepth(1);
-        //pastilla.body.setAllowGravity(false);
-        pastilla.play('brillarParacetamol'); // Reproducir la animación
+        pastilla.play('brillarParacetamol');
     }
 }
 
 generarFrascosGalletas(cantidad) {
     for (let i = 0; i < cantidad; i++) {
-        const x = Phaser.Math.Between(200, LEVEL_WIDTH - 200);
-        const y = Phaser.Math.Between(100, this.scale.height - 200);
-        const frasco = this.frascosGalletas.create(x, y, 'frascoGalletas').setScale(0.3 * altScale).setBounce(0.5).setSize(210,200);
-        frasco.body.setAllowGravity(true); // Sin gravedad para los frascos
+        const x = this.xSobreSuelo();
+        const y = this.scale.height - 200;
+        const frasco = this.frascosGalletas.create(x, y, 'frascoGalletas').setScale(0.3 * altScale).setBounce(0.5).setSize(210, 200);
+        frasco.body.setAllowGravity(true);
     }
 }
 
