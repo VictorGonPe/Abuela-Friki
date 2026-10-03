@@ -11,3 +11,5 @@ release/
 CLAUDE.local.md
 .claude/settings.local.json
 assets/default.jpg
+_archivo/
+.playwright-mcp/
