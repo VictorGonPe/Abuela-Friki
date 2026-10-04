@@ -58,7 +58,9 @@ class CargaScene extends Phaser.Scene {
     }
 
     create() {
-        this.scene.start('GameScene');
+        // Objeto vacío a propósito: sin datos, Phaser reutiliza los del último restart
+        // y la partida nueva heredaría vidas, puntos y pesetas de la anterior.
+        this.scene.start('GameScene', {});
     }
 }
 
