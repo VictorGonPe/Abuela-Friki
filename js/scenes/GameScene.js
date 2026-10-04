@@ -25,6 +25,9 @@ class GameScene extends Phaser.Scene {
 
     // init() se llama antes de create() en cada restart. Gestiona el estado persistente.
     init(data) {
+        // El reloj de la escena puede venir parado si se reinició o se salió desde el menú de pausa
+        this.time.paused = false;
+
         // Puntos y galletas sobreviven a perder una vida; se pasan explícitamente en scene.restart()
         this.puntos = data?.puntos ?? 0;
         this.galletasDisponibles = data?.galletasDisponibles ?? 10;
@@ -505,6 +508,9 @@ togglePausa() {
     if (this.nivelCompletado || this.abuela.haMuerto) return;
 
     this.estaPausado = !this.estaPausado;
+    // Para también el reloj de la escena: sin esto los temporizadores que generan palomas
+    // y patinetes siguen corriendo y al reanudar salen todos de golpe
+    this.time.paused = this.estaPausado;
 
     if (this.estaPausado) {
         this.physics.pause();
