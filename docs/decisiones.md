@@ -89,3 +89,11 @@ Una entrada por decisión técnica o de diseño relevante: qué se decidió, por
 **Decisión:** La Farmacia no venderá aspectos (Pirata, Espacial). Lo que se desbloquea con pesetas son dos transformaciones nuevas: Abuela Cibernética y Abuela Verde (estilo Hulk), además de Wukong.
 
 **Por qué:** una transformación cambia cómo se juega; un aspecto solo cambia el dibujo. Pendiente: sprites, y concretar mecánica y precios antes de programar.
+
+## 2026-10-04 · Precios en tres escalones, medidos en partidas
+
+**Decisión:** los consumibles y continuar cuestan 1–2 partidas (100–250 pesetas, como estaban). Desbloquear la Abuela Verde cuesta 600 y la Cibernética 1000; sus técnicas extra, 300 y 400; activar una transformación, 25 y 30 cada vez. Están en `ECONOMIA.transformaciones`.
+
+**Por qué:** una partida normal da unas 110 pesetas. Con los precios anteriores (120 y 150) las dos transformaciones se compraban tras la primera victoria y no quedaba nada por lo que ahorrar. Ahora lo barato enseña a comprar en la primera o segunda partida, las hazañas (1125 en total, una sola vez) pagan más o menos la primera transformación, y la segunda pide seguir jugando, que es donde encajarán los vídeos y los paquetes de la Fase 10.
+
+**Límites:** ninguna transformación de pago es necesaria para terminar un nivel, y sin ofertas con cuenta atrás ni precios que cambian. Son valores de partida: se revisan jugando y cuando haya más niveles. El precio en dinero real se decide en la Fase 10 con la misma medida (cuántas partidas ahorra cada paquete).

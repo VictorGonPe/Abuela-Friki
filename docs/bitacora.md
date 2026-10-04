@@ -94,6 +94,6 @@ Diseño aprobado el 2026-10-03 (economía, precios y hazañas).
 - **Cierre** — probado en emulación táctil a 844 × 390 (21:9) y 1024 × 768 (4:3): menú, La Farmacia, Hazañas, compra con toque, objetos aplicados, andar, saltar y lanzar a la vez, recoger peseta y pausa. `CLAUDE.md` actualizado
 
 ### Pendiente
-- Transformaciones de pago: Abuela Cibernética y Abuela Verde (estilo Hulk). Faltan los sprites y proponer la mecánica y los precios antes de programar. Los aspectos Pirata y Espacial quedan descartados
+- Transformaciones de pago: Abuela Cibernética y Abuela Verde (estilo Hulk). Precios aprobados y anotados en `ECONOMIA.transformaciones`; faltan los sprites y concretar la mecánica antes de programar. Los aspectos Pirata y Espacial quedan descartados
 - Probar jugando las hazañas acumuladas, Turista, Abuela millonaria y Tres estrellas, y que el escudo bloquea un golpe
 - Prueba del «Hecho cuando»: que alguien que no conoce el juego entienda para qué sirven las pesetas

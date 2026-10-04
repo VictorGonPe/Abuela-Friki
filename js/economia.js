@@ -23,6 +23,14 @@ export const ECONOMIA = {
     // Continuar tras un game over: una sola vez por partida
     continuar: { precio: 100, vidas: 1, salud: 50 },
 
+    // Transformaciones de pago. Precios aprobados el 2026-10-04; todavía no se usan:
+    // faltan los sprites y la mecánica. Wukong sigue siendo gratis dentro del nivel.
+    // `desbloquear` se paga una vez; `activar`, cada vez que se usa; `tecnica` es la técnica extra.
+    transformaciones: [
+        { id: 'verde',       nombre: 'Abuela Verde',       desbloquear: 600,  activar: 25, tecnica: 300 },
+        { id: 'cibernetica', nombre: 'Abuela Cibernética', desbloquear: 1000, activar: 30, tecnica: 400 },
+    ],
+
     // Hazañas. El id se guarda en el almacenamiento: no lo cambies sin migrar el guardado.
     // `meta` es la cantidad que hay que alcanzar en las que cuentan algo.
     hazanas: [
