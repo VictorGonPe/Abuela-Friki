@@ -85,10 +85,10 @@ Registro de estado por fase y pendientes concretos. Se actualiza al terminar cad
 Diseño aprobado el 2026-10-03 (economía, precios y hazañas).
 
 ### Pasos completados
-- **Paso 1** — pesetas recogibles en el nivel, contador en el HUD, saldo guardado y visible en el menú, en la victoria y en el game over (sin commit todavía)
+- **Paso 1** — pesetas recogibles en el nivel, contador en el HUD, saldo guardado y visible en el menú, en la victoria y en el game over
+- **Paso 2** — recompensas de fin de nivel: +50 por completar, bonus por estrellas (0/25/75) y +10 por vida, con desglose en la pantalla de victoria
 
-### Pasos pendientes (uno por conversación)
-2. Recompensas de fin de nivel: +50 por completar, bonus por estrellas (0/25/75) y +10 por vida
+### Pasos pendientes
 3. Escena de La Farmacia accesible desde el menú, con los consumibles (galletas extra, escudo, vida extra)
 4. Continuar tras el game over por 100 pesetas (una vez por partida)
 5. Hazañas con aviso en pantalla

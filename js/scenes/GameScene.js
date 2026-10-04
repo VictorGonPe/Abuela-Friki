@@ -882,7 +882,7 @@ mostrarPantallaVictoria() {
     overlay.setDepth(10);
 
     // Título
-    this.add.text(cx, cy - 220, '¡Nivel completado!', {
+    this.add.text(cx, cy - 330, '¡Nivel completado!', {
         fontFamily: 'Bangers', fontSize: '48px', color: '#ffd700', align: 'center',
     }).setOrigin(0.5).setDepth(10);
 
@@ -891,7 +891,7 @@ mostrarPantallaVictoria() {
     if (this.puntos >= 800) estrellas = 2;
     if (this.puntos >= 1500) estrellas = 3;
     const estrellasTexto = '★'.repeat(estrellas) + '☆'.repeat(3 - estrellas);
-    this.add.text(cx, cy - 155, estrellasTexto, {
+    this.add.text(cx, cy - 265, estrellasTexto, {
         fontFamily: 'Bangers', fontSize: '64px', color: '#ffd700',
     }).setOrigin(0.5).setDepth(10);
 
@@ -903,7 +903,7 @@ mostrarPantallaVictoria() {
         `──────────────────`,
         `Total:  ${this.puntos}`,
     ].join('\n');
-    this.add.text(cx, cy - 30, desglose, {
+    this.add.text(cx, cy - 140, desglose, {
         ...estiloTexto, lineSpacing: 8,
     }).setOrigin(0.5).setDepth(10);
 
@@ -912,24 +912,35 @@ mostrarPantallaVictoria() {
     const esNuevoRecord = this.puntos > datosGuardados.record;
     if (esNuevoRecord) {
         guardar({ record: this.puntos });
-        this.add.text(cx, cy + 100, '¡Nuevo récord!', {
+        this.add.text(cx, cy - 10, '¡Nuevo récord!', {
             fontFamily: 'Bangers', fontSize: '36px', color: '#ff4444',
         }).setOrigin(0.5).setDepth(10);
     } else {
-        this.add.text(cx, cy + 100, `Récord: ${datosGuardados.record}`, {
+        this.add.text(cx, cy - 10, `Récord: ${datosGuardados.record}`, {
             ...estiloTexto, color: '#aaaaaa',
         }).setOrigin(0.5).setDepth(10);
     }
 
-    // Pesetas de la partida
+    // Pesetas: las recogidas más las recompensas por completar el nivel
+    const recogidas = this.pesetasPartida;
+    const pesetasEstrellas = ECONOMIA.bonusEstrellas[estrellas - 1];
+    const pesetasVidas = this.vidas * ECONOMIA.bonusPorVida;
+    this.pesetasPartida += ECONOMIA.completarNivel + pesetasEstrellas + pesetasVidas;
     const { ganadas, saldo } = this.ingresarPesetas();
-    this.add.text(cx, cy + 145, `Pesetas: +${ganadas}  (ahorros: ${saldo})`, {
-        ...estiloTexto, color: '#ffd700',
+    const desglosePesetas = [
+        `Pesetas recogidas:  +${recogidas}`,
+        `Nivel completado:  +${ECONOMIA.completarNivel}`,
+        `Estrellas (${estrellas}):  +${pesetasEstrellas}`,
+        `Vidas (${this.vidas} x ${ECONOMIA.bonusPorVida}):  +${pesetasVidas}`,
+        `Total:  +${ganadas} pesetas  (ahorros: ${saldo})`,
+    ].join('\n');
+    this.add.text(cx, cy + 115, desglosePesetas, {
+        ...estiloTexto, color: '#ffd700', lineSpacing: 8,
         padding: { left: 5, right: 5, top: 5, bottom: 5 },
     }).setOrigin(0.5).setDepth(10);
 
     // Botón menú
-    const menuButton = this.add.text(cx, cy + 200, 'Ir al Menú', {
+    const menuButton = this.add.text(cx, cy + 265, 'Ir al Menú', {
         fontFamily: 'Bangers', fontSize: '36px', color: '#ffffff',
         backgroundColor: '#333333',
         padding: { left: 15, right: 15, top: 10, bottom: 10 },
