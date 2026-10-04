@@ -18,7 +18,7 @@ El plan por fases y el diagnóstico del código están en `docs/plan-multiplataf
 
 - `npm run dev` — servidor de desarrollo en `http://localhost:5173`.
 - `npm run build` — compila en `dist/`. `npm run preview` sirve `dist/` en local.
-- `npm run lint` — comprueba errores; solo deben aparecer los dos errores conocidos (`game` en AjustesScene y `createTouchControls` en GameScene).
+- `npm run lint` — comprueba errores; no debe señalar ninguno.
 - Verificar un cambio significa cargar el juego, recorrer el flujo afectado y comprobar que la consola no tiene errores. Con el MCP de Playwright (`.mcp.json`) puedes abrirlo y hacer capturas tú mismo.
 - Hazlo antes de dar una tarea por terminada. Si no has podido verificar algo, dilo claramente en lugar de darlo por bueno.
 - Para probar el táctil en escritorio usa la emulación de dispositivo del navegador.
@@ -33,19 +33,29 @@ js/abuelaFriki.js       Configuración de Phaser y lista de escenas
 js/scenes/              Una escena por archivo; la clave de escena es el nombre de la clase
   InicioScene.js          Pantalla de título
   HistoriaInicialScene.js Intro narrada (3 imágenes y audio)
-  MenuScene.js            Menú principal
+  MenuScene.js            Menú principal (récord y saldo de pesetas)
   ControlesScene.js       Pantalla de controles
-  GameScene.js            Nivel 1 (Barcelona): ~1470 líneas, casi toda la lógica
-  AjustesScene.js         Ajustes (todavía no se guardan ni se aplican)
+  CargaScene.js           Carga los assets del nivel con barra de progreso
+  GameScene.js            Escena de juego (~1150 líneas): partida, pesetas, game over y victoria
+  AjustesScene.js         Ajustes (se guardan con almacenamiento.js)
+  FarmaciaScene.js        La Farmacia: tienda de objetos de inicio de partida
+  HazanasScene.js         Lista de hazañas (logros)
+js/niveles/barcelona.js Datos del nivel: suelo, plataformas, decorado, recogibles y manifiesto de assets
+js/abuela.js            Clase Abuela: movimiento, salto, daño, escudo y transformación
 js/enemigos.js          Clase Enemigos: palomas, patinetes y cacas
 js/collisionManager.js  Clase CollisionManager: solo se usa colisionCaca
 js/monumento.js         Clase Monumento: monumentos con parallax
+js/entrada.js           Estado de entrada compartido por teclado y botones táctiles
+js/almacenamiento.js    Único acceso a localStorage: cargar() valida, guardar() mezcla cambios
+js/economia.js          ECONOMIA: todo lo que se gana y lo que cuesta (pesetas, Farmacia, hazañas)
+js/hazanas.js           Desbloqueo de hazañas y estadísticas acumuladas
+js/ui/                  hud.js, botonTexto.js, peseta.js (moneda dibujada por código), avisoHazana.js
 public/assets/          Imágenes y sonidos (103 MB)
 docs/                   Plan y registro de decisiones
 tools/                  Scripts de apoyo
 ```
 
-Flujo de escenas: Inicio → HistoriaInicial → Menu → Controles → Game. Ajustes se abre desde Menu.
+Flujo de escenas: Inicio → HistoriaInicial → Menu → Controles → Carga → Game. Farmacia, Hazañas y Ajustes se abren desde Menu.
 
 ## Convenciones del código
 
@@ -55,7 +65,11 @@ Flujo de escenas: Inicio → HistoriaInicial → Menu → Controles → Game. Aj
 - El nivel mide 30000 px de diseño de ancho y termina en x = 29600.
 - Profundidades (`depth`): 1 jugador, enemigos y plataformas · 1.5 primer plano (vallas, palomas) · 2 HUD · 3 pantalla de game over · 10 textos sobre todo lo demás.
 - Las claves de assets y animaciones se referencian en varios archivos: no las renombres sin buscar todos los usos.
-- El estado compartido entre escenas (sonido, vidas) se guarda hoy con `this.data` de GameScene.
+- Lo que dura entre sesiones (récord, ajustes, pesetas, inventario, hazañas, estadísticas) pasa siempre por `js/almacenamiento.js`. Un campo nuevo necesita su valor por defecto y su validación en `cargar()`.
+- Lo que sobrevive a perder una vida (puntos, galletas, vidas, pesetas de la partida, seguimiento para hazañas) se pasa explícitamente en `scene.restart({...})` con `continuaPartida: true`. Sin esa marca, `init()` lo trata como partida nueva y gasta los objetos de La Farmacia.
+- Para arrancar una escena sin datos pasa `{}`: con `scene.start(clave)` a secas Phaser reutiliza los datos del arranque anterior.
+- Nombres del juego: la moneda son **pesetas**, la tienda es **La Farmacia** y los logros son **hazañas**. Los precios y recompensas van solo en `js/economia.js`.
+- Las pesetas recogidas se ingresan en el saldo al acabar la partida (victoria o game over); las de las hazañas, en el momento.
 
 ## Trampas conocidas
 
@@ -66,9 +80,12 @@ Borra cada punto de esta lista cuando quede resuelto.
 - ~~El estado de la partida vive en variables de módulo al principio de `GameScene.js`~~ — resuelto en Fase 4 paso 4: todo migrado a `this.xxx` en `init()`.
 - Todo se calcula una sola vez con `window.innerHeight` al cargar. Cambiar el tamaño de la ventana o girar el dispositivo descuadra el juego. En pantallas pequeñas la abuela traspasa el suelo al andar.
 - Al transformarse en Wukong el sprite cambia de 378 px a 470 px de alto y el origen no se recalcula: la abuela queda ligeramente hundida en el suelo. Se corrige en Fase 2 junto con el resto del sistema de escala.
-- `AjustesScene.js:108` usa una variable `game` que no existe en ese módulo: lanza un error en cada cambio de tamaño después de visitar Ajustes.
 - ~~Las palomas son instancias fijas~~ — resuelto en Fase 4: spawning continuo + variante roja con picado.
 - Al menos seis spritesheets en uso superan los 4096 px de ancho, el límite de textura de muchos móviles.
+- Los botones táctiles del nivel están ocultos hasta el primer toque, y ese primer toque no cuenta como pulsación: si cae sobre un botón solo los muestra.
+- La moneda de la peseta es una textura provisional dibujada por código (`js/ui/peseta.js`); falta el sprite definitivo.
+- Los aspectos de la abuela (Pirata y Espacial, 500 pesetas) están aprobados pero sin hacer: faltan los sprites.
+- Para probar el final del nivel sin jugarlo entero, baja temporalmente `finNivel` en `barcelona.js` (por ejemplo a 900) y restáuralo a 29600 antes del commit.
 
 ## Forma de trabajar
 

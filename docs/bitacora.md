@@ -80,7 +80,7 @@ Registro de estado por fase y pendientes concretos. Se actualiza al terminar cad
 
 ---
 
-## Fase 7 · Pesetas, Farmacia y Hazañas — EN PROGRESO
+## Fase 7 · Pesetas, Farmacia y Hazañas — COMPLETADA salvo aspectos
 
 Diseño aprobado el 2026-10-03 (economía, precios y hazañas).
 
@@ -91,6 +91,9 @@ Diseño aprobado el 2026-10-03 (economía, precios y hazañas).
 - **Paso 4** — continuar tras el game over por 100 pesetas, una vez por partida: 1 vida, 50 % de salud, conserva puntos, galletas y monedas recogidas. Empieza desde el principio del nivel, igual que al perder una vida
 - **Paso 5** — Hazañas: 10 logros con aviso en pantalla, pesetas directas al saldo y lista en el menú (`HazanasScene`). Sin probar jugando: las acumuladas (palomas, patinetes, transformaciones), Turista, Abuela millonaria y Tres estrellas
 
-### Pasos pendientes
-6. Aspectos de la abuela (Pirata y Espacial): faltan los sprites
-7. Cerrar la fase: probar en táctil y en 4:3 / 21:9, y actualizar `CLAUDE.md`
+- **Cierre** — probado en emulación táctil a 844 × 390 (21:9) y 1024 × 768 (4:3): menú, La Farmacia, Hazañas, compra con toque, objetos aplicados, andar, saltar y lanzar a la vez, recoger peseta y pausa. `CLAUDE.md` actualizado
+
+### Pendiente
+- Aspectos de la abuela (Pirata y Espacial): faltan los sprites
+- Probar jugando las hazañas acumuladas, Turista, Abuela millonaria y Tres estrellas, y que el escudo bloquea un golpe
+- Prueba del «Hecho cuando»: que alguien que no conoce el juego entienda para qué sirven las pesetas
