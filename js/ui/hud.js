@@ -3,7 +3,7 @@ import Phaser from 'phaser';
 const altScale = 1; // Altura de diseño fija a 1080px
 
 export default class HUD {
-    constructor(scene, { puntos, salud, vidas, galletasDisponibles }) {
+    constructor(scene, { puntos, salud, vidas, galletasDisponibles, pesetas }) {
         this.scene = scene;
 
         // Puntos
@@ -36,6 +36,15 @@ export default class HUD {
             padding: { left: 5, right: 5, top: 5, bottom: 5 },
         }).setScrollFactor(0).setScale(0.8 * altScale).setDepth(2);
 
+        // Pesetas recogidas en esta partida (arriba a la derecha)
+        const ancho = scene.scale.width;
+        this.pesetaIcono = scene.add.image(ancho - 140 * altScale, 30 * altScale, 'peseta')
+            .setScale(0.5 * altScale).setScrollFactor(0).setDepth(2);
+        this.pesetasTexto = scene.add.text(ancho - 118 * altScale, 12 * altScale, `${pesetas}`, {
+            fontFamily: 'Bangers', fontSize: '30px', fill: '#ffffff',
+            padding: { left: 5, right: 5, top: 5, bottom: 5 },
+        }).setScrollFactor(0).setScale(0.8 * altScale).setDepth(2);
+
         // Barra de transformacion (se crea bajo demanda)
         this.barraTransformacion = null;
     }
@@ -60,6 +69,16 @@ export default class HUD {
 
     actualizarGalletas(cantidad) {
         this.galletasTexto.setText(`${cantidad}`);
+    }
+
+    actualizarPesetas(cantidad) {
+        this.pesetasTexto.setText(`${cantidad}`);
+        // Pulso breve del icono para que el cambio de número no pase desapercibido
+        this.scene.tweens.add({
+            targets: this.pesetaIcono,
+            scale: { from: 0.8 * altScale, to: 0.5 * altScale },
+            duration: 200,
+        });
     }
 
     crearBarraTransformacion() {

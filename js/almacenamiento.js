@@ -7,6 +7,7 @@ const VERSION = 1;
 const DEFAULTS = {
     version: VERSION,
     record: 0,
+    pesetas: 0, // saldo de pesetas del jugador
     musicaOn: true,
     efectosOn: true,
     dificultad: 1, // 0 = fácil, 1 = medio, 2 = difícil
@@ -22,6 +23,7 @@ export function cargar() {
         return {
             version: VERSION,
             record:     typeof datos.record === 'number' && datos.record >= 0 ? Math.floor(datos.record) : DEFAULTS.record,
+            pesetas:    typeof datos.pesetas === 'number' && datos.pesetas >= 0 ? Math.floor(datos.pesetas) : DEFAULTS.pesetas,
             musicaOn:   typeof datos.musicaOn === 'boolean' ? datos.musicaOn : DEFAULTS.musicaOn,
             efectosOn:  typeof datos.efectosOn === 'boolean' ? datos.efectosOn : DEFAULTS.efectosOn,
             dificultad: [0, 1, 2].includes(datos.dificultad) ? datos.dificultad : DEFAULTS.dificultad,

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { aplicarHover } from '../ui/botonTexto.js';
 import { cargar } from '../almacenamiento.js';
+import { asegurarTexturaPeseta } from '../ui/peseta.js';
 
 class MenuScene extends Phaser.Scene {
     constructor() {
@@ -46,6 +47,14 @@ class MenuScene extends Phaser.Scene {
                 fontFamily: 'Bangers', fontSize: '28px', color: '#ffd700',
             }).setOrigin(0.5);
         }
+
+        // Saldo de pesetas
+        asegurarTexturaPeseta(this);
+        const textoPesetas = this.add.text(centroX + 20, centroY + 130, `${datos.pesetas} pesetas`, {
+            fontFamily: 'Bangers', fontSize: '28px', color: '#ffd700',
+            padding: { left: 5, right: 5, top: 5, bottom: 5 },
+        }).setOrigin(0.5);
+        this.add.image(textoPesetas.x - textoPesetas.width / 2 - 22, textoPesetas.y, 'peseta').setScale(0.5);
 
         // Controles
         const esTactil = this.sys.game.device.input.touch;

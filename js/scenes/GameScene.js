@@ -8,6 +8,8 @@ import { aplicarHover } from '../ui/botonTexto.js';
 import HUD from '../ui/hud.js';
 import Abuela from '../abuela.js';
 import { cargar, guardar } from '../almacenamiento.js';
+import { ECONOMIA } from '../economia.js';
+import { asegurarTexturaPeseta } from '../ui/peseta.js';
 
 const altScale = 1; // Siempre 1: altura de diseño fija a 1080px (Phaser.Scale.FIT)
 const sueloAltura = 50;
@@ -25,6 +27,10 @@ class GameScene extends Phaser.Scene {
         this.puntos = data?.puntos ?? 0;
         this.galletasDisponibles = data?.galletasDisponibles ?? 10;
         this.vidas = data?.vidas ?? 3;
+        // Las pesetas recogidas también sobreviven a perder una vida. Se guardan los índices
+        // de las ya recogidas para que no reaparezcan, y se ingresan en el saldo al acabar la partida.
+        this.pesetasPartida = data?.pesetasPartida ?? 0;
+        this.pesetasRecogidas = data?.pesetasRecogidas ?? [];
         // El estado de la abuela (salud, invulnerabilidad, transformación, etc.)
         // se reinicia al crear la instancia de Abuela en create()
     }
@@ -287,12 +293,20 @@ BARCELONA.plataformas.forEach(p => {
     
 
 
+    // __________________________________PESETAS__________________________________________
+    asegurarTexturaPeseta(this);
+    this.pesetas = this.physics.add.group({ allowGravity: false });
+    this.crearPesetas(BARCELONA.recogibles.pesetas);
+    this.physics.add.overlap(this.player, this.pesetas, this.recogerPeseta, null, this);
+
+
     // __________________________________HUD__________________________________________
     this.hud = new HUD(this, {
         puntos: this.puntos,
         salud: this.abuela.salud,
         vidas: this.vidas,
         galletasDisponibles: this.galletasDisponibles,
+        pesetas: this.pesetasPartida,
     });
 
 
@@ -558,6 +572,44 @@ recogerPastilla(player, pastilla) {
     pastilla.destroy();
 }
 
+crearPesetas(posiciones) {
+    posiciones.forEach(({ x, y }, indice) => {
+        if (this.pesetasRecogidas.includes(indice)) return;
+        const peseta = this.pesetas.create(x * altScale, this.scale.height - y * altScale, 'peseta').setDepth(1);
+        peseta.indice = indice;
+        this.tweens.add({
+            targets: peseta,
+            y: peseta.y - 12 * altScale,
+            duration: 700,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut',
+        });
+    });
+}
+
+recogerPeseta(player, peseta) {
+    this.pesetasRecogidas.push(peseta.indice);
+    this.tweens.killTweensOf(peseta);
+    peseta.destroy();
+
+    this.pesetasPartida += ECONOMIA.pesetaRecogida;
+    this.hud.actualizarPesetas(this.pesetasPartida);
+    if (this.isSoundOn && this.cogerGalletasSound) {
+        this.cogerGalletasSound.play();
+    }
+}
+
+// Pasa las pesetas de la partida al saldo guardado. Se llama al acabar la partida
+// (victoria o game over); deja el contador a 0 para no ingresarlas dos veces.
+ingresarPesetas() {
+    const ganadas = this.pesetasPartida;
+    this.pesetasPartida = 0;
+    const saldo = cargar().pesetas + ganadas;
+    guardar({ pesetas: saldo });
+    return { ganadas, saldo };
+}
+
 // Devuelve una X aleatoria dentro de un bloque de suelo sólido
 xSobreSuelo() {
     const bloques = BARCELONA.bloquesYHuecos.filter(b => b.ancho !== undefined);
@@ -634,6 +686,19 @@ gameOver() {
     ).setOrigin(0.5).setDepth(3);
 
 
+
+    const { ganadas, saldo } = this.ingresarPesetas();
+    this.add.text(
+        this.cameras.main.worldView.x + this.cameras.main.width / 2,
+        this.cameras.main.worldView.y + this.cameras.main.height / 2 + 50 * altScale,
+        `Pesetas: +${ganadas}  (ahorros: ${saldo})`,
+        {
+            fontSize: `${28 * altScale}px`,
+            fill: '#ffd700',
+            fontFamily: 'Bangers',
+            padding: { left: 5, right: 5, top: 5, bottom: 5},
+        }
+    ).setOrigin(0.5).setDepth(3);
 
     // Mostrar botón para reiniciar el juego
     const restartButton = this.add.text(
@@ -765,7 +830,13 @@ verificaMuerte() {
                 this.gameOver();
             } else {
                 this.physics.world.colliders.destroy();
-                this.scene.restart({ puntos: this.puntos, galletasDisponibles: this.galletasDisponibles, vidas: this.vidas });
+                this.scene.restart({
+                    puntos: this.puntos,
+                    galletasDisponibles: this.galletasDisponibles,
+                    vidas: this.vidas,
+                    pesetasPartida: this.pesetasPartida,
+                    pesetasRecogidas: this.pesetasRecogidas,
+                });
             }
         });
     }
@@ -850,8 +921,15 @@ mostrarPantallaVictoria() {
         }).setOrigin(0.5).setDepth(10);
     }
 
+    // Pesetas de la partida
+    const { ganadas, saldo } = this.ingresarPesetas();
+    this.add.text(cx, cy + 145, `Pesetas: +${ganadas}  (ahorros: ${saldo})`, {
+        ...estiloTexto, color: '#ffd700',
+        padding: { left: 5, right: 5, top: 5, bottom: 5 },
+    }).setOrigin(0.5).setDepth(10);
+
     // Botón menú
-    const menuButton = this.add.text(cx, cy + 180, 'Ir al Menú', {
+    const menuButton = this.add.text(cx, cy + 200, 'Ir al Menú', {
         fontFamily: 'Bangers', fontSize: '36px', color: '#ffffff',
         backgroundColor: '#333333',
         padding: { left: 15, right: 15, top: 10, bottom: 10 },

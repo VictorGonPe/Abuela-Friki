@@ -77,3 +77,19 @@ Registro de estado por fase y pendientes concretos. Se actualiza al terminar cad
 | 10 · Monetización | Vídeos recompensados, compra de orbes |
 | 11 · Publicación | Fichas de tienda, firmas, prueba cerrada |
 | 12 · Escritorio | Electron, Mac y PC, sin anuncios |
+
+---
+
+## Fase 7 · Pesetas, Farmacia y Hazañas — EN PROGRESO
+
+Diseño aprobado el 2026-10-03 (economía, precios y hazañas).
+
+### Pasos completados
+- **Paso 1** — pesetas recogibles en el nivel, contador en el HUD, saldo guardado y visible en el menú, en la victoria y en el game over (sin commit todavía)
+
+### Pasos pendientes (uno por conversación)
+2. Recompensas de fin de nivel: +50 por completar, bonus por estrellas (0/25/75) y +10 por vida
+3. Escena de La Farmacia accesible desde el menú, con los consumibles (galletas extra, escudo, vida extra)
+4. Continuar tras el game over por 100 pesetas (una vez por partida)
+5. Hazañas con aviso en pantalla
+6. Aspectos de la abuela (Pirata y Espacial): faltan los sprites

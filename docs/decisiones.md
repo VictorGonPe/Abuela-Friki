@@ -61,3 +61,11 @@ Una entrada por decisión técnica o de diseño relevante: qué se decidió, por
 **Decisión:** se eliminan las colisiones duplicadas de `CollisionManager`, las plataformas móviles que nunca se crean, las zonas táctiles sin usar y el código comentado.
 
 **Por qué:** no se ejecuta y estorba al leer. Sigue disponible en el historial de git.
+
+## 2026-10-04 · Pesetas: se ingresan al acabar la partida
+
+**Decisión:** las pesetas recogidas en el nivel se cuentan aparte durante la partida y pasan al saldo guardado al terminar (victoria o game over). Salir al menú o reiniciar desde la pausa las pierde. Al perder una vida se conservan y las monedas ya recogidas no reaparecen.
+
+**Por qué:** si se guardaran al recogerlas, bastaría reiniciar una y otra vez para recoger siempre las primeras monedas. Así las pesetas premian jugar la partida hasta el final, se gane o se pierda.
+
+**Detalles:** 18 monedas en posiciones fijas y alcanzables (`recogibles.pesetas` en `barcelona.js`), 1 peseta cada una (`js/economia.js`). La moneda se dibuja por código (`js/ui/peseta.js`) hasta que haya un sprite definitivo.

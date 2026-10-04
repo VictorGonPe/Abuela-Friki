@@ -121,6 +121,28 @@ export const BARCELONA = {
         frascosGalletas: 3,
         pastillas:       3,
         lunasWukong:     [10550],
+        // Pesetas en posiciones fijas y alcanzables; y se cuenta desde abajo.
+        // Las de suelo se recogen andando; las altas premian subir a las plataformas.
+        pesetas: [
+            { x: 700,   y: 190 },
+            { x: 1558,  y: 780 }, // sobre la plataforma doble alta
+            { x: 2500,  y: 190 },
+            { x: 4200,  y: 190 },
+            { x: 6600,  y: 190 },
+            { x: 7700,  y: 190 },
+            { x: 9120,  y: 880 }, // plataforma más alta del agujero grande
+            { x: 12300, y: 190 },
+            { x: 14250, y: 630 }, // plataforma grande de la Sagrada Família
+            { x: 15200, y: 190 },
+            { x: 17500, y: 190 },
+            { x: 19000, y: 190 },
+            { x: 20500, y: 190 },
+            { x: 22240, y: 190 }, // bloques estrechos de la zona de obras
+            { x: 23350, y: 190 },
+            { x: 24500, y: 190 },
+            { x: 26000, y: 190 },
+            { x: 29000, y: 190 },
+        ],
     },
 
     // Manifiesto de assets. CargaScene lo consume para mostrar la barra de progreso.
