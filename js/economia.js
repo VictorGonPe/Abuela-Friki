@@ -19,4 +19,7 @@ export const ECONOMIA = {
     galletasConExtra: 20,
     vidasConExtra: 4,
     duracionEscudo: 10000, // ms
+
+    // Continuar tras un game over: una sola vez por partida
+    continuar: { precio: 100, vidas: 1, salud: 50 },
 };

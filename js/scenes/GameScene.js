@@ -31,6 +31,9 @@ class GameScene extends Phaser.Scene {
         // de las ya recogidas para que no reaparezcan, y se ingresan en el saldo al acabar la partida.
         this.pesetasPartida = data?.pesetasPartida ?? 0;
         this.pesetasRecogidas = data?.pesetasRecogidas ?? [];
+        // Continuar tras un game over (solo una vez por partida) reanuda con menos salud
+        this.continuarUsado = data?.continuarUsado ?? false;
+        this.saludInicial = data?.saludInicial ?? 100;
 
         // Partida nueva (no una vida más de la misma): se gastan los objetos comprados en La Farmacia
         this.escudoInicial = false;
@@ -141,6 +144,7 @@ BARCELONA.plataformas.forEach(p => {
     this.abuela = new Abuela(this, BARCELONA.jugadorInicio.x, BARCELONA.jugadorInicio.y);
     this.player = this.abuela.sprite; // Alias para colisiones y compatibilidad
     if (this.escudoInicial) this.abuela.activarEscudo(ECONOMIA.duracionEscudo);
+    this.abuela.salud = this.saludInicial;
 
    
     // Leer dificultad del almacenamiento antes de usarla
@@ -719,10 +723,12 @@ gameOver() {
         }
     ).setOrigin(0.5).setDepth(3);
 
+    this.crearBotonContinuar(saldo);
+
     // Mostrar botón para reiniciar el juego
     const restartButton = this.add.text(
         this.cameras.main.worldView.x + this.cameras.main.width / 2,
-        this.cameras.main.worldView.y + this.cameras.main.height / 2 * altScale + 100,
+        this.cameras.main.worldView.y + this.cameras.main.height / 2 * altScale + 160,
         'Reiniciar',
         {
             fontSize: `${32  * altScale}px`,
@@ -748,7 +754,7 @@ gameOver() {
     // Opción de volver al menú principal (opcional)
     const menuButton = this.add.text(
         this.cameras.main.worldView.x + this.cameras.main.width / 2,
-        this.cameras.main.worldView.y + this.cameras.main.height / 2 * altScale + 160,
+        this.cameras.main.worldView.y + this.cameras.main.height / 2 * altScale + 220,
         'Menú Principal',
         {
             fontSize: `${32  * altScale}px`,
@@ -762,6 +768,45 @@ gameOver() {
 
     menuButton.on('pointerdown', () => {
         this.scene.start('MenuScene');
+    });
+}
+
+// Opción de seguir la partida pagando pesetas. Solo se ofrece una vez por partida.
+crearBotonContinuar(saldo) {
+    if (this.continuarUsado) return;
+
+    const { precio, vidas, salud } = ECONOMIA.continuar;
+    const x = this.cameras.main.worldView.x + this.cameras.main.width / 2;
+    const y = this.cameras.main.worldView.y + this.cameras.main.height / 2 + 100 * altScale;
+    const estilo = {
+        fontSize: `${32 * altScale}px`,
+        fontFamily: 'Bangers',
+        padding: { left: 5, right: 5, top: 5, bottom: 5 },
+    };
+
+    if (saldo < precio) {
+        this.add.text(x, y, `Continuar: ${precio} pesetas (te faltan ${precio - saldo})`, { ...estilo, fill: '#888888' })
+            .setOrigin(0.5).setDepth(3);
+        return;
+    }
+
+    const boton = this.add.text(x, y, `Continuar: ${precio} pesetas`, { ...estilo, fill: '#ffffff' })
+        .setOrigin(0.5).setInteractive().setDepth(3);
+    aplicarHover(boton);
+    boton.on('pointerdown', () => {
+        const datos = cargar();
+        if (datos.pesetas < precio) return;
+        guardar({ pesetas: datos.pesetas - precio });
+        this.physics.world.colliders.destroy();
+        this.scene.restart({
+            puntos: this.puntos,
+            galletasDisponibles: this.galletasDisponibles,
+            vidas,
+            saludInicial: salud,
+            pesetasRecogidas: this.pesetasRecogidas,
+            continuaPartida: true,
+            continuarUsado: true,
+        });
     });
 }
 
@@ -856,6 +901,7 @@ verificaMuerte() {
                     pesetasPartida: this.pesetasPartida,
                     pesetasRecogidas: this.pesetasRecogidas,
                     continuaPartida: true,
+                    continuarUsado: this.continuarUsado,
                 });
             }
         });
