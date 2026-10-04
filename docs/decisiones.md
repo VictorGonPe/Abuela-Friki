@@ -83,3 +83,9 @@ Una entrada por decisión técnica o de diseño relevante: qué se decidió, por
 **Decisión:** al conseguir una hazaña sus pesetas se guardan en el saldo en ese momento, aunque la partida no termine. Las hazañas de «termina el nivel sin…» cuentan toda la partida, incluidas las vidas anteriores. Turista se consigue al haber tenido en pantalla los seis monumentos en una misma partida.
 
 **Por qué:** una hazaña solo se consigue una vez, así que no se puede repetir reiniciando, y perderla por salir al menú sería un castigo sin sentido. La lista y los valores están en `ECONOMIA.hazanas`.
+
+## 2026-10-04 · Transformaciones en lugar de aspectos
+
+**Decisión:** La Farmacia no venderá aspectos (Pirata, Espacial). Lo que se desbloquea con pesetas son dos transformaciones nuevas: Abuela Cibernética y Abuela Verde (estilo Hulk), además de Wukong.
+
+**Por qué:** una transformación cambia cómo se juega; un aspecto solo cambia el dibujo. Pendiente: sprites, y concretar mecánica y precios antes de programar.

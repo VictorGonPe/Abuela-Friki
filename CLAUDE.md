@@ -84,7 +84,7 @@ Borra cada punto de esta lista cuando quede resuelto.
 - Al menos seis spritesheets en uso superan los 4096 px de ancho, el límite de textura de muchos móviles.
 - Los botones táctiles del nivel están ocultos hasta el primer toque, y ese primer toque no cuenta como pulsación: si cae sobre un botón solo los muestra.
 - La moneda de la peseta es una textura provisional dibujada por código (`js/ui/peseta.js`); falta el sprite definitivo.
-- Los aspectos de la abuela (Pirata y Espacial, 500 pesetas) están aprobados pero sin hacer: faltan los sprites.
+- Faltan las dos transformaciones de pago, Abuela Cibernética y Abuela Verde (estilo Hulk): no hay sprites ni mecánica programada. No hay aspectos Pirata ni Espacial: se descartaron.
 - Para probar el final del nivel sin jugarlo entero, baja temporalmente `finNivel` en `barcelona.js` (por ejemplo a 900) y restáuralo a 29600 antes del commit.
 
 ## Forma de trabajar
