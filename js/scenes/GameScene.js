@@ -461,24 +461,34 @@ togglePausa() {
         }).setOrigin(0.5).setDepth(3);
         this.elementosPausa.push(titulo);
 
-        const btnReanudar = this.add.text(cx, cy + 10, 'Reanudar', {
+        const estiloBoton = {
             fontFamily: 'Bangers', fontSize: '32px', color: '#ffffff',
             padding: { left: 10, right: 10, top: 8, bottom: 8 },
-        }).setOrigin(0.5).setInteractive().setDepth(3);
+        };
+
+        const btnReanudar = this.add.text(cx, cy - 10, 'Reanudar', estiloBoton)
+            .setOrigin(0.5).setInteractive().setDepth(3);
         aplicarHover(btnReanudar);
         btnReanudar.on('pointerdown', () => this.togglePausa());
         this.elementosPausa.push(btnReanudar);
 
-        const btnMenu = this.add.text(cx, cy + 80, 'Menú Principal', {
-            fontFamily: 'Bangers', fontSize: '32px', color: '#ffffff',
-            padding: { left: 10, right: 10, top: 8, bottom: 8 },
-        }).setOrigin(0.5).setInteractive().setDepth(3);
-        aplicarHover(btnMenu);
-        btnMenu.on('pointerdown', () => {
+        const btnReiniciar = this.add.text(cx, cy + 50, 'Reiniciar', estiloBoton)
+            .setOrigin(0.5).setInteractive().setDepth(3);
+        aplicarHover(btnReiniciar);
+        btnReiniciar.on('pointerdown', () => {
+            this.sound.stopAll();
+            this.scene.restart({ puntos: 0, galletasDisponibles: 10, vidas: 3 });
+        });
+        this.elementosPausa.push(btnReiniciar);
+
+        const btnSalir = this.add.text(cx, cy + 110, 'Salir al menú', estiloBoton)
+            .setOrigin(0.5).setInteractive().setDepth(3);
+        aplicarHover(btnSalir);
+        btnSalir.on('pointerdown', () => {
             this.sound.stopAll();
             this.scene.start('MenuScene');
         });
-        this.elementosPausa.push(btnMenu);
+        this.elementosPausa.push(btnSalir);
     } else {
         this.physics.resume();
         if (this.musicaOn && this.backgroundSound) {
