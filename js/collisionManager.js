@@ -19,6 +19,7 @@ export default class CollisionManager {
         // Reducir la salud del jugador
         const multDif = this.scene.multDificultad || 1;
         this.scene.abuela.salud -= Math.round(15 * multDif);
+        this.scene.seguimiento.danoRecibido = true;
         if (this.scene.abuela.salud <= 0) {
             this.scene.abuela.salud = 0;
             this.scene.verificaMuerte();

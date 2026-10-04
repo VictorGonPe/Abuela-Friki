@@ -22,4 +22,19 @@ export const ECONOMIA = {
 
     // Continuar tras un game over: una sola vez por partida
     continuar: { precio: 100, vidas: 1, salud: 50 },
+
+    // Hazañas. El id se guarda en el almacenamiento: no lo cambies sin migrar el guardado.
+    // `meta` es la cantidad que hay que alcanzar en las que cuentan algo.
+    hazanas: [
+        { id: 'primeraVictoria',  nombre: 'Primera victoria',  descripcion: 'Termina el nivel',                          pesetas: 100 },
+        { id: 'intocable',        nombre: 'Intocable',         descripcion: 'Termina el nivel sin recibir daño',         pesetas: 200 },
+        { id: 'pacifista',        nombre: 'Pacifista',         descripcion: 'Termina el nivel sin lanzar galletas',      pesetas: 150 },
+        { id: 'turista',          nombre: 'Turista',           descripcion: 'Ve todos los monumentos en una partida',    pesetas: 100 },
+        { id: 'reinaDelBaston',   nombre: 'Reina del bastón',  descripcion: 'Derriba 50 palomas en total',               pesetas: 75,  meta: 50 },
+        { id: 'cazapatinetes',    nombre: 'Cazapatinetes',     descripcion: 'Derriba 20 patinetes en total',             pesetas: 75,  meta: 20 },
+        { id: 'wukongMaestro',    nombre: 'Wukong maestro',    descripcion: 'Transfórmate 5 veces en total',             pesetas: 75,  meta: 5 },
+        { id: 'abuelaMillonaria', nombre: 'Abuela millonaria', descripcion: 'Consigue 2000 puntos en una partida',       pesetas: 100, meta: 2000 },
+        { id: 'tresEstrellas',    nombre: 'Tres estrellas',    descripcion: 'Termina el nivel con tres estrellas',       pesetas: 150 },
+        { id: 'superviviente',    nombre: 'Superviviente',     descripcion: 'Termina el nivel sin perder ninguna vida',  pesetas: 100 },
+    ],
 };

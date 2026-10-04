@@ -89,9 +89,8 @@ Diseño aprobado el 2026-10-03 (economía, precios y hazañas).
 - **Paso 2** — recompensas de fin de nivel: +50 por completar, bonus por estrellas (0/25/75) y +10 por vida, con desglose en la pantalla de victoria
 - **Paso 3** — La Farmacia (`FarmaciaScene`), accesible desde el menú: galletas extra, escudo inicial y vida extra. Lo comprado se guarda en `inventario` y se gasta solo al empezar la siguiente partida
 - **Paso 4** — continuar tras el game over por 100 pesetas, una vez por partida: 1 vida, 50 % de salud, conserva puntos, galletas y monedas recogidas. Empieza desde el principio del nivel, igual que al perder una vida
+- **Paso 5** — Hazañas: 10 logros con aviso en pantalla, pesetas directas al saldo y lista en el menú (`HazanasScene`). Sin probar jugando: las acumuladas (palomas, patinetes, transformaciones), Turista, Abuela millonaria y Tres estrellas
 
 ### Pasos pendientes
-3. Escena de La Farmacia accesible desde el menú, con los consumibles (galletas extra, escudo, vida extra)
-4. Continuar tras el game over por 100 pesetas (una vez por partida)
-5. Hazañas con aviso en pantalla
 6. Aspectos de la abuela (Pirata y Espacial): faltan los sprites
+7. Cerrar la fase: probar en táctil y en 4:3 / 21:9, y actualizar `CLAUDE.md`

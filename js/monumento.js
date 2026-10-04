@@ -30,6 +30,15 @@ export default class Monumento {
         });
     }
 
+    // Índices de los monumentos que se ven ahora mismo en pantalla
+    indicesEnPantalla(scrollX) {
+        const indices = [];
+        this.monumentos.forEach((monumento, i) => {
+            if (monumento.x > scrollX && monumento.x < scrollX + this.scene.scale.width) indices.push(i);
+        });
+        return indices;
+    }
+
     actualizar(scrollX) {
         // Calcular la diferencia incremental del scroll
         const deltaScrollX = scrollX - this.lastScrollX;

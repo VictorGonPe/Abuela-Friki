@@ -10,6 +10,8 @@ import Abuela from '../abuela.js';
 import { cargar, guardar } from '../almacenamiento.js';
 import { ECONOMIA } from '../economia.js';
 import { asegurarTexturaPeseta } from '../ui/peseta.js';
+import { desbloquearHazana, sumarEstadistica } from '../hazanas.js';
+import { avisarHazana } from '../ui/avisoHazana.js';
 
 const altScale = 1; // Siempre 1: altura de diseño fija a 1080px (Phaser.Scale.FIT)
 const sueloAltura = 50;
@@ -35,6 +37,14 @@ class GameScene extends Phaser.Scene {
         this.continuarUsado = data?.continuarUsado ?? false;
         this.saludInicial = data?.saludInicial ?? 100;
 
+        // Lo que ha pasado en la partida, para las hazañas. Sobrevive a perder una vida.
+        this.seguimiento = data?.seguimiento ?? {
+            danoRecibido: false,
+            galletaLanzada: false,
+            vidaPerdida: false,
+            monumentosVistos: [],
+        };
+
         // Partida nueva (no una vida más de la misma): se gastan los objetos comprados en La Farmacia
         this.escudoInicial = false;
         if (!data?.continuaPartida) this.usarObjetosDeInicio();
@@ -52,6 +62,24 @@ class GameScene extends Phaser.Scene {
         if (usar('vidaExtra')) this.vidas = ECONOMIA.vidasConExtra;
         this.escudoInicial = usar('escudo');
         guardar({ inventario });
+    }
+
+    // Desbloquea la hazaña si no estaba conseguida y lo avisa en pantalla
+    lograrHazana(id) {
+        const hazana = desbloquearHazana(id);
+        if (hazana) avisarHazana(this, hazana);
+    }
+
+    // Suma a una estadística acumulada y desbloquea su hazaña al llegar a la meta
+    contarParaHazana(estadistica, id) {
+        const total = sumarEstadistica(estadistica);
+        const meta = ECONOMIA.hazanas.find(h => h.id === id).meta;
+        if (total >= meta) this.lograrHazana(id);
+    }
+
+    comprobarHazanaPuntos() {
+        const meta = ECONOMIA.hazanas.find(h => h.id === 'abuelaMillonaria').meta;
+        if (this.puntos >= meta) this.lograrHazana('abuelaMillonaria');
         // El estado de la abuela (salud, invulnerabilidad, transformación, etc.)
         // se reinicia al crear la instancia de Abuela en create()
     }
@@ -257,6 +285,8 @@ BARCELONA.plataformas.forEach(p => {
         paloma.destroy(); // Elimina la paloma
         this.puntos += 10; // Añadir puntos por destruir la paloma
         this.hud.actualizarPuntos(this.puntos);
+        this.contarParaHazana('palomas', 'reinaDelBaston');
+        this.comprobarHazanaPuntos();
     });
 
     this.physics.add.overlap(this.galletas, this.enemigosManager.patinetes, (galleta, patinete) => {
@@ -267,6 +297,8 @@ BARCELONA.plataformas.forEach(p => {
         }
         this.puntos += 25;
         this.hud.actualizarPuntos(this.puntos);
+        this.contarParaHazana('patinetes', 'cazapatinetes');
+        this.comprobarHazanaPuntos();
     }); 
 
     this.lanzarGalleta = () => {
@@ -282,6 +314,7 @@ BARCELONA.plataformas.forEach(p => {
             }
     
             // Reducir la cantidad de galletas disponibles
+            this.seguimiento.galletaLanzada = true;
             this.galletasDisponibles--;
             this.hud.actualizarGalletas(this.galletasDisponibles); // Actualizar el texto en pantalla
     
@@ -540,6 +573,7 @@ togglePausa() {
 
 colisionPaloma(player, paloma) {
     if (!this.abuela.recibirDano(Math.round(10 * this.multDificultad))) return;
+    this.seguimiento.danoRecibido = true;
 
     if (this.isSoundOn && this.abuelaGolpeSound) {
         this.abuelaGolpeSound.play();
@@ -570,6 +604,7 @@ colisionPaloma(player, paloma) {
 
 colisionPatinete(player, patinete) {
     if (!this.abuela.recibirDano(Math.round(30 * this.multDificultad))) return;
+    this.seguimiento.danoRecibido = true;
 
     if (this.isSoundOn && this.choquePatineteSound) {
         this.choquePatineteSound.play();
@@ -672,9 +707,21 @@ updateParallax() {
     // Actualizar posición de los monumentos con el scroll de la cámara
     const scrollX = this.cameras.main.scrollX;
     this.monumentoManager.actualizar(scrollX);
+    this.comprobarHazanaTurista(scrollX);
     this.enemigosManager.actualizar(scrollX); //maneja a todos los enemigos   
 }
 
+
+comprobarHazanaTurista(scrollX) {
+    const vistos = this.seguimiento.monumentosVistos;
+    const total = this.monumentoManager.monumentos.length;
+    if (vistos.length === total) return;
+
+    this.monumentoManager.indicesEnPantalla(scrollX).forEach((i) => {
+        if (!vistos.includes(i)) vistos.push(i);
+    });
+    if (vistos.length === total) this.lograrHazana('turista');
+}
 
 gameOver() {
     // Detener toda la física y lógica del juego
@@ -806,6 +853,7 @@ crearBotonContinuar(saldo) {
             pesetasRecogidas: this.pesetasRecogidas,
             continuaPartida: true,
             continuarUsado: true,
+            seguimiento: this.seguimiento,
         });
     });
 }
@@ -873,6 +921,8 @@ ponerVallasObra(x,y) { //Vallas zona agujeros
 verificaMuerte() {
     if (this.abuela.salud <= 0 && !this.abuela.haMuerto) {
         this.abuela.haMuerto = true;
+        this.seguimiento.danoRecibido = true;
+        this.seguimiento.vidaPerdida = true;
         this.vidas--;
         this.abuela.isTransformed = false;
         // Restaura el cuerpo físico si viene de Wukong
@@ -902,6 +952,7 @@ verificaMuerte() {
                     pesetasRecogidas: this.pesetasRecogidas,
                     continuaPartida: true,
                     continuarUsado: this.continuarUsado,
+                    seguimiento: this.seguimiento,
                 });
             }
         });
@@ -987,6 +1038,14 @@ mostrarPantallaVictoria() {
         }).setOrigin(0.5).setDepth(10);
     }
 
+    // Hazañas de fin de nivel (sus pesetas van directas al saldo, antes del desglose)
+    this.lograrHazana('primeraVictoria');
+    if (!this.seguimiento.danoRecibido) this.lograrHazana('intocable');
+    if (!this.seguimiento.galletaLanzada) this.lograrHazana('pacifista');
+    if (!this.seguimiento.vidaPerdida) this.lograrHazana('superviviente');
+    if (estrellas === 3) this.lograrHazana('tresEstrellas');
+    this.comprobarHazanaPuntos();
+
     // Pesetas: las recogidas más las recompensas por completar el nivel
     const recogidas = this.pesetasPartida;
     const pesetasEstrellas = ECONOMIA.bonusEstrellas[estrellas - 1];
@@ -1045,6 +1104,7 @@ crearLunaWukong(x) {
 recogerLunaWukong(player, luna) {
     luna.destroy();
     this.abuela.transformar();
+    this.contarParaHazana('transformaciones', 'wukongMaestro');
 }
 
 crearBotonesTactiles() {
