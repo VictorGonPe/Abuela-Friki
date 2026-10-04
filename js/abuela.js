@@ -10,6 +10,7 @@ export default class Abuela {
         // Estado
         this.salud = 100;
         this.isInvulnerable = false;
+        this.escudoActivo = false;
         this.isTransformed = false;
         this.isTransforming = false;
         this.dobleSalto = false;
@@ -183,7 +184,7 @@ export default class Abuela {
     }
 
     recibirDano(cantidad) {
-        if (this.isInvulnerable) return false;
+        if (this.isInvulnerable || this.escudoActivo) return false;
 
         this.salud -= cantidad;
         if (this.salud < 0) this.salud = 0;
@@ -203,6 +204,16 @@ export default class Abuela {
         });
 
         return true;
+    }
+
+    // Escudo comprado en La Farmacia: ningún enemigo hace daño mientras dura. Caer por un hueco sí mata.
+    activarEscudo(duracion) {
+        this.escudoActivo = true;
+        this.sprite.setTint(0x66ccff);
+        this.scene.time.delayedCall(duracion, () => {
+            this.escudoActivo = false;
+            this.sprite.clearTint();
+        });
     }
 
     transformar() {

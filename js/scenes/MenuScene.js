@@ -31,26 +31,33 @@ class MenuScene extends Phaser.Scene {
         }).setOrigin(0.5).setInteractive();
         aplicarHover(startButton);
 
-        const settingsButton = this.add.text(centroX, centroY, 'Ajustes', {
+        const farmaciaButton = this.add.text(centroX, centroY, 'La Farmacia', {
+            fontFamily: 'Bangers', fontSize: tamanio, fontStyle: 'bold', color: '#ffffff',
+            padding: { left: 5, right: 5, top: 5, bottom: 5 },
+        }).setOrigin(0.5).setInteractive();
+        aplicarHover(farmaciaButton);
+
+        const settingsButton = this.add.text(centroX, centroY + 80, 'Ajustes', {
             fontFamily: 'Bangers', fontSize: tamanio, fontStyle: 'bold', color: '#ffffff',
             padding: { left: 5, right: 5, top: 5, bottom: 5 },
         }).setOrigin(0.5).setInteractive();
         aplicarHover(settingsButton);
 
         startButton.on('pointerdown', () => this.scene.start('ControlesScene'));
+        farmaciaButton.on('pointerdown', () => this.scene.start('FarmaciaScene'));
         settingsButton.on('pointerdown', () => this.scene.start('AjustesScene'));
 
         // Récord
         const datos = cargar();
         if (datos.record > 0) {
-            this.add.text(centroX, centroY + 80, `Récord: ${datos.record}`, {
+            this.add.text(centroX, centroY + 160, `Récord: ${datos.record}`, {
                 fontFamily: 'Bangers', fontSize: '28px', color: '#ffd700',
             }).setOrigin(0.5);
         }
 
         // Saldo de pesetas
         asegurarTexturaPeseta(this);
-        const textoPesetas = this.add.text(centroX + 20, centroY + 130, `${datos.pesetas} pesetas`, {
+        const textoPesetas = this.add.text(centroX + 20, centroY + 210, `${datos.pesetas} pesetas`, {
             fontFamily: 'Bangers', fontSize: '28px', color: '#ffd700',
             padding: { left: 5, right: 5, top: 5, bottom: 5 },
         }).setOrigin(0.5);

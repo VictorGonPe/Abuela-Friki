@@ -9,6 +9,7 @@ export default class CollisionManager {
 
     colisionCaca(player, caca) {
         if (this.tocandoCaca) return; // Evitar múltiples colisiones simultáneas
+        if (this.scene.abuela.escudoActivo) return;
         this.tocandoCaca = true; // Marcar que estamos procesando una colisión
         
         // Reproducir el sonido de colisión si está activado

@@ -31,6 +31,24 @@ class GameScene extends Phaser.Scene {
         // de las ya recogidas para que no reaparezcan, y se ingresan en el saldo al acabar la partida.
         this.pesetasPartida = data?.pesetasPartida ?? 0;
         this.pesetasRecogidas = data?.pesetasRecogidas ?? [];
+
+        // Partida nueva (no una vida más de la misma): se gastan los objetos comprados en La Farmacia
+        this.escudoInicial = false;
+        if (!data?.continuaPartida) this.usarObjetosDeInicio();
+    }
+
+    usarObjetosDeInicio() {
+        const inventario = { ...cargar().inventario };
+        const usar = (id) => {
+            if (inventario[id] <= 0) return false;
+            inventario[id]--;
+            return true;
+        };
+
+        if (usar('galletasExtra')) this.galletasDisponibles = ECONOMIA.galletasConExtra;
+        if (usar('vidaExtra')) this.vidas = ECONOMIA.vidasConExtra;
+        this.escudoInicial = usar('escudo');
+        guardar({ inventario });
         // El estado de la abuela (salud, invulnerabilidad, transformación, etc.)
         // se reinicia al crear la instancia de Abuela en create()
     }
@@ -122,6 +140,7 @@ BARCELONA.plataformas.forEach(p => {
 
     this.abuela = new Abuela(this, BARCELONA.jugadorInicio.x, BARCELONA.jugadorInicio.y);
     this.player = this.abuela.sprite; // Alias para colisiones y compatibilidad
+    if (this.escudoInicial) this.abuela.activarEscudo(ECONOMIA.duracionEscudo);
 
    
     // Leer dificultad del almacenamiento antes de usarla
@@ -836,6 +855,7 @@ verificaMuerte() {
                     vidas: this.vidas,
                     pesetasPartida: this.pesetasPartida,
                     pesetasRecogidas: this.pesetasRecogidas,
+                    continuaPartida: true,
                 });
             }
         });

@@ -69,3 +69,11 @@ Una entrada por decisión técnica o de diseño relevante: qué se decidió, por
 **Por qué:** si se guardaran al recogerlas, bastaría reiniciar una y otra vez para recoger siempre las primeras monedas. Así las pesetas premian jugar la partida hasta el final, se gane o se pierda.
 
 **Detalles:** 18 monedas en posiciones fijas y alcanzables (`recogibles.pesetas` en `barcelona.js`), 1 peseta cada una (`js/economia.js`). La moneda se dibuja por código (`js/ui/peseta.js`) hasta que haya un sprite definitivo.
+
+## 2026-10-04 · Los objetos de La Farmacia se usan solos
+
+**Decisión:** galletas extra, escudo y vida extra se compran en La Farmacia, se guardan en el inventario y se gastan automáticamente (uno de cada tipo) al empezar la siguiente partida. No hay pantalla para elegir cuáles usar.
+
+**Por qué:** es lo más fácil de entender y de mantener. Si más adelante hay muchos objetos, se puede añadir una selección antes de la partida.
+
+**Detalles:** el escudo es un estado aparte de la invulnerabilidad tras un golpe (`escudoActivo` en `Abuela`), protege también de las cacas y no evita morir al caer por un hueco.
