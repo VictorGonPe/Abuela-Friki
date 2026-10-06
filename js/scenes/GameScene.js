@@ -27,6 +27,8 @@ const RAYO = {
         abuelaVueloCibernetica:  { x: 139, y: 146 },
     },
 };
+// Bola de energía de la Abuela Wukong. `mano` es la mano en píxeles del fotograma de disparo.
+const BOLA = { velocidad: 900, duracion: 1500, radio: 22, mano: { x: 335, y: 268 } };
 const sueloAltura = 50;
 const LEVEL_WIDTH = BARCELONA.anchoNivel; // Ancho total del nivel (definido en barcelona.js)
 
@@ -345,6 +347,18 @@ BARCELONA.plataformas.forEach(p => {
     };
  
     this.crearTexturaRayo();
+    this.crearTexturaBola();
+    // Bola que crece en la mano de Wukong mientras se carga. Se recoloca en `postupdate`,
+    // cuando las físicas ya han movido a la abuela, para que no vaya un fotograma por detrás.
+    this.cargaBola = this.add.image(0, 0, 'bolaEnergia').setDepth(1.2).setVisible(false);
+    const seguirMano = () => {
+        if (!this.cargaBola.visible) return;
+        const mano = this.puntoDelSprite(BOLA.mano);
+        const direccion = this.player.flipX ? -1 : 1;
+        this.cargaBola.setPosition(mano.x + direccion * BOLA.radio * this.cargaBola.scaleX, mano.y);
+    };
+    this.events.on('postupdate', seguirMano);
+    this.events.once('shutdown', () => this.events.off('postupdate', seguirMano));
 
     //____________________________LUNA_WUKONG___________________________
     // Crear un grupo de físicas para el objeto lunaWukong
@@ -958,6 +972,7 @@ verificaMuerte() {
         this.vidas--;
         this.abuela.isTransformed = false;
         this.abuela.terminarVuelo();
+        this.abuela.cancelarCarga();
         // Restaura el cuerpo físico si viene de Wukong
         this.player.body.setSize(150, 320).setOffset(50 * altScale, 50 * altScale);
 
@@ -994,6 +1009,7 @@ verificaMuerte() {
 
 nivel1Completado() {
     this.abuela.terminarVuelo();
+    this.abuela.cancelarCarga();
     this.physics.pause();
     this.player.anims.stop();
 
@@ -1132,17 +1148,70 @@ crearTexturaRayo() {
     g.destroy();
 }
 
+// Textura de la bola de energía de Wukong, dibujada por código y creada una sola vez.
+crearTexturaBola() {
+    if (this.textures.exists('bolaEnergia')) return;
+
+    const r = BOLA.radio;
+    const g = this.make.graphics({}, false);
+    g.fillStyle(0xffd000, 0.4);
+    g.fillCircle(r, r, r);
+    g.fillStyle(0xffe866, 0.85);
+    g.fillCircle(r, r, r * 0.7);
+    g.fillStyle(0xffffff, 1);
+    g.fillCircle(r, r, r * 0.4);
+    g.generateTexture('bolaEnergia', r * 2, r * 2);
+    g.destroy();
+}
+
+// Bola de energía de la Abuela Wukong: sale de la mano, no gasta galletas y, como el rayo,
+// va en el grupo de las galletas para compartir colisiones y puntos.
+// `escala` es el tamaño según lo que se haya cargado: 1 sin cargar, hasta el doble.
+mostrarCargaBola(escala) {
+    this.cargaBola.setScale(escala).setVisible(true);
+}
+
+ocultarCargaBola() {
+    this.cargaBola.setVisible(false);
+}
+
+lanzarBolaEnergia(escala) {
+    const direccion = this.player.flipX ? -1 : 1;
+    const mano = this.puntoDelSprite(BOLA.mano);
+    const bola = this.galletas.create(mano.x + direccion * BOLA.radio * escala, mano.y, 'bolaEnergia')
+        .setDepth(1.2).setScale(escala);
+    bola.setVelocityX(direccion * BOLA.velocidad);
+    bola.body.allowGravity = false;
+
+    // Provisional: suena como una galleta
+    if (this.isSoundOn && this.lanzarGalletaSound) {
+        this.lanzarGalletaSound.play();
+    }
+
+    // Es un ataque: también rompe la hazaña Pacifista
+    this.seguimiento.galletaLanzada = true;
+
+    this.time.delayedCall(BOLA.duracion, () => {
+        bola.destroy();
+    });
+}
+
 // Rayo de la Abuela Cibernética: no gasta galletas. Va en el grupo de las galletas
 // para acertar a palomas y patinetes con las mismas colisiones y los mismos puntos.
-// Posición del ojo en el mundo según el fotograma que se está mostrando y hacia dónde mira
-posicionOjo() {
+// Pasa un punto en píxeles del fotograma actual de la abuela a posición en el mundo,
+// teniendo en cuenta hacia dónde mira.
+puntoDelSprite(punto) {
     const p = this.player;
-    const ojo = RAYO.ojos[p.texture.key] || RAYO.ojos.abuelaQuietaCibernetica;
     const direccion = p.flipX ? -1 : 1;
     return {
-        x: p.x + direccion * (ojo.x - p.frame.width / 2) * p.scaleX,
-        y: p.y - (p.frame.height - ojo.y) * p.scaleY,
+        x: p.x + direccion * (punto.x - p.frame.width / 2) * p.scaleX,
+        y: p.y - (p.frame.height - punto.y) * p.scaleY,
     };
+}
+
+// Posición del ojo en el mundo según la hoja que se está mostrando
+posicionOjo() {
+    return this.puntoDelSprite(RAYO.ojos[this.player.texture.key] || RAYO.ojos.abuelaQuietaCibernetica);
 }
 
 lanzarRayo() {
@@ -1258,6 +1327,10 @@ crearBotonesTactiles() {
     // Botones pulso (saltar / lanzar)
     btnSaltar.on('pointerdown', () => { entrada.saltar = true; });
     btnLanzar.on('pointerdown', () => { entrada.lanzar = true; });
+    // Mantener lanzar carga la bola de energía de Wukong
+    btnLanzar.on('pointerdown', () => { entrada.lanzarMantenido = true; });
+    btnLanzar.on('pointerup',   () => { entrada.lanzarMantenido = false; });
+    btnLanzar.on('pointerout',  () => { entrada.lanzarMantenido = false; });
 
     // Vuelo: saltar mantenido sube; el botón de bajar es pulso (doble toque) y hold a la vez
     btnSaltar.on('pointerdown', () => { entrada.arriba = true; });
@@ -1279,6 +1352,7 @@ crearBotonesTactiles() {
         entrada.derecha   = false;
         entrada.arriba    = false;
         entrada.abajo     = false;
+        entrada.lanzarMantenido = false;
     });
 }
 

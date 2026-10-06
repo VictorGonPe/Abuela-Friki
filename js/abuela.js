@@ -4,6 +4,9 @@ import entrada from './entrada.js';
 const TIEMPO_TRANSFORMACION = 60000;
 const VELOCIDAD_VUELO = 300;  // px/s al subir y bajar volando
 const DOBLE_PULSACION = 200;  // ms máximos entre dos pulsaciones de abajo para dejarse caer
+const POSTURA_DISPARO = 250;  // ms que Wukong mantiene el brazo estirado al soltar una bola
+const TIEMPO_CARGA = 1000;    // ms manteniendo lanzar para que la bola llegue a su tamaño máximo
+const ESCALA_CARGA_MAX = 2;   // tamaño de la bola totalmente cargada respecto a la normal
 // Dónde salen el humo en pantalla respecto al origen del sprite (centro, pies) mirando a la derecha:
 // los pies juntos del fotograma de vuelo quedan a la izquierda del centro del fotograma.
 const HUMO_PIES = { x: -23, y: -4 };
@@ -11,11 +14,14 @@ const HUMO_PIES = { x: -23, y: -4 };
 // Animaciones, cuerpo físico y habilidades de cada transformación.
 // `vuela`: el segundo salto en el aire la deja flotando en vez de dar un doble salto.
 // `rayos`: dispara rayos por el ojo en lugar de galletas, sin gastarlas.
+// `disparo`: animación con el brazo estirado; suelta bolas de energía por la mano, sin gastar galletas.
+//            Manteniendo lanzar la bola se carga y crece; sale al soltar.
 // `offsetIzq` es el offset X del cuerpo al mirar a la izquierda: los fotogramas de la
 // cibernética miden lo mismo que los de la abuela normal y necesitan el mismo ajuste.
 const TRANSFORMACIONES = {
     wukong: {
         transformar: 'transformWukong', idle: 'idleWukong', andar: 'walkWukong', salto: 'jumpWukong',
+        disparo: 'disparoWukong',
         offsetX: 150, offsetIzq: 150, offsetY: 150,
     },
     cibernetica: {
@@ -39,6 +45,9 @@ export default class Abuela {
         this.transformacion = null; // 'wukong' o 'cibernetica' mientras isTransformed es true
         this.volando = false;
         this.ultimoPulsoAbajo = 0;
+        this.posturaHasta = 0; // hasta cuándo (reloj de la escena) se mantiene la postura de disparo
+        this.cargando = false;
+        this.inicioCarga = 0;
         this.dobleSalto = false;
         this.saltosRestantes = 2;
         this.saltando = false;
@@ -153,6 +162,14 @@ export default class Abuela {
             repeat: 0
         });
 
+        // Provisional: el último fotograma del salto, que es el que tiene el brazo estirado
+        scene.anims.create({
+            key: 'disparoWukong',
+            frames: scene.anims.generateFrameNumbers('abuelaMov2Wukong', { start: 6, end: 6 }),
+            frameRate: 1,
+            repeat: -1
+        });
+
         // Abuela Cibernética (sprites provisionales): mismas hojas y fotogramas que la abuela normal
         scene.anims.create({
             key: 'transformCibernetica',
@@ -191,6 +208,12 @@ export default class Abuela {
         });
     }
 
+    // Animaciones de andar y de quieta: esperan a que termine la postura de disparo
+    animar(clave) {
+        if (this.scene.time.now < this.posturaHasta) return;
+        this.sprite.anims.play(clave, true);
+    }
+
     actualizar() {
         if (this.haMuerto || this.isTransforming) {
             this.sprite.setVelocityX(0);
@@ -210,7 +233,7 @@ export default class Abuela {
         // Movimiento horizontal
         if (scene.cursors.left.isDown || entrada.izquierda) {
             this.sprite.setVelocityX(-300);
-            if (isOnGround) this.sprite.anims.play(forma ? forma.andar : 'left', true);
+            if (isOnGround) this.animar(forma ? forma.andar : 'left');
             this.sprite.flipX = true;
             if (forma) {
                 this.sprite.body.setOffset(forma.offsetIzq, forma.offsetY);
@@ -219,7 +242,7 @@ export default class Abuela {
             }
         } else if (scene.cursors.right.isDown || entrada.derecha) {
             this.sprite.setVelocityX(300);
-            if (isOnGround) this.sprite.anims.play(forma ? forma.andar : 'right', true);
+            if (isOnGround) this.animar(forma ? forma.andar : 'right');
             this.sprite.flipX = false;
             if (forma) {
                 this.sprite.body.setOffset(forma.offsetX, forma.offsetY);
@@ -230,7 +253,7 @@ export default class Abuela {
             this.sprite.setVelocityX(0);
             if (isOnGround) {
                 this.sprite.setOrigin(0.5, 1);
-                this.sprite.anims.play(forma ? forma.idle : 'abuelaIdle', true);
+                this.animar(forma ? forma.idle : 'abuelaIdle');
             }
         }
 
@@ -280,15 +303,49 @@ export default class Abuela {
             this.saltando = false;
         }
 
-        // Lanzar galleta
-        if (Phaser.Input.Keyboard.JustDown(scene.keys.lanzarGalleta) || entrada.lanzar) {
-            entrada.lanzar = false;
+        // Lanzar: galleta, rayo o bola de energía según la forma
+        const pulsoLanzar = Phaser.Input.Keyboard.JustDown(scene.keys.lanzarGalleta) || entrada.lanzar;
+        entrada.lanzar = false;
+        if (forma && forma.disparo) {
+            const mantenido = scene.keys.lanzarGalleta.isDown || entrada.lanzarMantenido;
+            this.actualizarCarga(forma, pulsoLanzar, mantenido);
+        } else if (pulsoLanzar) {
             if (forma && forma.rayos) {
                 scene.lanzarRayo();
             } else {
                 scene.lanzarGalleta();
             }
         }
+    }
+
+    // Bola de energía de Wukong: empieza a cargarse al pulsar lanzar, crece mientras se mantiene
+    // y sale al soltar. Un toque corto lanza la bola de tamaño normal.
+    actualizarCarga(forma, pulsoLanzar, mantenido) {
+        const scene = this.scene;
+        if (!this.cargando && (pulsoLanzar || mantenido)) {
+            this.cargando = true;
+            this.inicioCarga = scene.time.now;
+        }
+        if (!this.cargando) return;
+
+        // La postura va primero: la bola se coloca donde queda la mano en ese fotograma
+        this.sprite.anims.play(forma.disparo, true);
+        this.posturaHasta = scene.time.now + POSTURA_DISPARO;
+
+        const carga = Math.min((scene.time.now - this.inicioCarga) / TIEMPO_CARGA, 1);
+        const escala = 1 + carga * (ESCALA_CARGA_MAX - 1);
+        if (mantenido) {
+            scene.mostrarCargaBola(escala);
+        } else {
+            this.cancelarCarga();
+            scene.lanzarBolaEnergia(escala);
+        }
+    }
+
+    // Deja de cargar sin lanzar nada (al soltar, al morir o al cambiar de forma)
+    cancelarCarga() {
+        this.cargando = false;
+        this.scene.ocultarCargaBola();
     }
 
     // Vuelo de la Abuela Cibernética: flota sin gravedad hasta tocar el suelo,
@@ -365,6 +422,9 @@ export default class Abuela {
     // estando ya transformada cambia de forma y reinicia el tiempo.
     transformar(id) {
         const forma = TRANSFORMACIONES[id];
+        // Si llega volando o cargando una bola, eso es de la forma anterior: se corta aquí
+        this.terminarVuelo();
+        this.cancelarCarga();
         this.sprite.body.setSize(130, 150).setOffset(100, 100);
         this.scene.gritoTransformacion.play();
 
@@ -382,16 +442,16 @@ export default class Abuela {
 
             this.sprite.play(forma.transformar);
 
-            this.sprite.once('animationcomplete', (anim) => {
-                if (anim.key === forma.transformar) {
-                    this.sprite.play(forma.idle, true);
-                    if (this.isTransforming) {
-                        this.sprite.body.setSize(130, 320).setOffset(forma.offsetX, forma.offsetY);
-                    }
-                    this.isTransforming = false;
-                    this.scene.physics.resume();
-                    this.scene.input.enabled = true;
+            // Se escucha el final de esta animación en concreto: con 'animationcomplete' a secas,
+            // si acabara antes otra animación el juego se quedaría parado para siempre.
+            this.sprite.once('animationcomplete-' + forma.transformar, () => {
+                this.sprite.play(forma.idle, true);
+                if (this.isTransforming) {
+                    this.sprite.body.setSize(130, 320).setOffset(forma.offsetX, forma.offsetY);
                 }
+                this.isTransforming = false;
+                this.scene.physics.resume();
+                this.scene.input.enabled = true;
             });
         }
     }
@@ -400,6 +460,7 @@ export default class Abuela {
         this.isTransformed = false;
         this.transformacion = null;
         this.terminarVuelo();
+        this.cancelarCarga();
         this.sprite.setTexture('abuelaMovimiento1');
         this.sprite.play('abuelaIdle');
         this.sprite.body.setSize(130, 320).setOffset(50, 50);

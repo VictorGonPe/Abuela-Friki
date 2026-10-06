@@ -113,3 +113,13 @@ Una entrada por decisión técnica o de diseño relevante: qué se decidió, por
 **Por qué:** así cada transformación cambia cómo se juega (Wukong salta más; la Cibernética vuela y dispara sin límite), que es lo que justifica pagarla. Un rayo cuenta como ataque y rompe la hazaña Pacifista, para que no se consiga gratis.
 
 **Detalles:** las habilidades son marcas en `TRANSFORMACIONES` (`vuela`, `rayos`) en `js/abuela.js`; los valores del rayo están en `RAYO` (`GameScene.js`). En táctil aparece un botón ↓ solo con la Cibernética. El doble toque de abajo cuenta si hay menos de 200 ms entre los dos (`DOBLE_PULSACION`), para que no se dispare al bajar a toquecitos. Mientras vuela suena `sonidoRobot.mp3` en bucle, usa un fotograma con los pies juntos (`abuelaVueloCyborg.png`, sacado del de quieta) y el humo le sale de los pies. El rayo nace en el ojo, por delante de la abuela, con un destello. Provisional: rayo, destello y humo se dibujan por código y el rayo suena como una galleta.
+
+## 2026-10-06 · Wukong lanza bolas de energía
+
+**Decisión:** transformada en Wukong, lanzar ya no tira galletas: estira el brazo y suelta una bola de energía por la mano. No gasta galletas, dura lo que la transformación y al acertar vale lo mismo que una galleta. Como el rayo, cuenta como ataque para la hazaña Pacifista.
+
+**Por qué:** igual que la Cibernética, cada transformación tiene su propio ataque sin munición. La bola es más lenta que el rayo (900 frente a 1600 px/s) y llega algo más lejos; los valores están en `BOLA` (`GameScene.js`).
+
+**Carga:** manteniendo lanzar la bola crece en la mano hasta el doble de tamaño en 1 segundo (`TIEMPO_CARGA`, `ESCALA_CARGA_MAX` en `abuela.js`) y sale al soltar; un toque corto lanza la normal. La bola grande solo acierta más fácil: da los mismos puntos.
+
+**Detalles:** provisional: la postura es el último fotograma de la hoja de salto (el brazo con el bastón hacia delante), se mantiene 250 ms (`POSTURA_DISPARO`), la bola se dibuja por código y suena como una galleta. Falta un sprite propio con el brazo estirado.
