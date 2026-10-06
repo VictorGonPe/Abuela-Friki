@@ -121,6 +121,9 @@ export const BARCELONA = {
         frascosGalletas: 3,
         pastillas:       3,
         lunasWukong:     [10550],
+        // Luna roja: transforma en Abuela Cibernética. Provisional, cerca del inicio para probar
+        // los sprites; la transformación definitiva será de pago (ECONOMIA.transformaciones).
+        lunasCiberneticas: [1800],
         // Pesetas en posiciones fijas y alcanzables; y se cuenta desde abajo.
         // Las de suelo se recogen andando; las altas premian subir a las plataformas.
         pesetas: [
@@ -222,10 +225,15 @@ export const BARCELONA = {
             { key: 'abuelaMovimiento2',  ruta: 'assets/abuelaSalto.png',             fw: 363,   fh: 374 },
             { key: 'abuelaQuieta',       ruta: 'assets/abuelaIdle.png',              fw: 363,   fh: 378 },
             { key: 'abuelaMuerte',       ruta: 'assets/abuelaMuerte.png',            fw: 363,   fh: 378 },
-            { key: 'abuelaTWukong',      ruta: 'assets/abuelaTWukong.png',           fw: 452,   fh: 610 },
-            { key: 'abuelaMov1Wukong',   ruta: 'assets/abuelaAndarWukongPrueba.png', fw: 362,   fh: 470 },
-            { key: 'abuelaQuietaWukong', ruta: 'assets/abuelaIdleWukong.png',        fw: 450,   fh: 470 },
-            { key: 'abuelaMov2Wukong',   ruta: 'assets/abuelaSaltoWukong.png',       fw: 450,   fh: 470 },
+            { key: 'abuelaTWukong',      ruta: 'assets/trans/wukong/abuelaTWukong.png',           fw: 452,   fh: 610 },
+            { key: 'abuelaMov1Wukong',   ruta: 'assets/trans/wukong/abuelaAndarWukongPrueba.png', fw: 362,   fh: 470 },
+            { key: 'abuelaQuietaWukong', ruta: 'assets/trans/wukong/abuelaIdleWukong.png',        fw: 450,   fh: 470 },
+            { key: 'abuelaMov2Wukong',   ruta: 'assets/trans/wukong/abuelaSaltoWukong.png',       fw: 450,   fh: 470 },
+            { key: 'abuelaTCibernetica',      ruta: 'assets/trans/cyborg/abuelaTCyborg.png',      fw: 452,   fh: 610 },
+            { key: 'abuelaMov1Cibernetica',   ruta: 'assets/trans/cyborg/abuelaAndarCyborg.png',  fw: 363,   fh: 378 },
+            { key: 'abuelaQuietaCibernetica', ruta: 'assets/trans/cyborg/abuelaIdleCyborg.png',   fw: 363,   fh: 378 },
+            { key: 'abuelaMov2Cibernetica',   ruta: 'assets/trans/cyborg/abuelaSaltoCyborg.png',  fw: 363,   fh: 374 },
+            { key: 'abuelaVueloCibernetica',  ruta: 'assets/trans/cyborg/abuelaVueloCyborg.png',  fw: 363,   fh: 378 },
             { key: 'paracetamol',        ruta: 'assets/paracetamol.png',             fw: 275,   fh: 260 },
             { key: 'lunaWukong',         ruta: 'assets/lunaWukong.png',              fw: 210,   fh: 195 },
             { key: 'paloma',             ruta: 'assets/paloma1.png',                 fw: 370,   fh: 450 },
@@ -236,6 +244,7 @@ export const BARCELONA = {
         audios: [
             { key: 'backgroundSound',    ruta: 'assets/sonidos/pruebaBackground.mp3' },
             { key: 'abuelaSalto',        ruta: 'assets/sonidos/abuelaSalto.mp3' },
+            { key: 'vueloRobot',         ruta: 'assets/sonidos/sonidoRobot.mp3' },
             { key: 'cacaSalto',          ruta: 'assets/sonidos/cacaSalto.mp3' },
             { key: 'colisionCacaAsco',   ruta: 'assets/sonidos/colisionCacaAsco.mp3' },
             { key: 'abuelaGolpe',        ruta: 'assets/sonidos/abuelaGolpe.mp3' },

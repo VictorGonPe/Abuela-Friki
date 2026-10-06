@@ -97,3 +97,19 @@ Una entrada por decisión técnica o de diseño relevante: qué se decidió, por
 **Por qué:** una partida normal da unas 110 pesetas. Con los precios anteriores (120 y 150) las dos transformaciones se compraban tras la primera victoria y no quedaba nada por lo que ahorrar. Ahora lo barato enseña a comprar en la primera o segunda partida, las hazañas (1125 en total, una sola vez) pagan más o menos la primera transformación, y la segunda pide seguir jugando, que es donde encajarán los vídeos y los paquetes de la Fase 10.
 
 **Límites:** ninguna transformación de pago es necesaria para terminar un nivel, y sin ofertas con cuenta atrás ni precios que cambian. Son valores de partida: se revisan jugando y cuando haya más niveles. El precio en dinero real se decide en la Fase 10 con la misma medida (cuántas partidas ahorra cada paquete).
+
+## 2026-10-06 · Abuela Cibernética de prueba con luna roja
+
+**Decisión:** la Cibernética entra en el nivel con sprites provisionales y una luna roja (la de Wukong teñida) en x = 1800. Dura 60 segundos como Wukong y cuenta para la hazaña de transformaciones.
+
+**Por qué:** sirve para ver los sprites en movimiento antes de decidir su mecánica propia. La luna está cerca del inicio para probarla en segundos. Es gratis solo mientras se prueba: la versión definitiva se desbloquea y se activa con pesetas (`ECONOMIA.transformaciones`) y esta luna se quitará.
+
+**Detalles:** los originales (JPEG con fondo blanco) están en `_archivo/cyborg-originales/`; a `public/assets/trans/cyborg/` van como PNG con transparencia y con el mismo tamaño de fotograma que la abuela normal (363×378), así comparten cuerpo físico. Cada forma tiene sus animaciones y offsets en `TRANSFORMACIONES` (`js/abuela.js`).
+
+## 2026-10-06 · Mecánica de la Abuela Cibernética: vuelo y rayos
+
+**Decisión:** en lugar del doble salto, el segundo salto en el aire la deja flotando: arriba y abajo la mueven, y deja de volar al tocar el suelo, al pulsar abajo dos veces seguidas o al acabarse la transformación. En lugar de galletas dispara rayos rojos por el ojo, que no gastan galletas y valen lo mismo que una galleta al acertar.
+
+**Por qué:** así cada transformación cambia cómo se juega (Wukong salta más; la Cibernética vuela y dispara sin límite), que es lo que justifica pagarla. Un rayo cuenta como ataque y rompe la hazaña Pacifista, para que no se consiga gratis.
+
+**Detalles:** las habilidades son marcas en `TRANSFORMACIONES` (`vuela`, `rayos`) en `js/abuela.js`; los valores del rayo están en `RAYO` (`GameScene.js`). En táctil aparece un botón ↓ solo con la Cibernética. El doble toque de abajo cuenta si hay menos de 200 ms entre los dos (`DOBLE_PULSACION`), para que no se dispare al bajar a toquecitos. Mientras vuela suena `sonidoRobot.mp3` en bucle, usa un fotograma con los pies juntos (`abuelaVueloCyborg.png`, sacado del de quieta) y el humo le sale de los pies. El rayo nace en el ojo, por delante de la abuela, con un destello. Provisional: rayo, destello y humo se dibujan por código y el rayo suena como una galleta.

@@ -14,6 +14,19 @@ import { desbloquearHazana, sumarEstadistica } from '../hazanas.js';
 import { avisarHazana } from '../ui/avisoHazana.js';
 
 const altScale = 1; // Siempre 1: altura de diseño fija a 1080px (Phaser.Scale.FIT)
+const TINTE_LUNA_CIBERNETICA = 0xff3030;
+// Rayo del ojo de la Abuela Cibernética. `brillo` es lo que dura el destello, en ms.
+// `ojos` da el centro del ojo en píxeles del fotograma, por hoja: no está en el mismo sitio
+// al andar que quieta. Si cambian los sprites hay que volver a medirlo.
+const RAYO = {
+    velocidad: 1600, duracion: 800, ancho: 90, alto: 10, brillo: 180,
+    ojos: {
+        abuelaQuietaCibernetica: { x: 138, y: 147 },
+        abuelaMov1Cibernetica:   { x: 147, y: 142 },
+        abuelaMov2Cibernetica:   { x: 138, y: 140 },
+        abuelaVueloCibernetica:  { x: 139, y: 146 },
+    },
+};
 const sueloAltura = 50;
 const LEVEL_WIDTH = BARCELONA.anchoNivel; // Ancho total del nivel (definido en barcelona.js)
 
@@ -27,6 +40,7 @@ class GameScene extends Phaser.Scene {
     init(data) {
         // El reloj de la escena puede venir parado si se reinició o se salió desde el menú de pausa
         this.time.paused = false;
+        this.tactilVisible = false; // los botones táctiles se crean ocultos en cada arranque
 
         // Puntos y galletas sobreviven a perder una vida; se pasan explícitamente en scene.restart()
         this.puntos = data?.puntos ?? 0;
@@ -330,6 +344,8 @@ BARCELONA.plataformas.forEach(p => {
         }
     };
  
+    this.crearTexturaRayo();
+
     //____________________________LUNA_WUKONG___________________________
     // Crear un grupo de físicas para el objeto lunaWukong
     this.lunasWukong = this.physics.add.group({
@@ -342,7 +358,8 @@ BARCELONA.plataformas.forEach(p => {
     
 
     // Posicionar una lunaWukong en una coordenada específica
-    BARCELONA.recogibles.lunasWukong.forEach(x => this.crearLunaWukong(x));
+    BARCELONA.recogibles.lunasWukong.forEach(x => this.crearLunaWukong(x, 'wukong'));
+    BARCELONA.recogibles.lunasCiberneticas.forEach(x => this.crearLunaWukong(x, 'cibernetica'));
 
     // Recoger objeto
     this.physics.add.overlap(this.player, this.lunasWukong, this.recogerLunaWukong, null, this);
@@ -431,9 +448,11 @@ BARCELONA.plataformas.forEach(p => {
         if (this.isSoundOn) {
             this.soundButton.setTexture('soundOn');
             this.backgroundSound.play();
+            if (this.abuela.volando) this.vueloSound.play();
         } else {
             this.soundButton.setTexture('soundOff');
             this.backgroundSound.stop();
+            this.vueloSound.stop();
         }
     });
 
@@ -447,6 +466,10 @@ BARCELONA.plataformas.forEach(p => {
     this.lanzarGalletaSound = this.sound.add('lanzarGalleta', { volume: 0.3 });
     this.gritoPajaros = [this.sound.add('gritoPajaro1', { volume: 0.5 }), this.sound.add('gritoPajaro2', { volume: 0.5 })];
     this.gritoTransformacion = this.sound.add('gritoTransformacion', {volume: 0.5});
+    // Suena en bucle mientras vuela la Abuela Cibernética. Los sonidos viven más que la escena:
+    // hay que pararlo al salir o reiniciar.
+    this.vueloSound = this.sound.add('vueloRobot', { volume: 0.4, loop: true });
+    this.events.once('shutdown', () => this.vueloSound.stop());
 
 
     this.nivelCompletado = false;
@@ -484,6 +507,7 @@ BARCELONA.plataformas.forEach(p => {
         if (this.estaPausado) return;
 
         this.abuela.actualizar();
+        this.btnBajar.setVisible(this.tactilVisible && this.abuela.transformacion === 'cibernetica');
         this.updateParallax();
 
         if (this.player.x >= BARCELONA.finNivel * altScale && !this.nivelCompletado) {
@@ -517,6 +541,7 @@ togglePausa() {
         if (this.backgroundSound && this.backgroundSound.isPlaying) {
             this.backgroundSound.pause();
         }
+        if (this.vueloSound.isPlaying) this.vueloSound.pause();
 
         const cx = this.cameras.main.worldView.x + this.cameras.main.width / 2;
         const cy = this.cameras.main.worldView.y + this.cameras.main.height / 2;
@@ -570,6 +595,7 @@ togglePausa() {
         if (this.musicaOn && this.backgroundSound) {
             this.backgroundSound.resume();
         }
+        if (this.vueloSound.isPaused) this.vueloSound.resume();
         this.elementosPausa.forEach(e => e.destroy());
         this.elementosPausa = [];
     }
@@ -931,6 +957,7 @@ verificaMuerte() {
         this.seguimiento.vidaPerdida = true;
         this.vidas--;
         this.abuela.isTransformed = false;
+        this.abuela.terminarVuelo();
         // Restaura el cuerpo físico si viene de Wukong
         this.player.body.setSize(150, 320).setOffset(50 * altScale, 50 * altScale);
 
@@ -966,6 +993,7 @@ verificaMuerte() {
 }
 
 nivel1Completado() {
+    this.abuela.terminarVuelo();
     this.physics.pause();
     this.player.anims.stop();
 
@@ -1083,7 +1111,86 @@ mostrarPantallaVictoria() {
     });
 } 
 
-crearLunaWukong(x) {
+// Textura del rayo dibujada por código; las texturas son globales, se crea una sola vez.
+crearTexturaRayo() {
+    if (this.textures.exists('rayoCibernetico')) return;
+
+    const g = this.make.graphics({}, false);
+    g.fillStyle(0xff0000);
+    g.fillRect(0, 0, RAYO.ancho, RAYO.alto);
+    g.fillStyle(0xffb0b0);
+    g.fillRect(0, RAYO.alto * 0.3, RAYO.ancho, RAYO.alto * 0.4);
+    g.generateTexture('rayoCibernetico', RAYO.ancho, RAYO.alto);
+    g.clear();
+    g.fillStyle(0xff0000, 0.35);
+    g.fillCircle(24, 24, 24);
+    g.fillStyle(0xff3030, 0.7);
+    g.fillCircle(24, 24, 15);
+    g.fillStyle(0xffffff, 0.95);
+    g.fillCircle(24, 24, 7);
+    g.generateTexture('brilloOjo', 48, 48);
+    g.destroy();
+}
+
+// Rayo de la Abuela Cibernética: no gasta galletas. Va en el grupo de las galletas
+// para acertar a palomas y patinetes con las mismas colisiones y los mismos puntos.
+// Posición del ojo en el mundo según el fotograma que se está mostrando y hacia dónde mira
+posicionOjo() {
+    const p = this.player;
+    const ojo = RAYO.ojos[p.texture.key] || RAYO.ojos.abuelaQuietaCibernetica;
+    const direccion = p.flipX ? -1 : 1;
+    return {
+        x: p.x + direccion * (ojo.x - p.frame.width / 2) * p.scaleX,
+        y: p.y - (p.frame.height - ojo.y) * p.scaleY,
+    };
+}
+
+lanzarRayo() {
+    const direccion = this.player.flipX ? -1 : 1;
+    const ojo = this.posicionOjo();
+    // La cola del rayo empieza en el ojo y se dibuja por delante de la abuela
+    const rayo = this.galletas.create(ojo.x + direccion * RAYO.ancho / 2, ojo.y, 'rayoCibernetico')
+        .setDepth(1.2);
+    rayo.setVelocityX(direccion * RAYO.velocidad);
+    rayo.body.allowGravity = false;
+
+    // Destello en el ojo, que acompaña a la abuela mientras se apaga. Se recoloca en `postupdate`,
+    // cuando las físicas ya han movido el sprite: en un tween iría un fotograma por detrás al andar.
+    const brillo = this.add.image(ojo.x, ojo.y, 'brilloOjo')
+        .setDepth(1.3).setScale(0.5).setBlendMode(Phaser.BlendModes.ADD);
+    const seguirOjo = () => {
+        const actual = this.posicionOjo();
+        brillo.setPosition(actual.x, actual.y);
+    };
+    const soltarOjo = () => this.events.off('postupdate', seguirOjo);
+    this.events.on('postupdate', seguirOjo);
+    this.events.once('shutdown', soltarOjo);
+    this.tweens.add({
+        targets: brillo,
+        scale: 1.3,
+        alpha: 0,
+        duration: RAYO.brillo,
+        onComplete: () => {
+            soltarOjo();
+            brillo.destroy();
+        },
+    });
+
+    // Provisional: suena como una galleta hasta que haya un sonido de láser
+    if (this.isSoundOn && this.lanzarGalletaSound) {
+        this.lanzarGalletaSound.play();
+    }
+
+    // Un rayo es un ataque: también rompe la hazaña Pacifista
+    this.seguimiento.galletaLanzada = true;
+
+    this.time.delayedCall(RAYO.duracion, () => {
+        rayo.destroy();
+    });
+}
+
+// `transformacion` es la forma que da la luna: 'wukong' o 'cibernetica' (la misma luna, teñida de rojo)
+crearLunaWukong(x, transformacion) {
     // Crear la luna en la posición `x` y una posición temporal en `y`
     const luna = this.lunasWukong.create(x * altScale, this.scale.height - 200 * altScale, 'lunaWukong')
         .setScale(0.3 * altScale)
@@ -1093,14 +1200,18 @@ crearLunaWukong(x) {
     luna.body.setSize(300, 300); // Ajustar el cuerpo físico si es necesario
     luna.body.allowGravity = true; // Habilitar gravedad
     luna.setInteractive();
+    luna.transformacion = transformacion;
+    if (transformacion === 'cibernetica') luna.setTint(TINTE_LUNA_CIBERNETICA);
 
-    // Reproducir animación (si existe)
-    this.anims.create({
-        key: 'brillarLunaWukong',
-        frames: this.anims.generateFrameNumbers('lunaWukong', { start: 0, end: 5 }), // Ajusta los frames disponibles
-        frameRate: 8,
-        repeat: -1
-    });
+    // Las animaciones son globales: solo se crea la primera vez
+    if (!this.anims.exists('brillarLunaWukong')) {
+        this.anims.create({
+            key: 'brillarLunaWukong',
+            frames: this.anims.generateFrameNumbers('lunaWukong', { start: 0, end: 5 }), // Ajusta los frames disponibles
+            frameRate: 8,
+            repeat: -1
+        });
+    }
     luna.play('brillarLunaWukong');
 
     //console.log(`Luna Wukong creada en X: ${x}`);
@@ -1109,7 +1220,7 @@ crearLunaWukong(x) {
 
 recogerLunaWukong(player, luna) {
     luna.destroy();
-    this.abuela.transformar();
+    this.abuela.transformar(luna.transformacion);
     this.contarParaHazana('transformaciones', 'wukongMaestro');
 }
 
@@ -1129,6 +1240,9 @@ crearBotonesTactiles() {
     const btnDer   = this.add.text(margen + 160,      h - margen - 40, '→', estilo).setOrigin(0.5).setScrollFactor(0).setDepth(2).setAlpha(0.85).setInteractive();
     const btnSaltar = this.add.text(w - margen - 160, h - margen - 40, '↑', estilo).setOrigin(0.5).setScrollFactor(0).setDepth(2).setAlpha(0.85).setInteractive();
     const btnLanzar = this.add.text(w - margen - 45,  h - margen - 40, 'X', estilo).setOrigin(0.5).setScrollFactor(0).setDepth(2).setAlpha(0.85).setInteractive();
+    // Solo se ve con la Abuela Cibernética: baja en el vuelo y, pulsado dos veces, la deja caer
+    this.btnBajar   = this.add.text(w - margen - 275, h - margen - 40, '↓', estilo).setOrigin(0.5).setScrollFactor(0).setDepth(2).setAlpha(0.85).setInteractive();
+    this.btnBajar.setVisible(false);
 
     this.botonesMoviles = [btnIzq, btnDer, btnSaltar, btnLanzar];
     this.botonesMoviles.forEach(b => b.setVisible(false));
@@ -1145,14 +1259,26 @@ crearBotonesTactiles() {
     btnSaltar.on('pointerdown', () => { entrada.saltar = true; });
     btnLanzar.on('pointerdown', () => { entrada.lanzar = true; });
 
+    // Vuelo: saltar mantenido sube; el botón de bajar es pulso (doble toque) y hold a la vez
+    btnSaltar.on('pointerdown', () => { entrada.arriba = true; });
+    btnSaltar.on('pointerup',   () => { entrada.arriba = false; });
+    btnSaltar.on('pointerout',  () => { entrada.arriba = false; });
+    this.btnBajar.on('pointerdown', () => { entrada.bajar = true; entrada.abajo = true; });
+    this.btnBajar.on('pointerup',   () => { entrada.abajo = false; });
+    this.btnBajar.on('pointerout',  () => { entrada.abajo = false; });
+
     // Mostrar al tocar, ocultar al usar teclado
     this.input.on('pointerdown', () => {
         this.botonesMoviles.forEach(b => b.setVisible(true));
+        this.tactilVisible = true;
     });
     this.input.keyboard.on('keydown', () => {
         this.botonesMoviles.forEach(b => b.setVisible(false));
+        this.tactilVisible = false;
         entrada.izquierda = false;
         entrada.derecha   = false;
+        entrada.arriba    = false;
+        entrada.abajo     = false;
     });
 }
 
