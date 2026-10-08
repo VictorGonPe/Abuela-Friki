@@ -3,10 +3,30 @@
 // GameScene aplica altScale al colocarlas; con la resolución fija de Fase 2 altScale = 1.
 
 export const BARCELONA = {
+    nombre: 'Barcelona',
     anchoNivel: 30000,
     finNivel:   29600, // x donde termina el nivel (puerta del Imserso)
 
     jugadorInicio: { x: 130, y: 320 },
+
+    // Cielo y capas de fondo. `velo` es un color muy transparente por encima de todo el decorado.
+    fondo: {
+        cielo: 0x42aaff,
+        velo: { color: 0xFFCC00, alpha: 0.2 },
+        lejano: 'backgroundMountain',
+        ciudad: 'backgroundCiudad',
+        cesped: 'cesped',
+    },
+
+    // Monumentos con parallax (y desde abajo). Verlos todos en una partida da la hazaña Turista.
+    monumentos: [
+        { x: 1300,  y: 210, key: 'monumento1' }, // Colón
+        { x: 3800,  y: 210, key: 'monumento2' }, // Torres Mapfre
+        { x: 5430,  y: 210, key: 'monumento6' }, // La Pedrera
+        { x: 12200, y: 215, key: 'monumento3' }, // Sagrada Família
+        { x: 16000, y: 230, key: 'monumento4' }, // Torre Glòries
+        { x: 22000, y: 180, key: 'monumento5' }, // Arco de Triunfo
+    ],
 
     // Bloques de suelo y huecos. GameScene los recorre para crear el suelo estático.
     bloquesYHuecos: [
@@ -57,6 +77,9 @@ export const BARCELONA = {
         { tipo: 'grande', x: 14250, y: 550 },
     ],
 
+    // Plataformas que se mueven: este nivel no tiene (ver madrid.js)
+    plataformasMoviles: [],
+
     // Imágenes decorativas. x e y en píxeles de diseño; y se cuenta desde abajo.
     // depth y flipX son opcionales (por defecto: sin depth extra, sin flip).
     imagenes: [
@@ -105,6 +128,14 @@ export const BARCELONA = {
         { key: 'senal3',          x: 23700, y: 110, escala: 0.6  },
         { key: 'tierra2',         x: 23755, y: 95,  escala: 0.6,  depth: 1.5 },
         { key: 'cono2',           x: 23830, y: 98,  escala: 0.6,  depth: 1.5 },
+        // Valla del colegio, por delante de la abuela
+        { key: 'valla',           x: 5504,  y: 90,  escala: 0.4,  depth: 1.5 },
+        { key: 'valla',           x: 5312,  y: 90,  escala: 0.4,  depth: 1.5 },
+        { key: 'valla',           x: 5420,  y: 90,  escala: 0.4,  depth: 1.5 },
+        { key: 'valla',           x: 5528,  y: 90,  escala: 0.4,  depth: 1.5 },
+        { key: 'valla',           x: 5636,  y: 90,  escala: 0.4,  depth: 1.5 },
+        { key: 'valla',           x: 5744,  y: 90,  escala: 0.4,  depth: 1.5 },
+        { key: 'valla',           x: 5852,  y: 90,  escala: 0.4,  depth: 1.5 },
     ],
 
     // Rangos de elementos repetidos (se colocan con un bucle en GameScene).
@@ -124,6 +155,8 @@ export const BARCELONA = {
         // Luna roja: transforma en Abuela Cibernética. Provisional, cerca del inicio para probar
         // los sprites; la transformación definitiva será de pago (ECONOMIA.transformaciones).
         lunasCiberneticas: [1800],
+        // Lingote verde: transforma en Abuela Verde. Provisional y gratis, igual que la luna roja.
+        lingotesVerdes: [1200],
         // Pesetas en posiciones fijas y alcanzables; y se cuenta desde abajo.
         // Las de suelo se recogen andando; las altas premian subir a las plataformas.
         pesetas: [
@@ -221,10 +254,10 @@ export const BARCELONA = {
             { key: 'semaforo1',          ruta: 'assets/semaforo1.png' },
         ],
         spritesheets: [
-            { key: 'abuelaMovimiento1',  ruta: 'assets/abuelaAndar.png',             fw: 363,   fh: 378 },
-            { key: 'abuelaMovimiento2',  ruta: 'assets/abuelaSalto.png',             fw: 363,   fh: 374 },
-            { key: 'abuelaQuieta',       ruta: 'assets/abuelaIdle.png',              fw: 363,   fh: 378 },
-            { key: 'abuelaMuerte',       ruta: 'assets/abuelaMuerte.png',            fw: 363,   fh: 378 },
+            { key: 'abuelaMovimiento1',  ruta: 'assets/abuelaAndar1.png',            fw: 363,   fh: 378 },
+            { key: 'abuelaMovimiento2',  ruta: 'assets/abuelaSalto1.png',            fw: 363,   fh: 410 },
+            { key: 'abuelaQuieta',       ruta: 'assets/abuelaIdle1.png',             fw: 363,   fh: 378 },
+            { key: 'abuelaMuerte',       ruta: 'assets/abuelaMuerte1.png',           fw: 700,   fh: 390 },
             { key: 'abuelaTWukong',      ruta: 'assets/trans/wukong/abuelaTWukong.png',           fw: 452,   fh: 610 },
             { key: 'abuelaMov1Wukong',   ruta: 'assets/trans/wukong/abuelaAndarWukongPrueba.png', fw: 362,   fh: 470 },
             { key: 'abuelaQuietaWukong', ruta: 'assets/trans/wukong/abuelaIdleWukong.png',        fw: 450,   fh: 470 },
@@ -234,6 +267,12 @@ export const BARCELONA = {
             { key: 'abuelaQuietaCibernetica', ruta: 'assets/trans/cyborg/abuelaIdleCyborg.png',   fw: 363,   fh: 378 },
             { key: 'abuelaMov2Cibernetica',   ruta: 'assets/trans/cyborg/abuelaSaltoCyborg.png',  fw: 363,   fh: 374 },
             { key: 'abuelaVueloCibernetica',  ruta: 'assets/trans/cyborg/abuelaVueloCyborg.png',  fw: 363,   fh: 378 },
+            { key: 'lingoteVerde',            ruta: 'assets/trans/verde/lingoteVerde.png',        fw: 280,   fh: 300 },
+            { key: 'abuelaTVerde',            ruta: 'assets/trans/verde/abuelaTVerde.png',        fw: 452,   fh: 610 },
+            { key: 'abuelaQuietaVerde',       ruta: 'assets/trans/verde/abuelaIdleVerde.png',     fw: 363,   fh: 378 },
+            { key: 'abuelaMov1Verde',         ruta: 'assets/trans/verde/abuelaAndarVerde.png',    fw: 363,   fh: 378 },
+            { key: 'abuelaMov2Verde',         ruta: 'assets/trans/verde/abuelaSaltoVerde.png',    fw: 480,   fh: 378 },
+            { key: 'abuelaGolpeVerde',        ruta: 'assets/trans/verde/abuelaGolpeVerde.png',    fw: 640,   fh: 378 },
             { key: 'paracetamol',        ruta: 'assets/paracetamol.png',             fw: 275,   fh: 260 },
             { key: 'lunaWukong',         ruta: 'assets/lunaWukong.png',              fw: 210,   fh: 195 },
             { key: 'paloma',             ruta: 'assets/paloma1.png',                 fw: 370,   fh: 450 },

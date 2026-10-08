@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { BARCELONA } from '../niveles/barcelona.js';
+import { nivelActual } from '../niveles/index.js';
 
 // Carga los assets del nivel y muestra una barra de progreso.
 // Flujo: ControlesScene → CargaScene → GameScene.
@@ -11,8 +11,8 @@ class CargaScene extends Phaser.Scene {
         super({ key: 'CargaScene' });
     }
 
-    init(data) {
-        this.nivel = data?.nivel ?? BARCELONA;
+    init() {
+        this.nivel = nivelActual(this.registry);
     }
 
     preload() {

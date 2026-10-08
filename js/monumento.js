@@ -6,17 +6,8 @@ export default class Monumento {
         this.lastScrollX = 0; // Última posición del scroll de la cámara
     }
 
-    crearMonumentos() {
-        // Coordenadas y datos para los monumentos
-        const monumentosData = [
-            { x: 1300, y: 210, key: 'monumento1' }, // Colón
-            { x: 3800, y: 210, key: 'monumento2' }, // T.Maphre
-            { x: 5430, y: 210, key: 'monumento6' }, //Pedrera
-            { x: 12200, y: 215, key: 'monumento3' }, // Sagrada Familia
-            { x: 16000, y: 230, key: 'monumento4' }, // Agbar
-            { x: 22000, y: 180, key: 'monumento5' }, //Arco triunfo
-        ];
-
+    // `monumentosData` viene del archivo del nivel: [{ x, y, key }], con y contada desde abajo
+    crearMonumentos(monumentosData) {
         // Crear los monumentos basados en los datos
         monumentosData.forEach(data => {
             const monumento = this.scene.add.image(

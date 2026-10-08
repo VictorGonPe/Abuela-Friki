@@ -123,3 +123,27 @@ Una entrada por decisión técnica o de diseño relevante: qué se decidió, por
 **Carga:** manteniendo lanzar la bola crece en la mano hasta el doble de tamaño en 1 segundo (`TIEMPO_CARGA`, `ESCALA_CARGA_MAX` en `abuela.js`) y sale al soltar; un toque corto lanza la normal. La bola grande solo acierta más fácil: da los mismos puntos.
 
 **Detalles:** provisional: la postura es el último fotograma de la hoja de salto (el brazo con el bastón hacia delante), se mantiene 250 ms (`POSTURA_DISPARO`), la bola se dibuja por código y suena como una galleta. Falta un sprite propio con el brazo estirado.
+
+## 2026-10-07 · Abuela Verde de prueba con lingote verde
+
+**Decisión:** la Verde entra en el nivel con un lingote verde gratis en x = 1200 (`lingotesVerdes` en `barcelona.js`), que hace de luna: 5 fotogramas que van del lingote apagado al cargado de energía y vuelven (`lingoteVerde.png`). Durante la animación de transformación crece hasta 1,5 veces el tamaño de la abuela normal (`escala` en `TRANSFORMACIONES`, `js/abuela.js`) y se queda así hasta que se acaba; el cuerpo físico crece con ella. El aura verde solo sale en los fotogramas 2 y 3: al final queda sin aura.
+
+**Por qué:** igual que con la Cibernética, sirve para ver el sprite en movimiento antes de decidir la mecánica. Crecer por código, y no en la hoja, deja el tamaño como un número que se ajusta sin rehacer el dibujo.
+
+**Detalles:** provisional: hay hoja de transformación (`abuelaTVerde.png`, 5 fotogramas de 452×610) y de andar (`abuelaAndarVerde.png`, 20 fotogramas de 363×378 con el personaje centrado, a 12 fotogramas por segundo); la de quieta (`abuelaIdleVerde.png`) tiene 12 fotogramas de 363×378, porque el decimotercero del original tiene los pies cortados. La hoja de andar original traía 25 fotogramas, pero la última fila tiene los pies cortados por el borde de la imagen y no se usa. El original tenía fondo negro y el aura cortada sobre el moño: el fondo se quitó y el aura se redibujó siguiendo la silueta. Original y script en `_archivo/verde-originales/`.
+
+## 2026-10-07 · Mecánica de la Abuela Verde: salto alto, onda de choque y puñetazo
+
+**Decisión:** no lanza nada. Recibe la mitad de daño y anda algo más despacio (270 px/s en vez de 300). No tiene doble salto: salta más cuanto más se mantiene saltar, hasta casi el borde de arriba de la pantalla. Al aterrizar con fuerza suelta una onda de choque que destruye palomas, patinetes y cacas cercanos, y lo que toca mientras cae también se destruye sin hacerle daño. El botón de lanzar da un puñetazo que destruye lo que tiene delante sin recibir daño; por la espalda sí le hacen daño.
+
+**Por qué:** la definió Víctor. Es la forma cuerpo a cuerpo: Wukong y la Cibernética atacan de lejos y esta tiene que acercarse, a cambio de aguantar más. Los enemigos destruidos dan sus puntos de siempre y, como el rayo y la bola, cualquiera de sus ataques rompe la hazaña Pacifista.
+
+**Detalles:** todos los valores están en `TRANSFORMACIONES.verde` (`js/abuela.js`): `velocidad`, `dano`, `saltoVariable`, `golpe` y `onda`. Un toque de salto sube unos 330 px y mantenido unos 740. La onda sale si cae a más de 400 px/s, para que no se repita con el rebote. Ni la onda ni el puño tocan a un enemigo que todavía no se ve en pantalla. Las hojas de salto (7 fotogramas de 480×378) y de golpe (5 de 640×378) llevan el personaje en el centro aunque midan distinto, y el cuerpo físico se centra con el fotograma que se muestra (`centrado`). Provisional: el anillo de la onda se dibuja por código, los sonidos son prestados (galleta y choque de patinete) y dura 60 segundos como las otras. La grieta del suelo del dibujo del golpe no entra en el sprite.
+
+## 2026-10-07 · Segundo nivel de prueba: Madrid, con plataformas móviles
+
+**Decisión:** hay un segundo nivel, Madrid (`js/niveles/madrid.js`), al que se entra desde un botón provisional del menú. Es básico y para probar: 14000 px, tres huecos y cuatro plataformas que se mueven (dos de ida y vuelta, un ascensor y dos seguidas en el hueco largo). Usa las imágenes de Barcelona con cielo de atardecer y los fondos teñidos, y un letrero de texto, hasta que haya decorado propio.
+
+**Por qué:** el plan pide que cada nivel aporte una mecánica, no solo otro fondo; la de Madrid son las plataformas móviles. Para que el nivel sea solo un archivo de datos, lo que la escena tenía fijo de Barcelona (cielo, fondos, monumentos, valla del colegio) ha pasado a `barcelona.js`.
+
+**Detalles:** el nivel elegido se guarda en el registro de Phaser (clave `nivel`) y `nivelActual()` (`js/niveles/index.js`) lo devuelve; así sobrevive a los reinicios de la escena sin pasarlo en cada `scene.restart`. Las plataformas móviles se mueven con velocidad, no con tweens, para que Arcade arrastre a la abuela: necesitan `friction.x = 1` (los grupos crean los cuerpos sin rozamiento) y, al bajar, la abuela copia su velocidad para no ir dando saltitos. Pendiente: el récord es uno solo para los dos niveles, las hazañas «termina el nivel» valen en cualquiera, Madrid no tiene monumentos (no da Turista) y falta el selector de niveles con su desbloqueo.

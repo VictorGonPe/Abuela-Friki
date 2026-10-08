@@ -94,6 +94,49 @@ Diseño aprobado el 2026-10-03 (economía, precios y hazañas).
 - **Cierre** — probado en emulación táctil a 844 × 390 (21:9) y 1024 × 768 (4:3): menú, La Farmacia, Hazañas, compra con toque, objetos aplicados, andar, saltar y lanzar a la vez, recoger peseta y pausa. `CLAUDE.md` actualizado
 
 ### Pendiente
-- Transformaciones de pago: Abuela Cibernética y Abuela Verde (estilo Hulk). Precios aprobados y anotados en `ECONOMIA.transformaciones`; faltan los sprites y concretar la mecánica antes de programar. Los aspectos Pirata y Espacial quedan descartados
+- Transformaciones de pago: Abuela Cibernética y Abuela Verde (estilo Hulk). Las dos se prueban gratis con una luna (luna roja en x = 1800, lingote verde en x = 1200) y ya tienen sprites y mecánica; falta cobrarlas con los precios de `ECONOMIA.transformaciones` y quitar la luna y el lingote de prueba. Los aspectos Pirata y Espacial quedan descartados
+- **Sonidos de las transformaciones Cibernética y Verde**: hoy son prestados. Cibernética: falta el del rayo (suena como una galleta). Verde: faltan el del puñetazo (galleta) y el de la onda de choque (choque de patinete). Las dos usan el grito de transformación de Wukong
 - Probar jugando las hazañas acumuladas, Turista, Abuela millonaria y Tres estrellas, y que el escudo bloquea un golpe
 - Prueba del «Hecho cuando»: que alguien que no conoce el juego entienda para qué sirven las pesetas
+
+## Nivel 2 · Madrid (empezado el 2026-10-07)
+
+### Hecho
+- La escena de juego lee el nivel de `this.nivel`; Barcelona y Madrid son archivos de datos en `js/niveles/`
+- Madrid básico y jugable de principio a fin, con plataformas móviles horizontales y un ascensor
+- Botón provisional «Nivel 2: Madrid (prueba)» en el menú
+
+### Por dónde seguir el próximo día
+1. Que Víctor juegue Madrid entero y diga qué saltos quedan justos o fáciles y si sobran enemigos (parada en la salida, los patinetes le quitan una vida en pocos segundos).
+2. Colocar las imágenes de Madrid según lleguen. Madrid carga hoy `BARCELONA.assets`: cuando tenga imágenes propias necesita su manifiesto, con claves distintas a las de Barcelona (CargaScene no vuelve a cargar una clave que ya existe).
+3. Selector de niveles y quitar el botón provisional del menú.
+
+### Imágenes que faltan (estilo y tamaños como los de Barcelona)
+- Fondo lejano, unos 1800×1080, que empalme al repetirse: sierra o cielo de Madrid
+- Fondo de ciudad, mismo tamaño y repetible: tejados y edificios
+- De 4 a 6 monumentos con fondo transparente (Puerta de Alcalá, Cibeles, Oso y Madroño, Palacio Real, Torres Kio, Metrópolis…)
+- Cartel de «Madrid» como el de Barcelona (hoy es un texto)
+- Plataformas: piezas izquierda, derecha y centro; opcional, una distinta para las que se mueven
+- Edificios y tiendas madrileños (churrería, bar de bocadillos de calamares, boca de metro, quiosco…)
+- La meta (hoy es el Imserso de Barcelona)
+- Opcional: enemigo propio y música del nivel
+- Los originales, fuera de `dist/`: `npm run build` borra esa carpeta
+
+### Pendiente de código
+- Sin probar: Madrid jugado entero a mano y en táctil
+- Récord y estrellas por nivel (hoy el récord es uno solo para los dos)
+- Madrid no tiene monumentos, así que no da la hazaña Turista
+- Enemigo o detalle propio de Madrid y ajustar la dificultad jugando
+- Abuela Verde: sin ver de principio a fin un puñetazo y una onda contra un enemigo real, ni la vuelta al tamaño normal al acabarse el tiempo
+
+## Abuela normal: dibujo nuevo (2026-10-08)
+
+- Las cuatro hojas de la abuela normal ya son las del dibujo nuevo, en PNG transparente: quieta (`abuelaIdle1.png`), andar (`abuelaAndar1.png`), salto (`abuelaSalto1.png`) y muerte (`abuelaMuerte1.png`). Originales y scripts en `_archivo/abuela-originales/`
+- Quieta y andar tienen el formato de las anteriores (363×378). La de salto mide 363×410, porque en el aire la abuela ocupa más que de pie
+- Como las hojas ya no miden lo mismo de alto, el cuerpo físico de la abuela normal se apoya en la base del fotograma que se muestra (`apoyarCuerpo` en `abuela.js`). Sin eso, al pasar del salto a quieta el cuerpo bajaba unos píxeles, se metía en el suelo y lo atravesaba
+- Los dibujos no tienen las mismas proporciones entre hojas (andando la cabeza es más grande respecto al cuerpo). Están igualados por el ancho de la cabeza, que es lo que más se nota: andar sale un 2,5 % más baja y salto y muerte un 2 % más altas
+- Muerte: ya no es el mareo en bucle. Son 12 fotogramas de 700×390 a 7 por segundo, una sola vez: 8 dibujos (se asusta, tropieza y cae) y 4 hechos por script con la abuela tumbada cada vez más gris; mientras se pone gris crece hasta 1,4 veces (`MUERTE` en `abuela.js`). Los dos dibujos grises del original no se usan: saltar a ellos se veía brusco
+- Quieta traía 14 fotogramas: los dos últimos tienen los pies cortados y no se usan; el decimotercero repite el primero
+- Probado en el navegador: quieta, andar a los dos lados, salto y muerte con reinicio y una vida menos
+- Las transformaciones (Wukong, Cibernética, Verde) siguen partiendo del dibujo antiguo
+- `abuelaAndar.png`, `abuelaIdle.png`, `abuelaSalto.png` y `abuelaMuerte.png` ya no los carga nadie: decidir si se mueven a `_archivo/`

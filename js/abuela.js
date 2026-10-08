@@ -2,6 +2,12 @@ import Phaser from 'phaser';
 import entrada from './entrada.js';
 
 const TIEMPO_TRANSFORMACION = 60000;
+const VELOCIDAD_ANDAR = 300;   // px/s; las formas con `velocidad` usan la suya
+const BASE_CUERPO = 328;      // px del fotograma desde lo alto del cuerpo físico de la abuela normal hasta la base
+// Muerte: los primeros fotogramas son la caída; los últimos, la abuela tumbada volviéndose gris,
+// y mientras tanto crece hasta `escalaFinal` veces su tamaño.
+const MUERTE = { caida: 8, gris: 4, fotogramasPorSegundo: 7, escalaFinal: 1.4 };
+const ESCALA_BASE = 0.4;      // escala del sprite de la abuela; las formas con `escala` la multiplican
 const VELOCIDAD_VUELO = 300;  // px/s al subir y bajar volando
 const DOBLE_PULSACION = 200;  // ms máximos entre dos pulsaciones de abajo para dejarse caer
 const POSTURA_DISPARO = 250;  // ms que Wukong mantiene el brazo estirado al soltar una bola
@@ -16,6 +22,16 @@ const HUMO_PIES = { x: -23, y: -4 };
 // `rayos`: dispara rayos por el ojo en lugar de galletas, sin gastarlas.
 // `disparo`: animación con el brazo estirado; suelta bolas de energía por la mano, sin gastar galletas.
 //            Manteniendo lanzar la bola se carga y crece; sale al soltar.
+// `escala`: tamaño respecto a la abuela normal; crece durante la animación de transformación.
+// `velocidad`: px/s andando, si no es la normal. `dano`: parte del daño que recibe (0.5 = la mitad).
+// `saltoVariable`: no hay doble salto; sube a `velocidad` px/s mientras se mantiene saltar, como mucho `mantener` ms.
+// `golpe`: lanzar da un puñetazo en vez de tirar galletas. Destruye lo que haya hasta `alcance` px por delante
+//          entre `inicio` y `fin` ms de la animación, sin recibir daño de eso.
+// `onda`: al aterrizar cayendo a más de `caidaMinima` px/s destruye lo que haya a `radio` px a cada lado
+//         y hasta `alto` px sobre el suelo. Cayendo, lo que toca también se destruye sin hacerle daño;
+//         `gracia` son los ms tras aterrizar en que eso sigue valiendo.
+// `centrado`: el personaje va en el centro de todos sus fotogramas, aunque midan distinto: el offset
+//             del cuerpo se calcula con el fotograma que se está mostrando.
 // `offsetIzq` es el offset X del cuerpo al mirar a la izquierda: los fotogramas de la
 // cibernética miden lo mismo que los de la abuela normal y necesitan el mismo ajuste.
 const TRANSFORMACIONES = {
@@ -30,6 +46,18 @@ const TRANSFORMACIONES = {
         offsetX: 50, offsetIzq: 180, offsetY: 50,
         vuela: true, rayos: true,
     },
+    // Con la velocidad y el tiempo de salto de abajo, manteniendo saltar llega casi al borde de arriba de la pantalla.
+    verde: {
+        transformar: 'transformVerde', idle: 'idleVerde', andar: 'walkVerde', salto: 'jumpVerde',
+        offsetX: 116, offsetIzq: 116, offsetY: 56, // los de la hoja de andar; `centrado` los ajusta en las demás
+        centrado: true,
+        escala: 1.5,
+        velocidad: 270,
+        dano: 0.5,
+        saltoVariable: { velocidad: 800, mantener: 540 },
+        golpe: { animacion: 'golpeVerde', inicio: 170, fin: 420, alcance: 150 },
+        onda: { radio: 260, alto: 220, caidaMinima: 400, gracia: 250 },
+    },
 };
 
 export default class Abuela {
@@ -42,12 +70,16 @@ export default class Abuela {
         this.escudoActivo = false;
         this.isTransformed = false;
         this.isTransforming = false;
-        this.transformacion = null; // 'wukong' o 'cibernetica' mientras isTransformed es true
+        this.transformacion = null; // clave de TRANSFORMACIONES mientras isTransformed es true
         this.volando = false;
         this.ultimoPulsoAbajo = 0;
         this.posturaHasta = 0; // hasta cuándo (reloj de la escena) se mantiene la postura de disparo
         this.cargando = false;
         this.inicioCarga = 0;
+        this.subiendoHasta = 0; // hasta cuándo el salto variable sigue subiendo si se mantiene saltar
+        this.inicioGolpe = -Infinity; // cuándo empezó el último puñetazo
+        this.velocidadCaida = 0; // velocidad vertical del fotograma anterior, para saber con qué fuerza aterriza
+        this.aplastaHasta = 0;   // hasta cuándo, tras aterrizar, lo que toca se destruye sin hacerle daño
         this.dobleSalto = false;
         this.saltosRestantes = 2;
         this.saltando = false;
@@ -56,7 +88,7 @@ export default class Abuela {
 
         // Crear sprite
         this.sprite = scene.physics.add.sprite(x, y, 'abuelaMovimiento1')
-            .setScale(0.4).setOrigin(0.5, 1).setDepth(1);
+            .setScale(ESCALA_BASE).setOrigin(0.5, 1).setDepth(1);
         this.sprite.body.setSize(130, 320).setOffset(50, 70);
         this.sprite.setBounce(0.2);
         this.sprite.setCollideWorldBounds(true);
@@ -127,11 +159,13 @@ export default class Abuela {
             repeat: 0
         });
 
+        // Se asusta, tropieza, cae y se va quedando gris: una sola vez, y aguanta el último fotograma
+        // hasta que la escena se reinicia (2 segundos después de morir)
         scene.anims.create({
             key: 'muerte',
-            frames: scene.anims.generateFrameNumbers('abuelaMuerte', { start: 0, end: 5 }),
-            frameRate: 10,
-            repeat: -1
+            frames: scene.anims.generateFrameNumbers('abuelaMuerte', { start: 0, end: MUERTE.caida + MUERTE.gris - 1 }),
+            frameRate: MUERTE.fotogramasPorSegundo,
+            repeat: 0
         });
 
         scene.anims.create({
@@ -206,6 +240,55 @@ export default class Abuela {
             frameRate: 1,
             repeat: -1
         });
+
+        // Abuela Verde: va más despacio que las otras para que se vea crecer
+        scene.anims.create({
+            key: 'transformVerde',
+            frames: scene.anims.generateFrameNumbers('abuelaTVerde', { start: 0, end: 4 }),
+            frameRate: 4,
+            repeat: 0
+        });
+
+        // Más lenta que las otras de andar: la hoja repite un paso corto de unos 5 fotogramas
+        scene.anims.create({
+            key: 'walkVerde',
+            frames: scene.anims.generateFrameNumbers('abuelaMov1Verde', { start: 0, end: 19 }),
+            frameRate: 12,
+            repeat: -1
+        });
+
+        scene.anims.create({
+            key: 'jumpVerde',
+            frames: scene.anims.generateFrameNumbers('abuelaMov2Verde', { start: 0, end: 6 }),
+            frameRate: 14,
+            repeat: 0
+        });
+
+        scene.anims.create({
+            key: 'golpeVerde',
+            frames: scene.anims.generateFrameNumbers('abuelaGolpeVerde', { start: 0, end: 4 }),
+            frameRate: 12,
+            repeat: 0
+        });
+
+        scene.anims.create({
+            key: 'idleVerde',
+            frames: scene.anims.generateFrameNumbers('abuelaQuietaVerde', { start: 0, end: 11 }),
+            frameRate: 4,
+            repeat: -1
+        });
+    }
+
+    // Animación de muerte. Cuando ya está tumbada y empieza a ponerse gris, crece poco a poco.
+    animarMuerte() {
+        const msPorFotograma = 1000 / MUERTE.fotogramasPorSegundo;
+        this.sprite.anims.play('muerte', true);
+        this.scene.tweens.add({
+            targets: this.sprite,
+            scale: ESCALA_BASE * MUERTE.escalaFinal,
+            delay: MUERTE.caida * msPorFotograma,
+            duration: MUERTE.gris * msPorFotograma,
+        });
     }
 
     // Animaciones de andar y de quieta: esperan a que termine la postura de disparo
@@ -231,8 +314,9 @@ export default class Abuela {
         }
 
         // Movimiento horizontal
+        const velocidad = (forma && forma.velocidad) || VELOCIDAD_ANDAR;
         if (scene.cursors.left.isDown || entrada.izquierda) {
-            this.sprite.setVelocityX(-300);
+            this.sprite.setVelocityX(-velocidad);
             if (isOnGround) this.animar(forma ? forma.andar : 'left');
             this.sprite.flipX = true;
             if (forma) {
@@ -241,7 +325,7 @@ export default class Abuela {
                 this.sprite.body.setOffset(180, 50);
             }
         } else if (scene.cursors.right.isDown || entrada.derecha) {
-            this.sprite.setVelocityX(300);
+            this.sprite.setVelocityX(velocidad);
             if (isOnGround) this.animar(forma ? forma.andar : 'right');
             this.sprite.flipX = false;
             if (forma) {
@@ -268,13 +352,14 @@ export default class Abuela {
         } else if (quereSaltar) {
             if (isOnGround) {
                 scene.jumpSound.play();
-                this.sprite.setVelocityY(-700);
+                this.sprite.setVelocityY(forma && forma.saltoVariable ? -forma.saltoVariable.velocidad : -700);
+                if (forma && forma.saltoVariable) this.subiendoHasta = scene.time.now + forma.saltoVariable.mantener;
                 this.sprite.anims.play(forma ? forma.salto : 'jump', true);
                 this.saltosRestantes--;
                 this.saltando = true;
             } else if (forma && forma.vuela && this.saltosRestantes > 0) {
                 this.empezarVuelo();
-            } else if (this.isTransformed && this.saltosRestantes > 0) {
+            } else if (this.isTransformed && !forma.saltoVariable && this.saltosRestantes > 0) {
                 scene.jumpSound.play();
                 this.sprite.setVelocityY(-900);
                 this.sprite.anims.play(forma.salto, true);
@@ -303,10 +388,17 @@ export default class Abuela {
             this.saltando = false;
         }
 
-        // Lanzar: galleta, rayo o bola de energía según la forma
+        if (!forma) this.apoyarCuerpo();
+        if (forma && forma.saltoVariable) this.actualizarSaltoVariable(forma.saltoVariable);
+        if (forma && forma.onda) this.actualizarOnda(forma.onda, isOnGround);
+        if (forma && forma.centrado) this.centrarCuerpo();
+
+        // Lanzar: galleta, rayo, bola de energía o puñetazo según la forma
         const pulsoLanzar = Phaser.Input.Keyboard.JustDown(scene.keys.lanzarGalleta) || entrada.lanzar;
         entrada.lanzar = false;
-        if (forma && forma.disparo) {
+        if (forma && forma.golpe) {
+            this.actualizarGolpe(forma.golpe, pulsoLanzar);
+        } else if (forma && forma.disparo) {
             const mantenido = scene.keys.lanzarGalleta.isDown || entrada.lanzarMantenido;
             this.actualizarCarga(forma, pulsoLanzar, mantenido);
         } else if (pulsoLanzar) {
@@ -316,6 +408,85 @@ export default class Abuela {
                 scene.lanzarGalleta();
             }
         }
+    }
+
+    // Salto variable: sigue subiendo a velocidad fija mientras se mantiene saltar, hasta agotar el tiempo
+    // o darse con algo por arriba. Al soltar, la gravedad hace el resto.
+    actualizarSaltoVariable(salto) {
+        const scene = this.scene;
+        if (scene.time.now >= this.subiendoHasta) return;
+        const mantenido = scene.cursors.up.isDown || entrada.arriba;
+        if (mantenido && !this.sprite.body.blocked.up) {
+            this.sprite.setVelocityY(-salto.velocidad);
+        } else {
+            this.subiendoHasta = 0;
+        }
+    }
+
+    // Onda de choque al aterrizar con fuerza. Se compara con la velocidad del fotograma anterior
+    // porque al tocar el suelo Arcade ya la ha cambiado por el rebote.
+    actualizarOnda(onda, isOnGround) {
+        if (isOnGround && this.velocidadCaida > onda.caidaMinima) {
+            this.aplastaHasta = this.scene.time.now + onda.gracia;
+            this.scene.ondaDeChoque(this.sprite.x, this.sprite.y, onda);
+        }
+        this.velocidadCaida = isOnGround ? 0 : this.sprite.body.velocity.y;
+    }
+
+    // Puñetazo: mientras dura manda su animación, y en su tramo activo destruye lo que tenga delante
+    actualizarGolpe(golpe, pulsoLanzar) {
+        const scene = this.scene;
+        let transcurrido = scene.time.now - this.inicioGolpe;
+        if (pulsoLanzar && transcurrido > golpe.fin) {
+            this.inicioGolpe = scene.time.now;
+            transcurrido = 0;
+            this.sprite.anims.play(golpe.animacion, true);
+            this.posturaHasta = scene.time.now + golpe.fin;
+            if (scene.isSoundOn && scene.lanzarGalletaSound) scene.lanzarGalletaSound.play();
+        }
+        if (transcurrido >= golpe.inicio && transcurrido <= golpe.fin) {
+            const cuerpo = this.sprite.body;
+            const x = this.sprite.flipX ? cuerpo.center.x - golpe.alcance : cuerpo.center.x;
+            scene.destruirEnemigosEn(new Phaser.Geom.Rectangle(x, cuerpo.top, golpe.alcance, cuerpo.height));
+        }
+    }
+
+    // ¿Está dando un puñetazo hacia ese lado? `x` es la posición de lo que la toca
+    golpeaHacia(golpe, x) {
+        const transcurrido = this.scene.time.now - this.inicioGolpe;
+        if (transcurrido < golpe.inicio || transcurrido > golpe.fin) return false;
+        return this.sprite.flipX ? x <= this.sprite.x : x >= this.sprite.x;
+    }
+
+    // Lo que la toca se destruye, sin hacerle daño, si está cayendo, si acaba de aterrizar
+    // o si lo alcanza con el puño. Solo en las formas que aplastan (la Abuela Verde).
+    destruyeAlContacto(enemigo) {
+        const forma = this.isTransformed ? TRANSFORMACIONES[this.transformacion] : null;
+        if (!forma || this.haMuerto) return false;
+        if (forma.golpe && this.golpeaHacia(forma.golpe, enemigo.x)) return true;
+        if (!forma.onda) return false;
+        const cayendo = !this.sprite.body.touching.down && this.sprite.body.velocity.y > 0;
+        return cayendo || this.scene.time.now < this.aplastaHasta;
+    }
+
+    // Daño que recibe de verdad según la forma
+    ajustarDano(cantidad) {
+        const forma = this.isTransformed ? TRANSFORMACIONES[this.transformacion] : null;
+        return forma && forma.dano ? Math.round(cantidad * forma.dano) : cantidad;
+    }
+
+    // Abuela normal: el cuerpo físico se mide desde arriba del fotograma, y la hoja de salto es más alta
+    // que las de andar y quieta. Sin esto, al cambiar de hoja el cuerpo bajaría unos píxeles de golpe,
+    // se metería en el suelo y lo atravesaría.
+    apoyarCuerpo() {
+        const cuerpo = this.sprite.body;
+        cuerpo.setOffset(cuerpo.offset.x, this.sprite.frame.height - BASE_CUERPO);
+    }
+
+    // Deja el cuerpo físico centrado y apoyado en la base del fotograma actual (formas `centrado`)
+    centrarCuerpo() {
+        const sprite = this.sprite;
+        sprite.body.setOffset(sprite.frame.width / 2 - sprite.body.sourceWidth / 2, sprite.frame.height - sprite.body.sourceHeight - 2);
     }
 
     // Bola de energía de Wukong: empieza a cargarse al pulsar lanzar, crece mientras se mantiene
@@ -388,7 +559,7 @@ export default class Abuela {
     recibirDano(cantidad) {
         if (this.isInvulnerable || this.escudoActivo) return false;
 
-        this.salud -= cantidad;
+        this.salud -= this.ajustarDano(cantidad);
         if (this.salud < 0) this.salud = 0;
 
         this.isInvulnerable = true;
@@ -442,12 +613,21 @@ export default class Abuela {
 
             this.sprite.play(forma.transformar);
 
+            // Crece (o encoge, si viene de una forma más grande) mientras dura la animación
+            const escala = ESCALA_BASE * (forma.escala || 1);
+            this.scene.tweens.add({
+                targets: this.sprite,
+                scale: escala,
+                duration: this.scene.anims.get(forma.transformar).duration,
+            });
+
             // Se escucha el final de esta animación en concreto: con 'animationcomplete' a secas,
             // si acabara antes otra animación el juego se quedaría parado para siempre.
             this.sprite.once('animationcomplete-' + forma.transformar, () => {
                 this.sprite.play(forma.idle, true);
                 if (this.isTransforming) {
                     this.sprite.body.setSize(130, 320).setOffset(forma.offsetX, forma.offsetY);
+                    if (forma.centrado) this.centrarCuerpo();
                 }
                 this.isTransforming = false;
                 this.scene.physics.resume();
@@ -456,9 +636,15 @@ export default class Abuela {
         }
     }
 
+    // Vuelve al tamaño de la abuela normal (al acabarse la transformación o al morir)
+    restaurarEscala() {
+        this.sprite.setScale(ESCALA_BASE);
+    }
+
     revertirTransformacion() {
         this.isTransformed = false;
         this.transformacion = null;
+        this.restaurarEscala();
         this.terminarVuelo();
         this.cancelarCarga();
         this.sprite.setTexture('abuelaMovimiento1');

@@ -25,11 +25,18 @@ class MenuScene extends Phaser.Scene {
         background.setAlpha(0.5);
 
         // Botones del menú
-        const startButton = this.add.text(centroX, centroY - 80, 'Iniciar Juego', {
+        const startButton = this.add.text(centroX, centroY - 160, 'Iniciar Juego', {
             fontFamily: 'Bangers', fontSize: tamanio, fontStyle: 'bold', color: '#ffffff',
             padding: { left: 5, right: 5, top: 5, bottom: 5 },
         }).setOrigin(0.5).setInteractive();
         aplicarHover(startButton);
+
+        // Provisional: acceso directo al segundo nivel para probarlo, hasta que haya selector de niveles
+        const madridButton = this.add.text(centroX, centroY - 80, 'Nivel 2: Madrid (prueba)', {
+            fontFamily: 'Bangers', fontSize: tamanio, fontStyle: 'bold', color: '#ffffff',
+            padding: { left: 5, right: 5, top: 5, bottom: 5 },
+        }).setOrigin(0.5).setInteractive();
+        aplicarHover(madridButton);
 
         const farmaciaButton = this.add.text(centroX, centroY, 'La Farmacia', {
             fontFamily: 'Bangers', fontSize: tamanio, fontStyle: 'bold', color: '#ffffff',
@@ -49,7 +56,12 @@ class MenuScene extends Phaser.Scene {
         }).setOrigin(0.5).setInteractive();
         aplicarHover(settingsButton);
 
-        startButton.on('pointerdown', () => this.scene.start('ControlesScene'));
+        const jugar = (nivel) => {
+            this.registry.set('nivel', nivel);
+            this.scene.start('ControlesScene');
+        };
+        startButton.on('pointerdown', () => jugar('barcelona'));
+        madridButton.on('pointerdown', () => jugar('madrid'));
         farmaciaButton.on('pointerdown', () => this.scene.start('FarmaciaScene'));
         hazanasButton.on('pointerdown', () => this.scene.start('HazanasScene'));
         settingsButton.on('pointerdown', () => this.scene.start('AjustesScene'));

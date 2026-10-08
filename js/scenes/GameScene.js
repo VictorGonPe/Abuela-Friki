@@ -3,7 +3,7 @@ import Monumento from '../monumento.js';
 import Enemigos from '../enemigos.js';
 import CollisionManager from '../collisionManager.js';
 import entrada from '../entrada.js';
-import { BARCELONA } from '../niveles/barcelona.js';
+import { nivelActual } from '../niveles/index.js';
 import { aplicarHover } from '../ui/botonTexto.js';
 import HUD from '../ui/hud.js';
 import Abuela from '../abuela.js';
@@ -14,7 +14,8 @@ import { desbloquearHazana, sumarEstadistica } from '../hazanas.js';
 import { avisarHazana } from '../ui/avisoHazana.js';
 
 const altScale = 1; // Siempre 1: altura de diseño fija a 1080px (Phaser.Scale.FIT)
-const TINTE_LUNA_CIBERNETICA = 0xff3030;
+// La luna es la de Wukong, teñida según la transformación que da
+const TINTE_LUNA = { cibernetica: 0xff3030 };
 // Rayo del ojo de la Abuela Cibernética. `brillo` es lo que dura el destello, en ms.
 // `ojos` da el centro del ojo en píxeles del fotograma, por hoja: no está en el mismo sitio
 // al andar que quieta. Si cambian los sprites hay que volver a medirlo.
@@ -30,7 +31,6 @@ const RAYO = {
 // Bola de energía de la Abuela Wukong. `mano` es la mano en píxeles del fotograma de disparo.
 const BOLA = { velocidad: 900, duracion: 1500, radio: 22, mano: { x: 335, y: 268 } };
 const sueloAltura = 50;
-const LEVEL_WIDTH = BARCELONA.anchoNivel; // Ancho total del nivel (definido en barcelona.js)
 
 
 class GameScene extends Phaser.Scene {
@@ -40,6 +40,8 @@ class GameScene extends Phaser.Scene {
 
     // init() se llama antes de create() en cada restart. Gestiona el estado persistente.
     init(data) {
+        // Los datos del nivel que se juega (js/niveles/). Lo elige el menú y se guarda en el registro
+        this.nivel = nivelActual(this.registry);
         // El reloj de la escena puede venir parado si se reinició o se salió desde el menú de pausa
         this.time.paused = false;
         this.tactilVisible = false; // los botones táctiles se crean ocultos en cada arranque
@@ -107,29 +109,32 @@ class GameScene extends Phaser.Scene {
 
         //____________________________CREATE__________________________________________________________________________________________
     // Definir el tamaño del mundo del juego y de la camara
-    this.physics.world.setBounds(0, 0, LEVEL_WIDTH, this.scale.height);
-    this.cameras.main.setBounds(0, 0, LEVEL_WIDTH, this.scale.height);
+    this.physics.world.setBounds(0, 0, this.nivel.anchoNivel, this.scale.height);
+    this.cameras.main.setBounds(0, 0, this.nivel.anchoNivel, this.scale.height);
 
-    this.add.rectangle(0, 0, LEVEL_WIDTH, this.scale.height, 0xFFCC00)
+    const fondo = this.nivel.fondo;
+    this.add.rectangle(0, 0, this.nivel.anchoNivel, this.scale.height, fondo.velo.color)
     .setOrigin(0, 0)
-    .setAlpha(0.2) // Establecer opacidad al 30%
+    .setAlpha(fondo.velo.alpha)
     .setDepth(0.5); // Ajustar profundidad
 
 
     // Fondo azul cielo que ocupa todo el nivel ________________________FONDOS___________________________________
-    this.add.rectangle(0, 0, LEVEL_WIDTH, this.scale.height, 0x42aaff).setOrigin(0, 0);
+    this.add.rectangle(0, 0, this.nivel.anchoNivel, this.scale.height, fondo.cielo).setOrigin(0, 0);
     // Franja negra detrás del suelo para que los huecos se vean negros en vez de azules
-    this.add.rectangle(0, this.scale.height - 180, LEVEL_WIDTH, 250, 0x000000).setOrigin(0, 0);
+    this.add.rectangle(0, this.scale.height - 180, this.nivel.anchoNivel, 250, 0x000000).setOrigin(0, 0);
     // Fondo montañoso que se moverá lentamente
-    this.backgroundMountain = this.add.tileSprite(0, this.scale.height - 40, LEVEL_WIDTH, 1080, 'backgroundMountain').setOrigin(0, 1).setScrollFactor(0).setScale(1);
+    this.backgroundMountain = this.add.tileSprite(0, this.scale.height - 40, this.nivel.anchoNivel, 1080, fondo.lejano).setOrigin(0, 1).setScrollFactor(0).setScale(1);
     // Fondo de ciudad que se moverá más rápido
-    this.backgroundCiudad = this.add.tileSprite(0, this.scale.height - 40, LEVEL_WIDTH, 1080, 'backgroundCiudad').setOrigin(0, 1).setScrollFactor(0).setScale(1);
+    this.backgroundCiudad = this.add.tileSprite(0, this.scale.height - 40, this.nivel.anchoNivel, 1080, fondo.ciudad).setOrigin(0, 1).setScrollFactor(0).setScale(1);
+    if (fondo.tinteLejano) this.backgroundMountain.setTint(fondo.tinteLejano);
+    if (fondo.tinteCiudad) this.backgroundCiudad.setTint(fondo.tinteCiudad);
     this.backgroundCesped = this.add.tileSprite(
     0,
     this.scale.height - 40,
-    LEVEL_WIDTH,
+    this.nivel.anchoNivel,
     1080,
-    'cesped'
+    fondo.cesped
     )
     .setOrigin(0, 1)
     .setScale(1);
@@ -137,12 +142,12 @@ class GameScene extends Phaser.Scene {
     
     //Instancia y creacion de monumentos
     this.monumentoManager = new Monumento(this, altScale); //Esta escena y la escala
-    this.monumentoManager.crearMonumentos();
+    this.monumentoManager.crearMonumentos(this.nivel.monumentos);
 
 
     //__________________CREAR ESCENARIO____________________
     // Imágenes decorativas del nivel (tiendas, edificios, objetos de calle)
-    BARCELONA.imagenes.forEach(({ key, x, y, escala, depth, flipX }) => {
+    this.nivel.imagenes.forEach(({ key, x, y, escala, depth, flipX }) => {
         const img = this.add.image(x * altScale, this.scale.height - y * altScale, key)
             .setScale(escala * altScale)
             .setOrigin(0.5, 1);
@@ -150,9 +155,17 @@ class GameScene extends Phaser.Scene {
         if (flipX) img.flipX = true;
     });
 
+    if (this.nivel.rotulo) {
+        const { texto, x, y } = this.nivel.rotulo;
+        this.add.text(x, this.scale.height - y, texto, {
+            fontFamily: 'Bangers', fontSize: '110px', color: '#ffffff', stroke: '#7a1b1b', strokeThickness: 12,
+            padding: { left: 10, right: 10, top: 10, bottom: 10 },
+        }).setOrigin(0.5, 1);
+    }
+
     // Pivotes repetidos (Sagrada Família) y vallas de obra
-    BARCELONA.pivotes.forEach(({ inicio, fin }) => this.crearPivote(inicio, fin));
-    BARCELONA.vallasObra.forEach(({ inicio, fin }) => this.ponerVallasObra(inicio, fin));
+    this.nivel.pivotes.forEach(({ inicio, fin }) => this.crearPivote(inicio, fin));
+    this.nivel.vallasObra.forEach(({ inicio, fin }) => this.ponerVallasObra(inicio, fin));
 
    
     
@@ -160,7 +173,7 @@ class GameScene extends Phaser.Scene {
     // Crear grupo de plataformas, incluido el suelo__________________SUELOS_______________________________
     this.platforms = this.physics.add.staticGroup();
 
-BARCELONA.bloquesYHuecos.forEach((bloque) => {
+this.nivel.bloquesYHuecos.forEach((bloque) => {
     if (bloque.ancho !== undefined && bloque.x !== undefined) {
         // Creo bloque de suelo usando los valores de "x" y "ancho" escalados AltScale
         this.platforms.create(
@@ -175,11 +188,12 @@ BARCELONA.bloquesYHuecos.forEach((bloque) => {
 });
 
 // Plataformas elevadas del nivel
-BARCELONA.plataformas.forEach(p => {
+this.nivel.plataformas.forEach(p => {
     if (p.tipo === 'uno')    this.plataformaDeUno(p.x, p.y);
     else if (p.tipo === 'dos')    this.plataformaDeDos(p.x1, p.y1, p.x2, p.y2);
     else if (p.tipo === 'grande') this.plataformaGrande(p.x, p.y);
 });
+this.crearPlataformasMoviles(this.nivel.plataformasMoviles);
     
 
     //this.platforms.body.setSize(140, 70).setOffset(50 * altScale, 50 * altScale);
@@ -188,7 +202,7 @@ BARCELONA.plataformas.forEach(p => {
 
     // __________________________________CREAR ABUELA___________________________________________
 
-    this.abuela = new Abuela(this, BARCELONA.jugadorInicio.x, BARCELONA.jugadorInicio.y);
+    this.abuela = new Abuela(this, this.nivel.jugadorInicio.x, this.nivel.jugadorInicio.y);
     this.player = this.abuela.sprite; // Alias para colisiones y compatibilidad
     if (this.escudoInicial) this.abuela.activarEscudo(ECONOMIA.duracionEscudo);
     this.abuela.salud = this.saludInicial;
@@ -212,7 +226,7 @@ BARCELONA.plataformas.forEach(p => {
         repeat: -1, // Animación en buclecxxxxxx
     });
     //Creación de palomas
-    this.enemigosManager.crearPalomas(BARCELONA.enemigos.palomas);
+    this.enemigosManager.crearPalomas(this.nivel.enemigos.palomas);
     // Crear colisión entre las palomas y la abuela
     this.physics.add.overlap(this.enemigosManager.palomas, this.player, this.colisionPaloma, null, this);
 
@@ -234,7 +248,7 @@ BARCELONA.plataformas.forEach(p => {
         frameRate: 6,
         repeat: -1 // Animación en bucle
     });
-    this.enemigosManager.crearPatinetes(BARCELONA.enemigos.patinetes); //Crear patinetes
+    this.enemigosManager.crearPatinetes(this.nivel.enemigos.patinetes); //Crear patinetes
     // Crear colisiones entre los patinetes y el suelo
     this.physics.add.collider(this.enemigosManager.patinetes, this.platforms);
     this.physics.add.overlap(this.enemigosManager.patinetes, this.player, this.colisionPatinete, null, this); //overlap lanza un evento
@@ -247,7 +261,7 @@ BARCELONA.plataformas.forEach(p => {
 
     // __________________________________CACAS__________________________________________
 
-    this.enemigosManager.crearCacas(BARCELONA.enemigos.cacas); // Crear cacas
+    this.enemigosManager.crearCacas(this.nivel.enemigos.cacas); // Crear cacas
 
     // Colisiones de cacas con el jugador usando CollisionManager
     this.physics.add.overlap(this.enemigosManager.cacas,this.player,this.collisionManager.colisionCaca.bind(this.collisionManager),null,this); // Manejado por CollisionManager
@@ -259,7 +273,7 @@ BARCELONA.plataformas.forEach(p => {
     this.frascosGalletas = this.physics.add.group();
 
     // Generar frascos de galletas en el nivel
-    this.generarFrascosGalletas(BARCELONA.recogibles.frascosGalletas);
+    this.generarFrascosGalletas(this.nivel.recogibles.frascosGalletas);
     
 
     // Colisión entre la abuela y los FRASCOS GALLETAS
@@ -285,39 +299,12 @@ BARCELONA.plataformas.forEach(p => {
     this.physics.add.overlap(this.galletas, this.enemigosManager.palomas, (galleta, paloma) => {
         console.log('¡Galleta impactó una paloma!');
         galleta.destroy(); // Elimina la galleta
-
-        // Crear la animación de explosión en la posición de la paloma
-        const explosion = this.add.sprite(paloma.x, paloma.y, 'explosion').setScale(0.5 * altScale);
-
-        explosion.play('efectoExplosion', true);
-         // Reproducir un sonido aleatorio de grito de pájaro al chocar con abuela
-        if (this.isSoundOn && this.gritoPajaros) {
-            const sonidoAleatorio = Phaser.Math.Between(0, this.gritoPajaros.length - 1);
-            this.gritoPajaros[sonidoAleatorio].play();
-        }
-
-        // Destruir la paloma y el sprite de explosión tras la animación
-        explosion.on('animationcomplete', () => {
-        explosion.destroy();
-        });
-
-        paloma.destroy(); // Elimina la paloma
-        this.puntos += 10; // Añadir puntos por destruir la paloma
-        this.hud.actualizarPuntos(this.puntos);
-        this.contarParaHazana('palomas', 'reinaDelBaston');
-        this.comprobarHazanaPuntos();
+        this.destruirPaloma(paloma);
     });
 
     this.physics.add.overlap(this.galletas, this.enemigosManager.patinetes, (galleta, patinete) => {
         galleta.destroy();
-        patinete.destroy();
-        if (this.isSoundOn && this.gritoPatineteSound) {
-            this.gritoPatineteSound.play();
-        }
-        this.puntos += 25;
-        this.hud.actualizarPuntos(this.puntos);
-        this.contarParaHazana('patinetes', 'cazapatinetes');
-        this.comprobarHazanaPuntos();
+        this.destruirPatinete(patinete);
     }); 
 
     this.lanzarGalleta = () => {
@@ -372,8 +359,9 @@ BARCELONA.plataformas.forEach(p => {
     
 
     // Posicionar una lunaWukong en una coordenada específica
-    BARCELONA.recogibles.lunasWukong.forEach(x => this.crearLunaWukong(x, 'wukong'));
-    BARCELONA.recogibles.lunasCiberneticas.forEach(x => this.crearLunaWukong(x, 'cibernetica'));
+    this.nivel.recogibles.lunasWukong.forEach(x => this.crearLunaWukong(x, 'wukong'));
+    this.nivel.recogibles.lunasCiberneticas.forEach(x => this.crearLunaWukong(x, 'cibernetica'));
+    this.nivel.recogibles.lingotesVerdes.forEach(x => this.crearLingoteVerde(x));
 
     // Recoger objeto
     this.physics.add.overlap(this.player, this.lunasWukong, this.recogerLunaWukong, null, this);
@@ -386,7 +374,7 @@ BARCELONA.plataformas.forEach(p => {
     // __________________________________PESETAS__________________________________________
     asegurarTexturaPeseta(this);
     this.pesetas = this.physics.add.group({ allowGravity: false });
-    this.crearPesetas(BARCELONA.recogibles.pesetas);
+    this.crearPesetas(this.nivel.recogibles.pesetas);
     this.physics.add.overlap(this.player, this.pesetas, this.recogerPeseta, null, this);
 
 
@@ -410,7 +398,7 @@ BARCELONA.plataformas.forEach(p => {
     // Crear grupo de pastillas___________________________________________
     this.pastillas = this.physics.add.group();
 
-    this.generarPastillas(BARCELONA.recogibles.pastillas); // Genera pastillas en posiciones aleatorias
+    this.generarPastillas(this.nivel.recogibles.pastillas); // Genera pastillas en posiciones aleatorias
    
     // Colisiones entre las pastillas y las plataformas
     this.physics.add.collider(this.pastillas, this.platforms);
@@ -418,14 +406,6 @@ BARCELONA.plataformas.forEach(p => {
     
 
        
-    let valla = this.add.image(5504 * altScale, this.scale.height - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5); //Colegio
-    valla = this.add.image(5312 * altScale, this.scale.height - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
-    valla = this.add.image(5420 * altScale, this.scale.height - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
-    valla = this.add.image(5528 * altScale, this.scale.height - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
-    valla = this.add.image(5636 * altScale, this.scale.height - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
-    valla = this.add.image(5744 * altScale, this.scale.height - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
-    valla = this.add.image(5852 * altScale, this.scale.height - 90 * altScale, 'valla').setScale(0.4 * altScale).setOrigin(0.5, 1).setDepth(1.5);
-
      //__________________________SONIDOS___________________
     // Leer ajustes persistentes
     const ajustes = cargar();
@@ -521,10 +501,11 @@ BARCELONA.plataformas.forEach(p => {
         if (this.estaPausado) return;
 
         this.abuela.actualizar();
+        this.actualizarPlataformasMoviles();
         this.btnBajar.setVisible(this.tactilVisible && this.abuela.transformacion === 'cibernetica');
         this.updateParallax();
 
-        if (this.player.x >= BARCELONA.finNivel * altScale && !this.nivelCompletado) {
+        if (this.player.x >= this.nivel.finNivel * altScale && !this.nivelCompletado) {
             this.nivelCompletado = true;
             this.nivel1Completado();
         }
@@ -617,7 +598,86 @@ togglePausa() {
 
 //___________________________________METODOS GAME_________________________________
 
+// Destruye una paloma con su explosión, su grito y sus puntos (por una galleta, un rayo, un puñetazo...)
+destruirPaloma(paloma) {
+    const explosion = this.add.sprite(paloma.x, paloma.y, 'explosion').setScale(0.5 * altScale);
+    explosion.play('efectoExplosion', true);
+    if (this.isSoundOn && this.gritoPajaros) {
+        const sonidoAleatorio = Phaser.Math.Between(0, this.gritoPajaros.length - 1);
+        this.gritoPajaros[sonidoAleatorio].play();
+    }
+    explosion.on('animationcomplete', () => {
+        explosion.destroy();
+    });
+
+    paloma.destroy();
+    this.puntos += 10;
+    this.hud.actualizarPuntos(this.puntos);
+    this.contarParaHazana('palomas', 'reinaDelBaston');
+    this.comprobarHazanaPuntos();
+}
+
+destruirPatinete(patinete) {
+    patinete.destroy();
+    if (this.isSoundOn && this.gritoPatineteSound) {
+        this.gritoPatineteSound.play();
+    }
+    this.puntos += 25;
+    this.hud.actualizarPuntos(this.puntos);
+    this.contarParaHazana('patinetes', 'cazapatinetes');
+    this.comprobarHazanaPuntos();
+}
+
+// Destruye las palomas, patinetes y cacas que toquen el rectángulo (puñetazo y onda de choque de la
+// Abuela Verde). Como el rayo y la bola, cuenta como ataque para la hazaña Pacifista.
+// Solo cuenta lo que se ve: un enemigo que todavía no ha entrado en pantalla no se toca.
+destruirEnemigosEn(zona) {
+    const pantalla = this.cameras.main.worldView;
+    const dentro = grupo => grupo.getChildren().filter(e => e.active && e.visible
+        && Phaser.Geom.Rectangle.Contains(pantalla, e.x, e.y)
+        && Phaser.Geom.Intersects.RectangleToRectangle(zona, e.getBounds()));
+    const palomas = dentro(this.enemigosManager.palomas);
+    const patinetes = dentro(this.enemigosManager.patinetes);
+    const cacas = dentro(this.enemigosManager.cacas);
+    if (palomas.length + patinetes.length + cacas.length === 0) return;
+
+    this.seguimiento.galletaLanzada = true;
+    palomas.forEach(paloma => this.destruirPaloma(paloma));
+    patinetes.forEach(patinete => this.destruirPatinete(patinete));
+    cacas.forEach(caca => caca.destroy());
+}
+
+// Onda de choque de la Abuela Verde al aterrizar en (x, y): un anillo que se abre a ras de suelo,
+// una sacudida de cámara y fuera todo lo que pille. Provisional: el anillo se dibuja por código.
+ondaDeChoque(x, y, onda) {
+    if (!this.textures.exists('ondaChoque')) {
+        const g = this.make.graphics({}, false);
+        g.lineStyle(10, 0xffffff, 1);
+        g.strokeEllipse(100, 30, 180, 40);
+        g.generateTexture('ondaChoque', 200, 60);
+        g.destroy();
+    }
+    const anillo = this.add.image(x, y, 'ondaChoque').setDepth(1.2).setTint(0xc8ff9a).setScale(0.3);
+    this.tweens.add({
+        targets: anillo,
+        scaleX: onda.radio * 2 / 180,
+        scaleY: 1.6,
+        alpha: 0,
+        duration: 350,
+        onComplete: () => anillo.destroy(),
+    });
+    this.cameras.main.shake(180, 0.006);
+    if (this.isSoundOn && this.choquePatineteSound) this.choquePatineteSound.play();
+
+    this.destruirEnemigosEn(new Phaser.Geom.Rectangle(x - onda.radio, y - onda.alto, onda.radio * 2, onda.alto));
+}
+
 colisionPaloma(player, paloma) {
+    if (this.abuela.destruyeAlContacto(paloma)) {
+        this.seguimiento.galletaLanzada = true;
+        this.destruirPaloma(paloma);
+        return;
+    }
     if (!this.abuela.recibirDano(Math.round(10 * this.multDificultad))) return;
     this.seguimiento.danoRecibido = true;
 
@@ -649,6 +709,11 @@ colisionPaloma(player, paloma) {
 }
 
 colisionPatinete(player, patinete) {
+    if (this.abuela.destruyeAlContacto(patinete)) {
+        this.seguimiento.galletaLanzada = true;
+        this.destruirPatinete(patinete);
+        return;
+    }
     if (!this.abuela.recibirDano(Math.round(30 * this.multDificultad))) return;
     this.seguimiento.danoRecibido = true;
 
@@ -716,7 +781,7 @@ ingresarPesetas() {
 
 // Devuelve una X aleatoria dentro de un bloque de suelo sólido
 xSobreSuelo() {
-    const bloques = BARCELONA.bloquesYHuecos.filter(b => b.ancho !== undefined);
+    const bloques = this.nivel.bloquesYHuecos.filter(b => b.ancho !== undefined);
     const bloque = bloques[Phaser.Math.Between(0, bloques.length - 1)];
     return Phaser.Math.Between(bloque.x + 50, bloque.x + bloque.ancho - 50);
 }
@@ -742,7 +807,7 @@ generarFrascosGalletas(cantidad) {
 
 updateParallax() {
     // Fondos parallax
-    const maxScrollX = LEVEL_WIDTH - this.scale.width; //Calcula el desplazamiento dependiendo del ancho de la ventana
+    const maxScrollX = this.nivel.anchoNivel - this.scale.width; //Calcula el desplazamiento dependiendo del ancho de la ventana
 
     if (this.cameras.main.scrollX < maxScrollX) {
         this.backgroundMountain.tilePositionX = this.cameras.main.scrollX * 0.2; // Movimiento lento
@@ -950,6 +1015,46 @@ plataformaGrande(x, y) {
 colisionPlataformas() {
      // Añadir colisiones abuela con plataformas
      this.physics.add.collider(this.player, this.platforms);
+     // Al bajar, la plataforma se le escaparía un instante en cada rebote y la abuela iría dando
+     // saltitos: mientras va subida baja exactamente a la velocidad de la plataforma.
+     this.physics.add.collider(this.player, this.plataformasMoviles, (player, plataforma) => {
+         if (player.body.touching.down && plataforma.body.velocity.y > 0) {
+             player.body.velocity.y = plataforma.body.velocity.y;
+         }
+     });
+}
+
+// Plataformas que van y vuelven entre dos puntos. Se mueven con velocidad (no con un tween) para que
+// las físicas arrastren a la abuela cuando va subida. `datos` viene del nivel: ver madrid.js.
+crearPlataformasMoviles(datos) {
+    this.plataformasMoviles = this.physics.add.group({ allowGravity: false, immovable: true });
+    datos.forEach(({ x, y, hastaX, hastaY, velocidad }) => {
+        const yMundo = this.scale.height - y;
+        const plataforma = this.plataformasMoviles.create(x, yMundo, 'plataformasC').setScale(0.6).setDepth(1);
+        // Mismo cuerpo que la plataforma grande fija, en píxeles de la imagen sin escalar
+        plataforma.body.setSize(834, 25).setOffset(0, 42);
+        // Los grupos de físicas crean los cuerpos sin rozamiento, y sin él no arrastraría a quien lleva encima
+        plataforma.body.friction.x = 1;
+        if (hastaX !== undefined) {
+            plataforma.recorrido = { eje: 'x', min: Math.min(x, hastaX), max: Math.max(x, hastaX) };
+            plataforma.setVelocityX(hastaX > x ? velocidad : -velocidad);
+        } else {
+            const hastaYMundo = this.scale.height - hastaY;
+            plataforma.recorrido = { eje: 'y', min: Math.min(yMundo, hastaYMundo), max: Math.max(yMundo, hastaYMundo) };
+            plataforma.setVelocityY(hastaYMundo > yMundo ? velocidad : -velocidad);
+        }
+        plataforma.velocidadRecorrido = velocidad;
+    });
+}
+
+// Da la vuelta a cada plataforma móvil al llegar a un extremo de su recorrido
+actualizarPlataformasMoviles() {
+    this.plataformasMoviles.getChildren().forEach((plataforma) => {
+        const { eje, min, max } = plataforma.recorrido;
+        const v = plataforma.velocidadRecorrido;
+        if (plataforma[eje] >= max) plataforma.body.velocity[eje] = -v;
+        else if (plataforma[eje] <= min) plataforma.body.velocity[eje] = v;
+    });
 }
 
 crearPivote(x,y) { //Sagrada Familia = 13450 a 16350
@@ -973,13 +1078,14 @@ verificaMuerte() {
         this.abuela.isTransformed = false;
         this.abuela.terminarVuelo();
         this.abuela.cancelarCarga();
+        this.abuela.restaurarEscala();
         // Restaura el cuerpo físico si viene de Wukong
         this.player.body.setSize(150, 320).setOffset(50 * altScale, 50 * altScale);
 
         this.hud.actualizarVidas(this.vidas);
         this.physics.pause();
         this.player.setVelocity(0);
-        this.player.anims.play('muerte', true);
+        this.abuela.animarMuerte();
 
         if (this.backgroundSound && this.backgroundSound.isPlaying) {
             this.backgroundSound.stop();
@@ -1270,7 +1376,7 @@ crearLunaWukong(x, transformacion) {
     luna.body.allowGravity = true; // Habilitar gravedad
     luna.setInteractive();
     luna.transformacion = transformacion;
-    if (transformacion === 'cibernetica') luna.setTint(TINTE_LUNA_CIBERNETICA);
+    if (TINTE_LUNA[transformacion]) luna.setTint(TINTE_LUNA[transformacion]);
 
     // Las animaciones son globales: solo se crea la primera vez
     if (!this.anims.exists('brillarLunaWukong')) {
@@ -1286,6 +1392,29 @@ crearLunaWukong(x, transformacion) {
     //console.log(`Luna Wukong creada en X: ${x}`);
 }
 
+
+// El lingote verde transforma en Abuela Verde. Va en el mismo grupo que las lunas para compartir
+// con ellas las colisiones y la recogida.
+crearLingoteVerde(x) {
+    const lingote = this.lunasWukong.create(x * altScale, this.scale.height - 200 * altScale, 'lingoteVerde')
+        .setScale(0.25 * altScale)
+        .setBounce(0.5);
+    // El cuerpo es solo el lingote, sin los rayos de alrededor
+    lingote.body.setSize(220, 130).setOffset(30, 155);
+    lingote.transformacion = 'verde';
+
+    // Va y vuelve: del lingote apagado al cargado de energía y otra vez al apagado
+    if (!this.anims.exists('brillarLingoteVerde')) {
+        this.anims.create({
+            key: 'brillarLingoteVerde',
+            frames: this.anims.generateFrameNumbers('lingoteVerde', { start: 0, end: 4 }),
+            frameRate: 6,
+            yoyo: true,
+            repeat: -1
+        });
+    }
+    lingote.play('brillarLingoteVerde');
+}
 
 recogerLunaWukong(player, luna) {
     luna.destroy();

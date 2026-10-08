@@ -40,7 +40,10 @@ js/scenes/              Una escena por archivo; la clave de escena es el nombre 
   AjustesScene.js         Ajustes (se guardan con almacenamiento.js)
   FarmaciaScene.js        La Farmacia: tienda de objetos de inicio de partida
   HazanasScene.js         Lista de hazañas (logros)
-js/niveles/barcelona.js Datos del nivel: suelo, plataformas, decorado, recogibles y manifiesto de assets
+js/niveles/             Un archivo de datos por nivel: fondo, suelo, plataformas, decorado, recogibles y assets
+  index.js                Lista de niveles y nivelActual(): el elegido se guarda en el registro, clave 'nivel'
+  barcelona.js            Nivel 1
+  madrid.js               Nivel 2, de prueba: plataformas móviles; usa las imágenes de Barcelona
 js/abuela.js            Clase Abuela: movimiento, salto, daño, escudo y transformación
 js/enemigos.js          Clase Enemigos: palomas, patinetes y cacas
 js/collisionManager.js  Clase CollisionManager: solo se usa colisionCaca
@@ -62,7 +65,7 @@ Flujo de escenas: Inicio → HistoriaInicial → Menu → Controles → Carga �
 - **Idioma: español** en identificadores, comentarios, textos del juego y mensajes de commit. Respóndele a Víctor en español.
 - Clases en PascalCase, una por archivo, con `export default`. Variables y métodos en camelCase.
 - **Coordenadas de diseño a 1080 px de alto.** Hoy cada medida se multiplica por `altScale = window.innerHeight / 1080`, y la vertical se cuenta desde abajo: `window.innerHeight - y * altScale`. La Fase 2 del plan sustituye esto por una resolución fija; hasta entonces sigue el patrón existente y no mezcles los dos sistemas.
-- El nivel mide 30000 px de diseño de ancho y termina en x = 29600.
+- Barcelona mide 30000 px de diseño de ancho y termina en x = 29600; Madrid, 14000 y 13600. La escena de juego no lleva datos de ningún nivel: los lee de `this.nivel`.
 - Profundidades (`depth`): 1 jugador, enemigos y plataformas · 1.5 primer plano (vallas, palomas) · 2 HUD · 3 pantalla de game over · 10 textos sobre todo lo demás.
 - Las claves de assets y animaciones se referencian en varios archivos: no las renombres sin buscar todos los usos.
 - Lo que dura entre sesiones (récord, ajustes, pesetas, inventario, hazañas, estadísticas) pasa siempre por `js/almacenamiento.js`. Un campo nuevo necesita su valor por defecto y su validación en `cargar()`.
@@ -84,7 +87,9 @@ Borra cada punto de esta lista cuando quede resuelto.
 - Al menos seis spritesheets en uso superan los 4096 px de ancho, el límite de textura de muchos móviles.
 - Los botones táctiles del nivel están ocultos hasta el primer toque, y ese primer toque no cuenta como pulsación: si cae sobre un botón solo los muestra.
 - La moneda de la peseta es una textura provisional dibujada por código (`js/ui/peseta.js`); falta el sprite definitivo.
-- Faltan las dos transformaciones de pago, Abuela Cibernética y Abuela Verde (estilo Hulk). La Cibernética tiene sprites provisionales y se prueba con una luna roja gratis en x = 1800 (`lunasCiberneticas` en `barcelona.js`), con mecánica propia (vuelo y rayos por el ojo, sin gastar galletas); falta cobrarla, un sonido de láser y un sprite para el rayo. La Verde no tiene sprites ni mecánica. No hay aspectos Pirata ni Espacial: se descartaron.
+- Faltan las dos transformaciones de pago, Abuela Cibernética y Abuela Verde (estilo Hulk). La Cibernética tiene sprites provisionales y se prueba con una luna roja gratis en x = 1800 (`lunasCiberneticas` en `barcelona.js`), con mecánica propia (vuelo y rayos por el ojo, sin gastar galletas); falta cobrarla, un sonido de láser y un sprite para el rayo. La Verde se prueba con un lingote verde gratis en x = 1200 (`lingotesVerdes`): crece a 1,5, tiene hojas de transformación, quieta, andar, salto y golpe, y mecánica propia (no lanza: salto variable, onda de choque al aterrizar, puñetazo, mitad de daño; valores en `TRANSFORMACIONES.verde` de `abuela.js`); falta cobrarla y un sprite para la onda. No hay aspectos Pirata ni Espacial: se descartaron.
+- Faltan los sonidos propios de las transformaciones Cibernética y Verde; hoy usan sonidos prestados. Cibernética: rayo (suena como una galleta). Verde: puñetazo (galleta), onda de choque (choque de patinete). Las dos usan además el grito de transformación de Wukong.
+- Madrid es un nivel de prueba: se entra por un botón provisional del menú, usa el decorado de Barcelona teñido y no tiene monumentos. Falta el selector de niveles, el récord por nivel y sus imágenes.
 - Para probar el final del nivel sin jugarlo entero, baja temporalmente `finNivel` en `barcelona.js` (por ejemplo a 900) y restáuralo a 29600 antes del commit.
 
 ## Forma de trabajar

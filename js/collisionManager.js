@@ -10,6 +10,12 @@ export default class CollisionManager {
     colisionCaca(player, caca) {
         if (this.tocandoCaca) return; // Evitar múltiples colisiones simultáneas
         if (this.scene.abuela.escudoActivo) return;
+        // La Abuela Verde las aplasta al caerles encima o con el puño
+        if (this.scene.abuela.destruyeAlContacto(caca)) {
+            this.scene.seguimiento.galletaLanzada = true;
+            caca.destroy();
+            return;
+        }
         this.tocandoCaca = true; // Marcar que estamos procesando una colisión
         
         // Reproducir el sonido de colisión si está activado
@@ -18,7 +24,7 @@ export default class CollisionManager {
         }
         // Reducir la salud del jugador
         const multDif = this.scene.multDificultad || 1;
-        this.scene.abuela.salud -= Math.round(15 * multDif);
+        this.scene.abuela.salud -= this.scene.abuela.ajustarDano(Math.round(15 * multDif));
         this.scene.seguimiento.danoRecibido = true;
         if (this.scene.abuela.salud <= 0) {
             this.scene.abuela.salud = 0;
