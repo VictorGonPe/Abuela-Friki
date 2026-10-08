@@ -407,7 +407,7 @@ this.crearPlataformasMoviles(this.nivel.plataformasMoviles);
 
      this.backgroundSound = this.sound.add(this.nivel.musica, {
         loop: true,
-        volume: 0.2,
+        volume: 0.25,
     });
      
     // Iniciar la música si estaba encendida

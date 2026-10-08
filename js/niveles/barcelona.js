@@ -265,7 +265,7 @@ export const BARCELONA = {
             { key: 'abuelaMov1Wukong',   ruta: 'assets/trans/wukong/abuelaAndarWukongPrueba.png', fw: 362,   fh: 470 },
             { key: 'abuelaQuietaWukong', ruta: 'assets/trans/wukong/abuelaIdleWukong.png',        fw: 450,   fh: 470 },
             { key: 'abuelaMov2Wukong',   ruta: 'assets/trans/wukong/abuelaSaltoWukong.png',       fw: 450,   fh: 470 },
-            { key: 'abuelaTCibernetica',      ruta: 'assets/trans/cyborg/abuelaTCyborg.png',      fw: 452,   fh: 610 },
+            { key: 'abuelaTCibernetica',      ruta: 'assets/trans/cyborg/abuelaTCyborg1.png',     fw: 500,   fh: 400 },
             { key: 'abuelaMov1Cibernetica',   ruta: 'assets/trans/cyborg/abuelaAndarCyborg.png',  fw: 363,   fh: 378 },
             { key: 'abuelaQuietaCibernetica', ruta: 'assets/trans/cyborg/abuelaIdleCyborg.png',   fw: 363,   fh: 378 },
             { key: 'abuelaMov2Cibernetica',   ruta: 'assets/trans/cyborg/abuelaSaltoCyborg.png',  fw: 363,   fh: 374 },

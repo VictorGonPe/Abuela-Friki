@@ -7,6 +7,8 @@ const BASE_CUERPO = 328;      // px del fotograma desde lo alto del cuerpo físi
 // Muerte: los primeros fotogramas son la caída; los últimos, la abuela tumbada volviéndose gris,
 // y mientras tanto crece hasta `escalaFinal` veces su tamaño.
 const MUERTE = { caida: 8, gris: 4, fotogramasPorSegundo: 7, escalaFinal: 1.4 };
+// Rayos de la transformación: cuántos, cada cuánto se redibujan y de dónde a dónde llegan (px desde el centro)
+const CHISPAS = { rayos: 6, cadaMs: 55, tramos: 4, radioDentro: 25, radioFuera: 80, zigzag: 12 };
 const ESCALA_BASE = 0.4;      // escala del sprite de la abuela; las formas con `escala` la multiplican
 const VELOCIDAD_VUELO = 300;  // px/s al subir y bajar volando
 const DOBLE_PULSACION = 200;  // ms máximos entre dos pulsaciones de abajo para dejarse caer
@@ -32,6 +34,8 @@ const HUMO_PIES = { x: -23, y: -4 };
 //         `alto` px sobre el suelo. `caidaMinima` es esa altura, como parte del alto de la pantalla,
 //         medida desde el punto más alto del salto: un saltito no hace onda. Cayendo, lo que toca
 //         también se destruye sin hacerle daño; `gracia` son los ms tras la onda en que eso sigue valiendo.
+// `chispas`: rayos de colores alrededor de la abuela durante la transformación, entre los fotogramas
+//            `desde` y `hasta` de su animación (el primero es el 1).
 // `centrado`: el personaje va en el centro de todos sus fotogramas, aunque midan distinto: el offset
 //             del cuerpo se calcula con el fotograma que se está mostrando.
 // `offsetIzq` es el offset X del cuerpo al mirar a la izquierda: los fotogramas de la
@@ -47,6 +51,7 @@ const TRANSFORMACIONES = {
         vuelo: 'vueloCibernetica',
         offsetX: 50, offsetIzq: 180, offsetY: 50,
         vuela: true, rayos: true,
+        chispas: { desde: 3, hasta: 7, colores: [0x4db8ff, 0xff3b3b] },
     },
     // Con la velocidad y el tiempo de salto de abajo, manteniendo saltar llega casi al borde de arriba de la pantalla.
     verde: {
@@ -216,10 +221,11 @@ export default class Abuela {
             repeat: -1
         });
 
-        // Abuela Cibernética (sprites provisionales): mismas hojas y fotogramas que la abuela normal
+        // Abuela Cibernética: la transformación es del dibujo nuevo; quieta, andar y salto siguen siendo
+        // provisionales, con las hojas y fotogramas de la abuela antigua
         scene.anims.create({
             key: 'transformCibernetica',
-            frames: scene.anims.generateFrameNumbers('abuelaTCibernetica', { start: 0, end: 8 }),
+            frames: scene.anims.generateFrameNumbers('abuelaTCibernetica', { start: 0, end: 9 }),
             frameRate: 8,
             repeat: 0
         });
@@ -613,6 +619,52 @@ export default class Abuela {
         });
     }
 
+    // Rayos que saltan alrededor de la abuela mientras se transforma. Se redibujan cada pocos ms, cada vez
+    // distintos, sobre un único gráfico; el temporizador se quita solo al acabar la transformación.
+    chispear(forma) {
+        const scene = this.scene;
+        if (!this.graficoChispas) {
+            this.graficoChispas = scene.add.graphics().setDepth(1.1);
+        }
+        const grafico = this.graficoChispas;
+        const { desde, hasta, colores } = forma.chispas;
+        const temporizador = scene.time.addEvent({
+            delay: CHISPAS.cadaMs,
+            loop: true,
+            callback: () => {
+                grafico.clear();
+                const animacion = this.sprite.anims;
+                if (!this.isTransforming || !animacion.currentAnim || animacion.currentAnim.key !== forma.transformar) {
+                    temporizador.remove();
+                    return;
+                }
+                const fotograma = animacion.currentFrame.index;
+                if (fotograma >= desde && fotograma <= hasta) this.dibujarChispas(grafico, colores);
+            },
+        });
+    }
+
+    // Unos cuantos rayos en zigzag que salen del cuerpo hacia fuera, alternando los colores
+    dibujarChispas(grafico, colores) {
+        const cx = this.sprite.x, cy = this.sprite.y - this.sprite.displayHeight * 0.45;
+        for (let i = 0; i < CHISPAS.rayos; i++) {
+            const angulo = Phaser.Math.FloatBetween(0, Math.PI * 2);
+            const dx = Math.cos(angulo), dy = Math.sin(angulo);
+            const puntos = [];
+            for (let t = 0; t <= CHISPAS.tramos; t++) {
+                const r = Phaser.Math.Linear(CHISPAS.radioDentro, CHISPAS.radioFuera, t / CHISPAS.tramos);
+                const desvio = t === 0 ? 0 : Phaser.Math.FloatBetween(-CHISPAS.zigzag, CHISPAS.zigzag);
+                puntos.push({ x: cx + dx * r - dy * desvio, y: cy + dy * r * 0.9 + dx * desvio });
+            }
+            // Un halo ancho y suave, el trazo de color y, encima, un hilo blanco fino: así parece que
+            // brilla por dentro sin perder el color sobre los fondos claros
+            const color = colores[i % colores.length];
+            grafico.lineStyle(10, color, 0.25).strokePoints(puntos);
+            grafico.lineStyle(5, color, 1).strokePoints(puntos);
+            grafico.lineStyle(1.2, 0xffffff, 0.85).strokePoints(puntos);
+        }
+    }
+
     // `id` es una clave de TRANSFORMACIONES. Coger una luna de otra transformación
     // estando ya transformada cambia de forma y reinicia el tiempo.
     transformar(id) {
@@ -637,6 +689,7 @@ export default class Abuela {
             this.scene.input.enabled = false;
 
             this.sprite.play(forma.transformar);
+            if (forma.chispas) this.chispear(forma);
 
             // Crece (o encoge, si viene de una forma más grande) mientras dura la animación
             const escala = ESCALA_BASE * (forma.escala || 1);
