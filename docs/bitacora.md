@@ -95,7 +95,9 @@ Diseño aprobado el 2026-10-03 (economía, precios y hazañas).
 
 ### Pendiente
 - Transformaciones de pago: Abuela Cibernética y Abuela Verde (estilo Hulk). Las dos se prueban gratis con una luna (luna roja en x = 1800, lingote verde en x = 1200) y ya tienen sprites y mecánica; falta cobrarlas con los precios de `ECONOMIA.transformaciones` y quitar la luna y el lingote de prueba. Los aspectos Pirata y Espacial quedan descartados
-- **Sonidos de las transformaciones Cibernética y Verde**: hoy son prestados. Cibernética: falta el del rayo (suena como una galleta). Verde: faltan el del puñetazo (galleta) y el de la onda de choque (choque de patinete). Las dos usan el grito de transformación de Wukong
+- **Sonidos de las transformaciones**, puestos el 2026-10-08: muerte de la abuela (`abuelaMuerte.wav`); Verde: puñetazo (`abuelaVerdeGolpe.wav`) y onda (`abuelaVerdeExplosion.wav`); Cibernética: rayo (`cyborgLaser.wav`, a volumen bajo) y transformación (`cyborgTransformacion.mp3`, recortado a 3 segundos sin recodificar y con un apagado final hecho por código). Faltan el de la bola de Wukong (suena como una galleta) y uno de transformación para la Verde (usa el grito de Wukong)
+- **Licencias de los cinco audios nuevos**: vienen de freesound.org (autores reitanna, microsoftsam, duskbreaker, thehorsevalse y tjcason, según el nombre de los archivos originales, guardados en `_archivo/sonidos-originales/`). Comprobar la licencia de cada uno y si pide atribución antes de publicar el juego
+- Cuatro están en WAV porque en este equipo no hay con qué convertirlos a MP3; pesan poco (240 KB entre los cuatro)
 - Probar jugando las hazañas acumuladas, Turista, Abuela millonaria y Tres estrellas, y que el escudo bloquea un golpe
 - Prueba del «Hecho cuando»: que alguien que no conoce el juego entienda para qué sirven las pesetas
 

@@ -14,6 +14,7 @@ import { desbloquearHazana, sumarEstadistica } from '../hazanas.js';
 import { avisarHazana } from '../ui/avisoHazana.js';
 
 const altScale = 1; // Siempre 1: altura de diseño fija a 1080px (Phaser.Scale.FIT)
+const VOLUMEN_TRANSFORMACION_CYBORG = 0.4;
 // La luna es la de Wukong, teñida según la transformación que da
 const TINTE_LUNA = { cibernetica: 0xff3030 };
 // Rayo del ojo de la Abuela Cibernética. `brillo` es lo que dura el destello, en ms.
@@ -460,9 +461,15 @@ this.crearPlataformasMoviles(this.nivel.plataformasMoviles);
     this.lanzarGalletaSound = this.sound.add('lanzarGalleta', { volume: 0.3 });
     this.gritoPajaros = [this.sound.add('gritoPajaro1', { volume: 0.5 }), this.sound.add('gritoPajaro2', { volume: 0.5 })];
     this.gritoTransformacion = this.sound.add('gritoTransformacion', {volume: 0.5});
+    this.abuelaMuerteSound = this.sound.add('abuelaMuerte', { volume: 0.6 });
+    this.verdeGolpeSound = this.sound.add('abuelaVerdeGolpe', { volume: 0.4 });
+    this.verdeExplosionSound = this.sound.add('abuelaVerdeExplosion', { volume: 0.6 });
+    // Bajo a propósito: el rayo se dispara muchas veces seguidas
+    this.cyborgLaserSound = this.sound.add('cyborgLaser', { volume: 0.3 });
+    this.cyborgTransformacionSound = this.sound.add('cyborgTransformacion', { volume: VOLUMEN_TRANSFORMACION_CYBORG });
     // Suena en bucle mientras vuela la Abuela Cibernética. Los sonidos viven más que la escena:
     // hay que pararlo al salir o reiniciar.
-    this.vueloSound = this.sound.add('vueloRobot', { volume: 0.4, loop: true });
+    this.vueloSound = this.sound.add('vueloRobot', { volume: 0.2, loop: true });
     this.events.once('shutdown', () => this.vueloSound.stop());
 
 
@@ -667,7 +674,7 @@ ondaDeChoque(x, y, onda) {
         onComplete: () => anillo.destroy(),
     });
     this.cameras.main.shake(180, 0.006);
-    if (this.isSoundOn && this.choquePatineteSound) this.choquePatineteSound.play();
+    if (this.isSoundOn) this.verdeExplosionSound.play();
 
     this.destruirEnemigosEn(new Phaser.Geom.Rectangle(x - onda.radio, y - onda.alto, onda.radio * 2, onda.alto));
 }
@@ -1086,6 +1093,7 @@ verificaMuerte() {
         this.physics.pause();
         this.player.setVelocity(0);
         this.abuela.animarMuerte();
+        if (this.isSoundOn) this.abuelaMuerteSound.play();
 
         if (this.backgroundSound && this.backgroundSound.isPlaying) {
             this.backgroundSound.stop();
@@ -1351,10 +1359,7 @@ lanzarRayo() {
         },
     });
 
-    // Provisional: suena como una galleta hasta que haya un sonido de láser
-    if (this.isSoundOn && this.lanzarGalletaSound) {
-        this.lanzarGalletaSound.play();
-    }
+    if (this.isSoundOn) this.cyborgLaserSound.play();
 
     // Un rayo es un ataque: también rompe la hazaña Pacifista
     this.seguimiento.galletaLanzada = true;
@@ -1362,6 +1367,21 @@ lanzarRayo() {
     this.time.delayedCall(RAYO.duracion, () => {
         rayo.destroy();
     });
+}
+
+// Sonido al transformarse: la Cibernética tiene el suyo; las demás, el grito de Wukong
+sonarTransformacion(id) {
+    if (!this.isSoundOn) return;
+    if (id !== 'cibernetica') {
+        this.gritoTransformacion.play();
+        return;
+    }
+    // El audio está cortado en seco a los 3 segundos: se apaga poco a poco al final para que no se note
+    const sonido = this.cyborgTransformacionSound;
+    this.tweens.killTweensOf(sonido);
+    sonido.setVolume(VOLUMEN_TRANSFORMACION_CYBORG);
+    sonido.play();
+    this.tweens.add({ targets: sonido, volume: 0, delay: 2300, duration: 650 });
 }
 
 // `transformacion` es la forma que da la luna: 'wukong' o 'cibernetica' (la misma luna, teñida de rojo)

@@ -294,6 +294,11 @@ export const BARCELONA = {
             { key: 'gritoPajaro1',       ruta: 'assets/sonidos/gritoPajaro1.wav' },
             { key: 'gritoPajaro2',       ruta: 'assets/sonidos/gritoPajaro2.wav' },
             { key: 'gritoTransformacion',ruta: 'assets/sonidos/scream2.mp3' },
+            { key: 'abuelaMuerte',       ruta: 'assets/sonidos/abuelaMuerte.wav' },
+            { key: 'cyborgLaser',        ruta: 'assets/sonidos/cyborgLaser.wav' },
+            { key: 'cyborgTransformacion', ruta: 'assets/sonidos/cyborgTransformacion.mp3' },
+            { key: 'abuelaVerdeGolpe',   ruta: 'assets/sonidos/abuelaVerdeGolpe.wav' },
+            { key: 'abuelaVerdeExplosion', ruta: 'assets/sonidos/abuelaVerdeExplosion.wav' },
         ],
     },
 };

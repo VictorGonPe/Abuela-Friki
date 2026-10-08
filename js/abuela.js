@@ -26,10 +26,11 @@ const HUMO_PIES = { x: -23, y: -4 };
 // `velocidad`: px/s andando, si no es la normal. `dano`: parte del daño que recibe (0.5 = la mitad).
 // `saltoVariable`: no hay doble salto; sube a `velocidad` px/s mientras se mantiene saltar, como mucho `mantener` ms.
 // `golpe`: lanzar da un puñetazo en vez de tirar galletas. Destruye lo que haya hasta `alcance` px por delante
-//          entre `inicio` y `fin` ms de la animación, sin recibir daño de eso.
-// `onda`: al aterrizar cayendo a más de `caidaMinima` px/s destruye lo que haya a `radio` px a cada lado
-//         y hasta `alto` px sobre el suelo. Cayendo, lo que toca también se destruye sin hacerle daño;
-//         `gracia` son los ms tras aterrizar en que eso sigue valiendo.
+//          entre `inicio` y `fin` ms de la animación, sin recibir daño de eso. El sonido va en `inicio`.
+// `onda`: al aterrizar tras caer desde bastante alto destruye lo que haya a `radio` px a cada lado y hasta
+//         `alto` px sobre el suelo. `caidaMinima` es esa altura, como parte del alto de la pantalla,
+//         medida desde el punto más alto del salto: un saltito no hace onda. Cayendo, lo que toca
+//         también se destruye sin hacerle daño; `gracia` son los ms tras la onda en que eso sigue valiendo.
 // `centrado`: el personaje va en el centro de todos sus fotogramas, aunque midan distinto: el offset
 //             del cuerpo se calcula con el fotograma que se está mostrando.
 // `offsetIzq` es el offset X del cuerpo al mirar a la izquierda: los fotogramas de la
@@ -56,7 +57,7 @@ const TRANSFORMACIONES = {
         dano: 0.5,
         saltoVariable: { velocidad: 800, mantener: 540 },
         golpe: { animacion: 'golpeVerde', inicio: 170, fin: 420, alcance: 150 },
-        onda: { radio: 260, alto: 220, caidaMinima: 400, gracia: 250 },
+        onda: { radio: 260, alto: 220, caidaMinima: 0.4, gracia: 250 },
     },
 };
 
@@ -78,7 +79,8 @@ export default class Abuela {
         this.inicioCarga = 0;
         this.subiendoHasta = 0; // hasta cuándo el salto variable sigue subiendo si se mantiene saltar
         this.inicioGolpe = -Infinity; // cuándo empezó el último puñetazo
-        this.velocidadCaida = 0; // velocidad vertical del fotograma anterior, para saber con qué fuerza aterriza
+        this.puntoMasAlto = null; // y más alta alcanzada desde que dejó el suelo, para saber desde dónde cae
+        this.golpeSonado = true;  // el sonido del puñetazo en curso ya ha sonado
         this.aplastaHasta = 0;   // hasta cuándo, tras aterrizar, lo que toca se destruye sin hacerle daño
         this.dobleSalto = false;
         this.saltosRestantes = 2;
@@ -423,14 +425,19 @@ export default class Abuela {
         }
     }
 
-    // Onda de choque al aterrizar con fuerza. Se compara con la velocidad del fotograma anterior
-    // porque al tocar el suelo Arcade ya la ha cambiado por el rebote.
+    // Onda de choque al aterrizar desde alto. Mientras está en el aire se apunta el punto más alto;
+    // al tocar suelo se mira cuánto ha caído desde ahí.
     actualizarOnda(onda, isOnGround) {
-        if (isOnGround && this.velocidadCaida > onda.caidaMinima) {
-            this.aplastaHasta = this.scene.time.now + onda.gracia;
-            this.scene.ondaDeChoque(this.sprite.x, this.sprite.y, onda);
+        const y = this.sprite.y;
+        if (!isOnGround) {
+            this.puntoMasAlto = this.puntoMasAlto === null ? y : Math.min(this.puntoMasAlto, y);
+            return;
         }
-        this.velocidadCaida = isOnGround ? 0 : this.sprite.body.velocity.y;
+        if (this.puntoMasAlto !== null && y - this.puntoMasAlto >= onda.caidaMinima * this.scene.scale.height) {
+            this.aplastaHasta = this.scene.time.now + onda.gracia;
+            this.scene.ondaDeChoque(this.sprite.x, y, onda);
+        }
+        this.puntoMasAlto = null;
     }
 
     // Puñetazo: mientras dura manda su animación, y en su tramo activo destruye lo que tenga delante
@@ -442,9 +449,14 @@ export default class Abuela {
             transcurrido = 0;
             this.sprite.anims.play(golpe.animacion, true);
             this.posturaHasta = scene.time.now + golpe.fin;
-            if (scene.isSoundOn && scene.lanzarGalletaSound) scene.lanzarGalletaSound.play();
+            this.golpeSonado = false;
         }
         if (transcurrido >= golpe.inicio && transcurrido <= golpe.fin) {
+            // El sonido va con el fotograma en que el puño llega, no al empezar a coger impulso
+            if (!this.golpeSonado) {
+                this.golpeSonado = true;
+                if (scene.isSoundOn) scene.verdeGolpeSound.play();
+            }
             const cuerpo = this.sprite.body;
             const x = this.sprite.flipX ? cuerpo.center.x - golpe.alcance : cuerpo.center.x;
             scene.destruirEnemigosEn(new Phaser.Geom.Rectangle(x, cuerpo.top, golpe.alcance, cuerpo.height));
@@ -596,8 +608,9 @@ export default class Abuela {
         // Si llega volando o cargando una bola, eso es de la forma anterior: se corta aquí
         this.terminarVuelo();
         this.cancelarCarga();
+        this.puntoMasAlto = null;
         this.sprite.body.setSize(130, 150).setOffset(100, 100);
-        this.scene.gritoTransformacion.play();
+        this.scene.sonarTransformacion(id);
 
         if (!this.isTransformed || this.transformacion !== id) {
             this.isTransformed = true;
