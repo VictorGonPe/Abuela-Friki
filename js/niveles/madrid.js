@@ -11,6 +11,8 @@ export const MADRID = {
 
     jugadorInicio: { x: 130, y: 320 },
 
+    musica: 'musicaCiudad', // la misma que Barcelona hasta que tenga la suya
+
     // Atardecer: cielo anaranjado y los fondos de Barcelona teñidos
     fondo: {
         cielo: 0xf6a35c,

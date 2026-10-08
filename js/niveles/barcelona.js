@@ -9,6 +9,8 @@ export const BARCELONA = {
 
     jugadorInicio: { x: 130, y: 320 },
 
+    musica: 'musicaCiudad', // música de fondo del nivel, en bucle
+
     // Cielo y capas de fondo. `velo` es un color muy transparente por encima de todo el decorado.
     fondo: {
         cielo: 0x42aaff,
@@ -281,7 +283,9 @@ export const BARCELONA = {
             { key: 'caca',               ruta: 'assets/caca.png',                   fw: 345,   fh: 300 },
         ],
         audios: [
-            { key: 'backgroundSound',    ruta: 'assets/sonidos/pruebaBackground.mp3' },
+            // Clave propia: 'backgroundSound' es la sintonía de la pantalla de título, que ya está cargada
+            // cuando se llega aquí, y la escena de carga no vuelve a cargar una clave que existe
+            { key: 'musicaCiudad',       ruta: 'assets/sonidos/musicaCiudad.m4a' },
             { key: 'abuelaSalto',        ruta: 'assets/sonidos/abuelaSalto.mp3' },
             { key: 'vueloRobot',         ruta: 'assets/sonidos/sonidoRobot.mp3' },
             { key: 'cacaSalto',          ruta: 'assets/sonidos/cacaSalto.mp3' },

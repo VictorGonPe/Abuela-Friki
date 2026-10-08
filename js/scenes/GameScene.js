@@ -415,9 +415,9 @@ this.crearPlataformasMoviles(this.nivel.plataformasMoviles);
     this.efectosOn = ajustes.efectosOn;
     // this.dificultad ya se leyó arriba, antes de crear enemigos
 
-     this.backgroundSound = this.sound.add('backgroundSound', {
+     this.backgroundSound = this.sound.add(this.nivel.musica, {
         loop: true,
-        volume: 0.15,
+        volume: 0.2,
     });
      
     // Iniciar la música si estaba encendida
@@ -1376,12 +1376,12 @@ sonarTransformacion(id) {
         this.gritoTransformacion.play();
         return;
     }
-    // El audio está cortado en seco a los 3 segundos: se apaga poco a poco al final para que no se note
+    // El audio está cortado en seco a los 2 segundos: se apaga poco a poco al final para que no se note
     const sonido = this.cyborgTransformacionSound;
     this.tweens.killTweensOf(sonido);
     sonido.setVolume(VOLUMEN_TRANSFORMACION_CYBORG);
     sonido.play();
-    this.tweens.add({ targets: sonido, volume: 0, delay: 2300, duration: 650 });
+    this.tweens.add({ targets: sonido, volume: 0, delay: 1400, duration: 550 });
 }
 
 // `transformacion` es la forma que da la luna: 'wukong' o 'cibernetica' (la misma luna, teñida de rojo)
