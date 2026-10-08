@@ -23,10 +23,10 @@ const TINTE_LUNA = { cibernetica: 0xff3030 };
 const RAYO = {
     velocidad: 1600, duracion: 800, ancho: 90, alto: 10, brillo: 180,
     ojos: {
-        abuelaQuietaCibernetica: { x: 138, y: 147 },
-        abuelaMov1Cibernetica:   { x: 147, y: 142 },
-        abuelaMov2Cibernetica:   { x: 138, y: 140 },
-        abuelaVueloCibernetica:  { x: 139, y: 146 },
+        abuelaQuietaCibernetica: { x: 135, y: 138 },
+        abuelaMov1Cibernetica:   { x: 142, y: 135 },
+        abuelaMov2Cibernetica:   { x: 136, y: 138 },
+        abuelaVueloCibernetica:  { x: 208, y: 140 },
     },
 };
 // Galleta de la abuela normal. Sale de la mano cuando el brazo ya está estirado: `retraso` son los ms
@@ -1329,8 +1329,8 @@ puntoDelSprite(punto) {
     const p = this.player;
     const direccion = p.flipX ? -1 : 1;
     return {
-        x: p.x + direccion * (punto.x - p.frame.width / 2) * p.scaleX,
-        y: p.y - (p.frame.height - punto.y) * p.scaleY,
+        x: p.x + direccion * (punto.x - p.displayOriginX) * p.scaleX,
+        y: p.y + (punto.y - p.displayOriginY) * p.scaleY,
     };
 }
 

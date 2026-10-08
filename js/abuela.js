@@ -11,14 +11,17 @@ const MUERTE = { caida: 8, gris: 4, fotogramasPorSegundo: 7, escalaFinal: 1.4 };
 const CHISPAS = { rayos: 6, cadaMs: 55, tramos: 4, radioDentro: 25, radioFuera: 80, zigzag: 12 };
 const ESCALA_BASE = 0.4;      // escala del sprite de la abuela; las formas con `escala` la multiplican
 const VELOCIDAD_VUELO = 300;  // px/s al subir y bajar volando
+// Temblor de la Cibernética al volar: cuánto se mueve el dibujo (px del fotograma; en pantalla, 0,4 veces)
+// y cada cuántos ms oscila en cada eje. Ritmos distintos para que no dibuje un círculo.
+const TEMBLOR_VUELO = { px: 1.5, ritmoX: 70, ritmoY: 52 };
 const DOBLE_PULSACION = 200;  // ms máximos entre dos pulsaciones de abajo para dejarse caer
 const POSTURA_DISPARO = 250;  // ms que Wukong mantiene el brazo estirado al soltar una bola
 const POSTURA_LANZAR = 350;   // ms que la abuela normal mantiene el gesto de lanzar una galleta
 const TIEMPO_CARGA = 1000;    // ms manteniendo lanzar para que la bola llegue a su tamaño máximo
 const ESCALA_CARGA_MAX = 2;   // tamaño de la bola totalmente cargada respecto a la normal
-// Dónde salen el humo en pantalla respecto al origen del sprite (centro, pies) mirando a la derecha:
-// los pies juntos del fotograma de vuelo quedan a la izquierda del centro del fotograma.
-const HUMO_PIES = { x: -23, y: -4 };
+// Dónde sale el humo en pantalla respecto al ancla del sprite en vuelo, mirando a la derecha:
+// los propulsores de los pies quedan a la izquierda del centro del fotograma de vuelo.
+const HUMO_PIES = { x: -51, y: 14 };
 
 // Animaciones, cuerpo físico y habilidades de cada transformación.
 // `vuela`: el segundo salto en el aire la deja flotando en vez de dar un doble salto.
@@ -50,6 +53,13 @@ const TRANSFORMACIONES = {
         transformar: 'transformCibernetica', idle: 'idleCibernetica', andar: 'walkCibernetica', salto: 'jumpCibernetica',
         vuelo: 'vueloCibernetica',
         offsetX: 50, offsetIzq: 180, offsetY: 50,
+        // El fotograma de vuelo es más grande (463x484) y la abuela no está pegada a la izquierda. Mientras
+        // vuela, el sprite se ancla en este punto del fotograma (en px) y el cuerpo físico lleva estos
+        // offsets: así ni el dibujo ni el cuerpo se mueven de sitio al empezar o dejar de volar.
+        vueloOffset: { origenX: 255.5, origenY: 373, x: 124, izq: 254, y: 45 },
+        // Sus dibujos miden lo mismo que los de la abuela normal, pero al ser más oscuros y recargados
+        // se ve más pequeña: se compensa con un poco de escala
+        escala: 1.08,
         vuela: true, rayos: true,
         chispas: { desde: 3, hasta: 7, colores: [0x4db8ff, 0xff3b3b] },
     },
@@ -221,8 +231,7 @@ export default class Abuela {
             repeat: -1
         });
 
-        // Abuela Cibernética: la transformación es del dibujo nuevo; quieta, andar y salto siguen siendo
-        // provisionales, con las hojas y fotogramas de la abuela antigua
+        // Abuela Cibernética, toda con el dibujo nuevo
         scene.anims.create({
             key: 'transformCibernetica',
             frames: scene.anims.generateFrameNumbers('abuelaTCibernetica', { start: 0, end: 9 }),
@@ -232,7 +241,7 @@ export default class Abuela {
 
         scene.anims.create({
             key: 'idleCibernetica',
-            frames: scene.anims.generateFrameNumbers('abuelaQuietaCibernetica', { start: 0, end: 12 }),
+            frames: scene.anims.generateFrameNumbers('abuelaQuietaCibernetica', { start: 0, end: 7 }),
             frameRate: 4,
             repeat: -1
         });
@@ -251,7 +260,7 @@ export default class Abuela {
             repeat: 0
         });
 
-        // Un solo fotograma: la de quieta con los pies juntos
+        // Un solo fotograma con los propulsores encendidos; el temblor lo pone actualizarVuelo
         scene.anims.create({
             key: 'vueloCibernetica',
             frames: scene.anims.generateFrameNumbers('abuelaVueloCibernetica', { start: 0, end: 0 }),
@@ -562,6 +571,13 @@ export default class Abuela {
     }
 
     terminarVuelo() {
+        // Deja la hoja de vuelo: vuelve a una hoja normal y a sus offsets, o el cuerpo quedaría descolocado
+        const forma = TRANSFORMACIONES[this.transformacion];
+        if (this.volando && forma && forma.vueloOffset) {
+            this.sprite.setOrigin(0.5, 1);
+            this.sprite.anims.play(forma.salto, true);
+            this.sprite.body.setOffset(this.sprite.flipX ? forma.offsetIzq : forma.offsetX, forma.offsetY);
+        }
         this.volando = false;
         this.sprite.body.allowGravity = true;
         this.humo.stop();
@@ -575,6 +591,16 @@ export default class Abuela {
         else if (scene.cursors.down.isDown || entrada.abajo) velocidadY = VELOCIDAD_VUELO;
         this.sprite.setVelocityY(velocidadY);
         this.sprite.anims.play(forma.vuelo, true);
+        if (forma.vueloOffset) {
+            // Leve temblor: el ancla del sprite y el offset del cuerpo se mueven lo mismo, así que
+            // tiembla el dibujo y el cuerpo físico no se entera
+            const { origenX, origenY, x, izq, y } = forma.vueloOffset;
+            const t = scene.time.now;
+            const dx = Math.sin(t / TEMBLOR_VUELO.ritmoX) * TEMBLOR_VUELO.px;
+            const dy = Math.sin(t / TEMBLOR_VUELO.ritmoY) * TEMBLOR_VUELO.px;
+            this.sprite.setDisplayOrigin(origenX + dx, origenY + dy);
+            this.sprite.body.setOffset((this.sprite.flipX ? izq : x) + dx, y + dy);
+        }
         // El humo sale de los pies, que cambian de lado al girarse
         this.humo.followOffset.x = this.sprite.flipX ? -HUMO_PIES.x : HUMO_PIES.x;
 
