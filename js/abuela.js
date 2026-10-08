@@ -11,6 +11,7 @@ const ESCALA_BASE = 0.4;      // escala del sprite de la abuela; las formas con 
 const VELOCIDAD_VUELO = 300;  // px/s al subir y bajar volando
 const DOBLE_PULSACION = 200;  // ms máximos entre dos pulsaciones de abajo para dejarse caer
 const POSTURA_DISPARO = 250;  // ms que Wukong mantiene el brazo estirado al soltar una bola
+const POSTURA_LANZAR = 350;   // ms que la abuela normal mantiene el gesto de lanzar una galleta
 const TIEMPO_CARGA = 1000;    // ms manteniendo lanzar para que la bola llegue a su tamaño máximo
 const ESCALA_CARGA_MAX = 2;   // tamaño de la bola totalmente cargada respecto a la normal
 // Dónde salen el humo en pantalla respecto al origen del sprite (centro, pies) mirando a la derecha:
@@ -158,6 +159,15 @@ export default class Abuela {
             key: 'jump',
             frames: scene.anims.generateFrameNumbers('abuelaMovimiento2', { start: 4, end: 10 }),
             frameRate: 14,
+            repeat: 0
+        });
+
+        // Gesto de la abuela normal al lanzar una galleta. Va rápido: el último fotograma, con el brazo
+        // estirado, llega a los 125 ms, que es cuando la escena suelta la galleta (GALLETA.retraso)
+        scene.anims.create({
+            key: 'lanzar',
+            frames: scene.anims.generateFrameNumbers('abuelaLanzar', { start: 0, end: 3 }),
+            frameRate: 24,
             repeat: 0
         });
 
@@ -406,8 +416,10 @@ export default class Abuela {
         } else if (pulsoLanzar) {
             if (forma && forma.rayos) {
                 scene.lanzarRayo();
-            } else {
-                scene.lanzarGalleta();
+            } else if (scene.lanzarGalleta() && !forma) {
+                // Solo la abuela normal tiene gesto de lanzar, y solo si ha salido una galleta
+                this.sprite.anims.play('lanzar', true);
+                this.posturaHasta = scene.time.now + POSTURA_LANZAR;
             }
         }
     }

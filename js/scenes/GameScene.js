@@ -29,6 +29,10 @@ const RAYO = {
         abuelaVueloCibernetica:  { x: 139, y: 146 },
     },
 };
+// Galleta de la abuela normal. Sale de la mano cuando el brazo ya está estirado: `retraso` son los ms
+// que tarda la animación de lanzar en llegar a ese fotograma, y `mano` es el punto de salida, justo
+// delante de los dedos, en píxeles de ese fotograma (de `fotograma.ancho` x `fotograma.alto`).
+const GALLETA = { velocidad: 800, duracion: 3000, retraso: 125, mano: { x: 235, y: 222 }, fotograma: { ancho: 363, alto: 378 } };
 // Bola de energía de la Abuela Wukong. `mano` es la mano en píxeles del fotograma de disparo.
 const BOLA = { velocidad: 900, duracion: 1500, radio: 22, mano: { x: 335, y: 268 } };
 const sueloAltura = 50;
@@ -308,30 +312,16 @@ this.crearPlataformasMoviles(this.nivel.plataformasMoviles);
         this.destruirPatinete(patinete);
     }); 
 
+    // Gasta una galleta y la suelta un instante después, cuando la animación tiene el brazo estirado.
+    // Devuelve si había galleta que lanzar.
     this.lanzarGalleta = () => {
-        if (this.galletasDisponibles > 0) {
+        if (this.galletasDisponibles <= 0) return false;
 
-
-            const galleta = this.galletas.create(this.player.x, this.player.y - this.player.displayHeight / 2, 'galleta').setScale(0.15 * altScale);
-            galleta.setVelocityX(this.player.flipX ? -800 * altScale : 800 * altScale); // Dirección según la orientación del jugador
-            galleta.body.allowGravity = false; // Desactivar gravedad de la galleta
-
-            if (this.isSoundOn && this.lanzarGalletaSound) {
-                this.lanzarGalletaSound.play();
-            }
-    
-            // Reducir la cantidad de galletas disponibles
-            this.seguimiento.galletaLanzada = true;
-            this.galletasDisponibles--;
-            this.hud.actualizarGalletas(this.galletasDisponibles); // Actualizar el texto en pantalla
-    
-            // Destruir la galleta después de un tiempo
-            this.time.delayedCall(3000, () => {
-                galleta.destroy();
-            });
-        } else {
-            console.log('No tienes galletas suficientes para lanzar.');
-        }
+        this.seguimiento.galletaLanzada = true;
+        this.galletasDisponibles--;
+        this.hud.actualizarGalletas(this.galletasDisponibles);
+        this.time.delayedCall(GALLETA.retraso, () => this.soltarGalleta());
+        return true;
     };
  
     this.crearTexturaRayo();
@@ -1287,6 +1277,27 @@ mostrarCargaBola(escala) {
 
 ocultarCargaBola() {
     this.cargaBola.setVisible(false);
+}
+
+// La galleta sale de la mano de la abuela, por delante de ella. La posición se calcula desde los pies
+// y el centro del sprite, no desde el fotograma que se esté mostrando, que puede haber cambiado.
+soltarGalleta() {
+    if (this.abuela.haMuerto) return;
+    const p = this.player;
+    const direccion = p.flipX ? -1 : 1;
+    const x = p.x + direccion * (GALLETA.mano.x - GALLETA.fotograma.ancho / 2) * p.scaleX;
+    const y = p.y - (GALLETA.fotograma.alto - GALLETA.mano.y) * p.scaleY;
+    const galleta = this.galletas.create(x, y, 'galleta').setScale(0.15 * altScale).setDepth(1.2);
+    galleta.setVelocityX(direccion * GALLETA.velocidad * altScale);
+    galleta.body.allowGravity = false;
+
+    if (this.isSoundOn && this.lanzarGalletaSound) {
+        this.lanzarGalletaSound.play();
+    }
+
+    this.time.delayedCall(GALLETA.duracion, () => {
+        galleta.destroy();
+    });
 }
 
 lanzarBolaEnergia(escala) {

@@ -259,6 +259,7 @@ export const BARCELONA = {
             { key: 'abuelaMovimiento1',  ruta: 'assets/abuelaAndar1.png',            fw: 363,   fh: 378 },
             { key: 'abuelaMovimiento2',  ruta: 'assets/abuelaSalto1.png',            fw: 363,   fh: 410 },
             { key: 'abuelaQuieta',       ruta: 'assets/abuelaIdle1.png',             fw: 363,   fh: 378 },
+            { key: 'abuelaLanzar',       ruta: 'assets/abuelaLanzar1.png',           fw: 363,   fh: 378 },
             { key: 'abuelaMuerte',       ruta: 'assets/abuelaMuerte1.png',           fw: 700,   fh: 390 },
             { key: 'abuelaTWukong',      ruta: 'assets/trans/wukong/abuelaTWukong.png',           fw: 452,   fh: 610 },
             { key: 'abuelaMov1Wukong',   ruta: 'assets/trans/wukong/abuelaAndarWukongPrueba.png', fw: 362,   fh: 470 },

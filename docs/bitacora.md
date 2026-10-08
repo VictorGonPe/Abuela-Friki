@@ -141,5 +141,6 @@ Diseño aprobado el 2026-10-03 (economía, precios y hazañas).
 - Muerte: ya no es el mareo en bucle. Son 12 fotogramas de 700×390 a 7 por segundo, una sola vez: 8 dibujos (se asusta, tropieza y cae) y 4 hechos por script con la abuela tumbada cada vez más gris; mientras se pone gris crece hasta 1,4 veces (`MUERTE` en `abuela.js`). Los dos dibujos grises del original no se usan: saltar a ellos se veía brusco
 - Quieta traía 14 fotogramas: los dos últimos tienen los pies cortados y no se usan; el decimotercero repite el primero
 - Probado en el navegador: quieta, andar a los dos lados, salto y muerte con reinicio y una vida menos
+- Lanzar: la abuela normal hace un gesto al tirar una galleta (`abuelaLanzar1.png`, 4 fotogramas de 363×378 a 24 por segundo, hasta el brazo estirado; lo mantiene 350 ms, `POSTURA_LANZAR`). Solo si sale galleta, y solo sin transformar. La galleta ya no sale del centro del cuerpo: sale de la mano, por delante de la abuela, cuando el brazo está estirado, unos 125–150 ms después de pulsar (`GALLETA` en `GameScene.js`)
 - Las transformaciones (Wukong, Cibernética, Verde) siguen partiendo del dibujo antiguo
 - `abuelaAndar.png`, `abuelaIdle.png`, `abuelaSalto.png` y `abuelaMuerte.png` ya no los carga nadie: decidir si se mueven a `_archivo/`
